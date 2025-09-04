@@ -1,4 +1,4 @@
-from config import labels as lbl
+from src.ui import labels as lbl
 import pyqtgraph as pg
 
 # Панели экрана ручного режима

@@ -9,7 +9,7 @@ class Model(QObject):
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
-        self.realtime_data = RealTimeData(self)
+        self.realtime_data = RealTimeData(self) # Данные которые (пишем в/получаем из) регистров Modbus ПЛК с частотой опроса
         self.command_handler = CommandHandler(self)
 
         self.realtime_data.data_updated.connect(self.rt_data_changed)
