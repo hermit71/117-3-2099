@@ -1,0 +1,39 @@
+import labels as lbl
+import pyqtgraph as pg
+
+# Панели экрана ручного режима
+hand_graphs = [
+    ['tension plot',
+     {'pen': pg.mkPen(color='#1C1CF0', width=2),
+      'background': '#FEFEFA',
+      'dataset_name': 'tension_data_c',
+      'y_limits': (-100.0, 100.0)}],
+    ['velocity plot',
+     {'pen': pg.mkPen(color='#1C1CF0', width=2),
+      'background': '#FEFEFA',
+      'dataset_name': 'velocity_data',
+      'y_limits': (-10.0, 10.0)}],
+]
+
+# Индикаторы состояния дискретных входов
+hand_right_panel_led_dashboards = [
+    ['alarm_dashboard',
+     {'num': 8,
+      'title': 'Контроль цепей безопасности',
+      'labels': lbl.alarm_led_labels,
+      'register': 0,
+      'bits': [0, 1, 2, 3, 4, 5, 6, 7]}],
+    ['ups_dashboard',
+     {'num': 3,
+      'title': 'Монитор состояния ИБП',
+      'labels': lbl.ups_led_labels,
+      'register': 0,
+      'bits': [8, 9, 10]}],
+    ['power_dashboard',
+     {'num': 2,
+      'title': 'Питание приводов',
+      'labels': lbl.power_labels,
+      'register': 0,
+      'bits': [11, 12]}]
+]
+
