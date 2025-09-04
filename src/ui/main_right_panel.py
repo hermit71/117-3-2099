@@ -1,8 +1,7 @@
-import numpy as np
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QSpacerItem, QSizePolicy, QGridLayout, QLabel, QGroupBox
-from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QSpacerItem, QSizePolicy
+from PyQt6.QtCore import pyqtSlot as Slot
 
-from led_panel import LedPanel
+from src.ui.widgets.led_panel import LedPanel
 
 class MainRightPanel(QFrame):
     def __init__(self, parent=None):

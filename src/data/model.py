@@ -1,10 +1,7 @@
-import sys
+from PyQt6.QtCore import QObject, pyqtSignal as Signal, pyqtSlot as Slot
 
-import numpy as np
-from PyQt6.QtCore import QTimer, QObject, pyqtSignal as Signal, pyqtSlot as Slot
-
-from command_handler import CommandHandler
-from realtime_data import RealTimeData
+from src.command_handler import CommandHandler
+from src.data.realtime_data import RealTimeData
 
 class Model(QObject):
     data_updated = Signal(list)

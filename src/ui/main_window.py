@@ -321,7 +321,7 @@ class Ui_MainWindow(object):
         self.menuAbout.setTitle(_translate("MainWindow", "О программе"))
         self.menuExit.setTitle(_translate("MainWindow", "Выход"))
         self.menu.setTitle(_translate("MainWindow", "Настройки"))
-from graph_widget import GraphWidget
+from src.ui.widgets.graph_widget import GraphWidget
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 import pyqtgraph as pg
-from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
-from realtime_data import poll_interval
+from src.data.realtime_data import poll_interval
 
 class GraphWidget(pg.PlotWidget):
     def __init__(self, parent=None):

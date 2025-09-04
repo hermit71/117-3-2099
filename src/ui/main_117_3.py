@@ -453,11 +453,11 @@ class Ui_MainWindow(object):
         self.menuAbout.setTitle(_translate("MainWindow", "О программе"))
         self.menuExit.setTitle(_translate("MainWindow", "Выход"))
         self.menu.setTitle(_translate("MainWindow", "Настройки"))
-from graph_widget import GraphWidget
-from hand_graph_panel import HandGraphPanel
-from hand_right_panel import LedDashboardPanel
-from hand_top_panel import dashboardPanel
-from spin_box_int_to_float import appSpinBox
+from src.ui.widgets.graph_widget import GraphWidget
+from src.ui.widgets.hand_graph_panel import HandGraphPanel
+from src.ui.widgets.hand_right_panel import LedDashboardPanel
+from src.ui.widgets.hand_top_panel import dashboardPanel
+from src.utils.spin_box_int_to_float import appSpinBox
 
 
 if __name__ == "__main__":

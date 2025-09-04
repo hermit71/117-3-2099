@@ -2,22 +2,21 @@ import sys
 import time
 import numpy as np
 from PyQt6 import QtWidgets, QtCore
-import pyqtgraph as pg
-from pymodbus.client import ModbusTcpClient
-from pymodbus.exceptions import ModbusException
+from src.ui.widgets.graph_widget import GraphWidget
 
+arr = np.zeros(60*60*500)
+print(sys.getsizeof(arr))
 
 class RealTimePlot(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.initModbus()
         self.initData()
         self.setupTimer()
 
     def initUI(self):
         # Настройка главного окна
-        self.setWindowTitle('Real-Time Modbus Plot')
+        self.setWindowTitle('Real-Time Sine Plot')
         self.setGeometry(100, 100, 800, 600)
 
         # Центральный виджет
@@ -26,7 +25,7 @@ class RealTimePlot(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QVBoxLayout(self.central_widget)
 
         # Создание графика
-        self.plot_widget = pg.PlotWidget()
+        self.plot_widget = GraphWidget() #pg.PlotWidget()
         self.layout.addWidget(self.plot_widget)
 
         # Настройка графика
@@ -42,16 +41,6 @@ class RealTimePlot(QtWidgets.QMainWindow):
         self.layout.addWidget(self.time_range_combo)
 
         self.time_range = 5  # Начальное значение временного окна в секундах
-
-    def initModbus(self):
-        # Настройка Modbus клиента
-        self.client = ModbusTcpClient('192.168.1.100')  # Укажите IP-адрес PLC
-        self.register_address = 0  # Укажите адрес регистра
-        self.connected = False
-        try:
-            self.connected = self.client.connect()
-        except ModbusException as e:
-            print(f"Modbus connection error: {e}")
 
     def initData(self):
         # Инициализация массивов данных
@@ -73,43 +62,29 @@ class RealTimePlot(QtWidgets.QMainWindow):
         self.plot_widget.setXRange(-self.time_range, 0)
 
     def update(self):
-        if not self.connected:
-            return
+        # Генерация синусоидального значения (амплитуда 0.5, период 2 с)
+        current_time = time.time() - self.start_time
+        value = 0.5 * np.sin(2 * np.pi * current_time / 2.0)  # Период 2 с
 
-        try:
-            # Чтение данных из регистра
-            result = self.client.read_holding_registers(self.register_address, 1)
-            if result.isError():
-                print("Error reading register")
-                return
-            value = result.registers[0]
+        # Обновление данных
+        self.times[self.ptr] = current_time
+        self.values[self.ptr] = value
+        self.ptr += 1
 
-            # Обновление данных
-            current_time = time.time() - self.start_time
-            self.times[self.ptr] = current_time
-            self.values[self.ptr] = value
-            self.ptr += 1
+        # Если массив заполнен, сдвигаем данные
+        if self.ptr >= self.max_points:
+            self.times[:-1] = self.times[1:]
+            self.values[:-1] = self.values[1:]
+            self.ptr = self.max_points - 1
 
-            # Если массив заполнен, сдвигаем данные
-            if self.ptr >= self.max_points:
-                self.times[:-1] = self.times[1:]
-                self.values[:-1] = self.values[1:]
-                self.ptr = self.max_points - 1
-
-            # Обновление графика
-            display_points = int(self.time_range / 0.1)
-            start_idx = max(0, self.ptr - display_points)
-            time_data = self.times[start_idx:self.ptr] - current_time
-            value_data = self.values[start_idx:self.ptr]
-            self.curve.setData(time_data, value_data)
-
-        except ModbusException as e:
-            print(f"Modbus error: {e}")
-
-    def closeEvent(self, event):
-        # Закрытие соединения при выходе
-        if self.connected:
-            self.client.close()
+        # Обновление графика
+        display_points = int(self.time_range / 0.1)
+        start_idx = max(0, self.ptr - display_points)
+        #time_data = self.times[start_idx:self.ptr] - current_time
+        time_data = range(2000)
+        #value_data = self.values[start_idx:self.ptr]
+        value_data = arr[0:len(time_data)]
+        self.curve.setData(time_data, value_data)
 
 
 def main():

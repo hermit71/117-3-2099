@@ -1,15 +1,10 @@
 import sys
-import numpy as np
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSpacerItem, QSizePolicy, QDialog
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal as Signal, pyqtSlot as Slot
-from main_117_3 import Ui_MainWindow
-from dlgPID_settings import Ui_dlgHandRegulatorSettings
-from model import Model
-from settings import Setting
-import pyqtgraph as pg
-import dashboards
-import connection_control_widget as cw
-from app_palette import colors as app_colors
+from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog
+from PyQt6.QtCore import pyqtSlot as Slot
+from src.ui.main_117_3 import Ui_MainWindow
+from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
+from src.data.model import Model
+from src.ui.widgets import dashboards, connection_control_widget as cw
 
 
 class MainWindow_117_3(QMainWindow, Ui_MainWindow):
