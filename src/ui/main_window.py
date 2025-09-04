@@ -6,6 +6,42 @@ from src.data.model import Model
 from src.ui.widgets import dashboards, connection_control_widget as cw
 
 
+class ConnectionSettingsDialog(QDialog):
+    def __init__(self, parent=None, config=None):
+        super().__init__(parent)
+        self.setWindowTitle("Параметры соединения")
+        self.config = config
+
+        form = QFormLayout(self)
+
+        self.ed_host = QLineEdit(self.config.get('modbus', 'host', '127.0.0.1'))
+        self.ed_port = QLineEdit(str(self.config.get('modbus', 'port', 502)))
+        self.ed_timeout = QLineEdit(str(self.config.get('modbus', 'timeout', 2.0)))
+        self.ed_poll = QLineEdit(str(self.config.get('ui', 'poll_interval_ms', 200)))
+
+        form.addRow("IP-адрес ПЛК:", self.ed_host)
+        form.addRow("Порт:", self.ed_port)
+        form.addRow("Таймаут (с):", self.ed_timeout)
+        form.addRow("Период опроса (мс):", self.ed_poll)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        form.addRow(buttons)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+
+    def accept(self):
+        # Валидация данных можно добавить здесь
+        super().accept()
+
+
+class AboutDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("О программе")
+        v = QVBoxLayout(self)
+        v.addWidget(QLabel("Шаблон интерфейса стенда крутильных статических испытаний. PyQt6 + pyqtgraph + Modbus TCP."))
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, config):
         super().__init__()
