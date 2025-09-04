@@ -1,4 +1,7 @@
-from PyQt6.QtWidgets import QMainWindow, QDialog
+from PyQt6.QtWidgets import (
+    QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QStackedWidget,
+    QMenuBar, QStatusBar, QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QLabel
+)
 from PyQt6.QtCore import pyqtSlot as Slot
 from src.ui.main_117_3 import Ui_MainWindow
 from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
