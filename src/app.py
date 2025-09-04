@@ -10,7 +10,7 @@ def adc_convert(idc_value):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
-    config = Config('config/config.yaml')
+    config = Config('../config/config.yaml')
     window = MainWindow(config)
     window.setGeometry(700, 50, 500, 400)
     window.on_btnHand_click()

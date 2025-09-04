@@ -24,7 +24,7 @@ class Worker(QObject):
         QObject.__init__(self)
         self.data_set = data_set
         print('worker init')
-        #self.initModbus()
+        self.initModbus()
         self.data_received.connect(self.data_set.update)
         # Устанавливаем и запускаем таймер опроса ПЛК
         self.timer = QTimer()
@@ -102,7 +102,8 @@ class Worker(QObject):
 
     @Slot()
     def on_timer(self):
-        self.safe_modbus_read("", "", "")
+        self.get_data()
+        #self.safe_modbus_read("", "", "")
 
     @Slot()
     def get_data(self):

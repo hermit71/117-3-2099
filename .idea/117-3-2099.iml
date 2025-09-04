@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/dist" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (117-3-2099)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (117-3-2099) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
