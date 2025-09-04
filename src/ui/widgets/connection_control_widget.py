@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QGridLayout, QLabel, QGroupBox, QStatusBar, \
     QHBoxLayout
 from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
-from led_panel import appLed
+from src.ui.widgets.led_panel import appLed
 
 class connectionControl(QWidget):
     def __init__(self, parent=None):

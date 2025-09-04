@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QPushButton
 from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot, QSize
-from dashboard_value_widget import valueWidget
+from src.ui.widgets.dashboard_value_widget import valueWidget
 
 class dashboardPanel(QFrame):
     def __init__(self, parent=None, model=None):

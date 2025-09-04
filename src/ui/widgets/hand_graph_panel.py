@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QFrame
 from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
-from graph_widget import GraphWidget
+from src.ui.widgets.graph_widget import GraphWidget
 
 class HandGraphPanel(QFrame):
     def __init__(self, parent=None):
