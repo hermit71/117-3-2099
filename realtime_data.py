@@ -103,16 +103,6 @@ class Worker(QObject):
     @Slot()
     def on_timer(self):
         self.safe_modbus_read("", "", "")
-    '''
-        try:
-            self.connected = self.client.connect()
-            self.connection_status.emit(True)
-            self.get_data()
-            self.client.close()
-        except ModbusException as e:
-            self.connection_status.emit(False)
-            print(f"Modbus connection error: {e}")
-    '''
 
     @Slot()
     def get_data(self):
