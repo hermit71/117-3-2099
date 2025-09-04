@@ -58,7 +58,7 @@ class Worker(QObject):
                 self.get_data()
 
                 if self.result.isNone():
-                    raise Exception(f"Ошибка Modbus: {result}")
+                    raise Exception(f"Ошибка Modbus: {self.result}")
 
                 return {
                     'status': 'успешно',
