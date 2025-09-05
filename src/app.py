@@ -17,3 +17,7 @@ if __name__ == '__main__':
     window.show()
     #window.showMaximized()
     sys.exit(app.exec())
+
+
+
+# todo: убрать скакание значений датчиков особенно при переходе от - к +

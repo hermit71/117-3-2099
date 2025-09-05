@@ -37,7 +37,7 @@ class Worker(QObject):
 
     def initModbus(self):
         # Настройка Modbus клиента
-        self.client = ModbusTcpClient('127.0.0.1') #('192.168.6.31')  # IP-адрес PLC
+        self.client = ModbusTcpClient('192.168.6.31')  # IP-адрес PLC ('127.0.0.1')
         self.register_address = 0  # Начальный адрес регистра для чтения
         self.register_qty = 7 # Количество регистров для чтения
 
