@@ -204,8 +204,7 @@ class RealTimeData(QObject):
                 return self.angle_data_c
             case 'velocity_data':
                 return self.velocity_data
-
-    Slot(dict)
+    @Slot(dict)
     def modbus_registers_to_PLC_update(self, regs):
         for key, reg in regs.items():
             match key:
