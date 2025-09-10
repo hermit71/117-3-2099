@@ -29,7 +29,9 @@ class connectionControl(QWidget):
         if status:
             self.controlLed.turn_on()
             self.status_text = 'Соединение установлено'
+            self.status.setText(self.status_text)
         else:
             self.controlLed.turn_off()
             self.status_text = 'Соединение отсутствует'
+            self.status.setText(self.status_text)
 
