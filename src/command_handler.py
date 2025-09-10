@@ -1,7 +1,10 @@
+import logging
+
 from PyQt6.QtCore import Qt, QObject, pyqtSignal as Signal, pyqtSlot as Slot
 
 class CommandHandler(QObject):
     write_to_plc = Signal(dict)
+    error = Signal(str)
 
     def __init__(self, parent=None):
         super(CommandHandler, self).__init__(parent)
@@ -19,6 +22,11 @@ class CommandHandler(QObject):
                 mask = 0b0000000000000000
             case 'service':
                 mask = 0b1000000000000000
+            case _:
+                message = f"Unsupported PLC mode: {mode}"
+                logging.warning(message)
+                self.error.emit(message)
+                raise ValueError(message)
         regs_['Modbus_CTRL'] |= mask
         self.write_to_plc.emit(regs_)
 
@@ -60,6 +68,11 @@ class CommandHandler(QObject):
             case 'ccw':
                 mask = 0b0000000000001000
                 regs_['Modbus_CTRL'] |= mask
+            case _:
+                message = f"Unsupported jog direction: {direction}"
+                logging.warning(message)
+                self.error.emit(message)
+                raise ValueError(message)
         self.write_to_plc.emit(regs_)
 
     def stop(self):
