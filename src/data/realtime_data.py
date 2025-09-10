@@ -4,16 +4,13 @@
 # Обмен данными с ПЛК стенда в программе управления стендом происходит ТОЛЬКО в данном модуле!
 import time
 
-from PyQt6.QtCore import Qt, QThread, QTimer, QObject, pyqtSignal as Signal, pyqtSlot as Slot, QThread
+from PyQt6.QtCore import Qt, QThread, QTimer, QObject, pyqtSignal as Signal, pyqtSlot as Slot
 from pymodbus.client import ModbusTcpClient
 from pymodbus.exceptions import ModbusException
 import numpy as np
 from ctypes import *
 
-poll_interval = 25 # мс - период опроса датчиков в мс
-poll_interval_s = float(poll_interval) / 1000.0
 realtime_data_window = 60 # час - временное окно для хранения данных от датчиков в реальном времени в минутах
-data_window_length =  int(realtime_data_window * 60 * 1000/poll_interval)
 
 
 class Worker(QObject):
@@ -30,7 +27,7 @@ class Worker(QObject):
         self.timer = QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.on_timer)
-        self.timer.start(poll_interval)
+        self.timer.start(self.data_set.poll_interval)
         self.tension = 0
         self.angle = 0
         self.result = None
@@ -125,23 +122,32 @@ class RealTimeData(QObject):
     data_updated = Signal(list)
     prev_time = 0
 
-    def __init__(self, parent=None):
+    def __init__(self, config, parent=None):
         super(RealTimeData, self).__init__(parent)
+        self.config = config
+
+        # период опроса датчиков в миллисекундах
+        self.poll_interval = self.config.get('ui', 'poll_interval_ms', 25)
+        # период опроса в секундах
+        self.poll_interval_s = float(self.poll_interval) / 1000.0
+        # Длина массива данных с учётом периода опроса
+        self.data_window_length = int(realtime_data_window * 60 * 1000 / self.poll_interval)
+
         # Слово состояния дискретных сигналов от ПЛК
         self.in_status = 0
         # данные от датчика угла поворота, в градусах
-        self.angle_data = np.zeros(data_window_length, dtype=np.int32)
+        self.angle_data = np.zeros(self.data_window_length, dtype=np.int32)
         # Данные от датчика угла поворота (преобразованные, в градусах)
-        self.angle_data_c = np.zeros(data_window_length, dtype=np.float16)
+        self.angle_data_c = np.zeros(self.data_window_length, dtype=np.float16)
         # данные от датчика крутящего момента, в Нм
-        self.tension_data = np.zeros(data_window_length, dtype=np.int16)
+        self.tension_data = np.zeros(self.data_window_length, dtype=np.int16)
         # Данные от датчика крутящего момента (преобразованные к Нм)
-        self.tension_data_c = np.zeros(data_window_length, dtype=np.float16)
+        self.tension_data_c = np.zeros(self.data_window_length, dtype=np.float16)
         # Скорость нарастания момента (моментальные значения в Нм/с)
-        self.velocity_data = np.zeros(data_window_length, dtype=np.float16)
+        self.velocity_data = np.zeros(self.data_window_length, dtype=np.float16)
 
         # временные метки для потока данных, в мс
-        self.times = np.zeros(data_window_length, dtype=np.int64)
+        self.times = np.zeros(self.data_window_length, dtype=np.int64)
         self.ptr = 0  # Указатель текущей позиции данных
 
         # Слово управления для отправки в ПЛК
@@ -170,12 +176,12 @@ class RealTimeData(QObject):
         self.ptr += 1
 
         # Если массив заполнен, сдвигаем данные
-        if self.ptr >= data_window_length:
+        if self.ptr >= self.data_window_length:
             self.times[:-1] = self.times[1:]
             self.tension_data_c[:-1] = self.tension_data_c[1:]
             self.angle_data_c[:-1] = self.angle_data_c[1:]
             self.velocity_data[:-1] = self.velocity_data[1:]
-            self.ptr = data_window_length - 1
+            self.ptr = self.data_window_length - 1
 
         # Считываем состяние регистров
         self.in_status = c_short(registers[0]).value
@@ -193,7 +199,7 @@ class RealTimeData(QObject):
     def get_real_velocity(self):
         velocity = 0.0
         if self.ptr > 0:
-            velocity =  (self.tension_data_c[self.ptr] - self.tension_data_c[self.ptr - 1]) / poll_interval_s
+            velocity = (self.tension_data_c[self.ptr] - self.tension_data_c[self.ptr - 1]) / self.poll_interval_s
         return velocity
 
     def get_dataset_by_name(self, dataset_name):
