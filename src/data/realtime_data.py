@@ -23,7 +23,13 @@ class Worker(QObject):
         print('worker init')
         self.initModbus()
         self.data_received.connect(self.data_set.update)
-        # Устанавливаем и запускаем таймер опроса ПЛК
+        self.timer = None
+        self.tension = 0
+        self.angle = 0
+        self.result = None
+
+    def start(self):
+        """Настройка и запуск таймера опроса ПЛК."""
         self.timer = QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.on_timer)
@@ -159,6 +165,8 @@ class RealTimeData(QObject):
         self.worker_thread = QThread()
         # переносим worker в отдельный поток
         self.worker.moveToThread(self.worker_thread)
+        # запускаем worker из главного потока после переноса
+        QTimer.singleShot(0, self.worker.start)
         # запускаем поток
         self.worker_thread.start()
 
