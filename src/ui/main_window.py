@@ -50,7 +50,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.config = config
         self.setupUi(self)
-        self.model = Model()
+        self.model = Model(self.config)
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.connectionControl()
         self.hand_screen_config()

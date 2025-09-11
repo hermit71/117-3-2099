@@ -1,5 +1,4 @@
 import pyqtgraph as pg
-from src.data.realtime_data import poll_interval
 
 class GraphWidget(pg.PlotWidget):
     def __init__(self, parent=None):
@@ -27,6 +26,7 @@ class GraphWidget(pg.PlotWidget):
         self.curve.setData(time_data, value_data)
 
         if model.realtime_data.times[model.realtime_data.ptr-1] > self.x_view_range_ms['end']:
+            poll_interval = model.realtime_data.poll_interval
             self.x_view_range_ms['start'] += poll_interval
             self.x_view_range_ms['end'] += poll_interval
             self.setXRange(self.x_view_range_ms['start'], self.x_view_range_ms['end'])
