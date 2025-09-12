@@ -10,6 +10,7 @@
   - pyqtgraph
   - pymodbus
   - pyyaml
+  - pyqt-led
 
 ## Шаги запуска
 
