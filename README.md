@@ -34,7 +34,7 @@
 │   └── config.yaml
 ├── modbus_registers.txt # Описание регистров ПЛК
 ├── requirements.txt     # Зависимости проекта
-├── src/                 # Исходный код приложения
+├── src/                 # Исходный код программы
 │   ├── command_handler.py
 │   ├── data/
 │   │   ├── model.py
