@@ -908,11 +908,12 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuAbout">
-    <property name="title">
-     <string>О программе</string>
-    </property>
-   </widget>
+    <widget class="QMenu" name="menuAbout">
+     <property name="title">
+      <string>О программе</string>
+     </property>
+     <addaction name="actionAbout"/>
+    </widget>
    <widget class="QMenu" name="menuExit">
     <property name="title">
      <string>Выход</string>
@@ -925,10 +926,15 @@
    </widget>
    <addaction name="menuExit"/>
    <addaction name="menu"/>
-   <addaction name="menuAbout"/>
+    <addaction name="menuAbout"/>
+   </widget>
+   <widget class="QStatusBar" name="statusbar"/>
+   <action name="actionAbout">
+    <property name="text">
+     <string>О программе</string>
+    </property>
+   </action>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
- </widget>
  <customwidgets>
   <customwidget>
    <class>GraphWidget</class>

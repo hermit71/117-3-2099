@@ -410,6 +410,9 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actionAbout = QtGui.QAction(parent=MainWindow)
+        self.actionAbout.setObjectName("actionAbout")
+        self.menuAbout.addAction(self.actionAbout)
         self.menubar.addAction(self.menuExit.menuAction())
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menuAbout.menuAction())
@@ -453,6 +456,7 @@ class Ui_MainWindow(object):
         self.menuAbout.setTitle(_translate("MainWindow", "О программе"))
         self.menuExit.setTitle(_translate("MainWindow", "Выход"))
         self.menu.setTitle(_translate("MainWindow", "Настройки"))
+        self.actionAbout.setText(_translate("MainWindow", "О программе"))
 from src.ui.widgets.graph_widget import GraphWidget
 from src.ui.widgets.hand_graph_panel import HandGraphPanel
 from src.ui.widgets.hand_right_panel import LedDashboardPanel
