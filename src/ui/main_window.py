@@ -63,6 +63,9 @@ class AboutDialog(QDialog):
                 "испытаний. PyQt6 + pyqtgraph + Modbus TCP."
             )
         )
+        btn_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        btn_box.accepted.connect(self.accept)
+        v.addWidget(btn_box)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
