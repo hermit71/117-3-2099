@@ -17,6 +17,6 @@ if __name__ == '__main__':
     window.setGeometry(250, 50, 900, 600)
     window.on_btn_hand_click()
     window.show()
-    #window.showMaximized()
+    # window.showMaximized()
     sys.exit(app.exec())
 

@@ -23,7 +23,9 @@ class ValueWidget(QFrame):
 
     def _setup_ui(self):
         """Configure layout and label styles."""
-        size_policy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
+        size_policy = QSizePolicy(
+            QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred
+        )
         self.setSizePolicy(size_policy)
         self.setMinimumSize(QSize(180, 0))
         self.setFrameShape(QFrame.Shape.StyledPanel)

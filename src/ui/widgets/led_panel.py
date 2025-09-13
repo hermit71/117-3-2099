@@ -39,7 +39,14 @@ class AppLed(Led):
 class LedPanel(QWidget):
     """Panel containing a group of LEDs with optional labels."""
 
-    def __init__(self, led_number=8, size=(12, 12), title='Title', labels=None, parent=None):
+    def __init__(
+        self,
+        led_number=8,
+        size=(12, 12),
+        title='Title',
+        labels=None,
+        parent=None,
+    ):
         super().__init__(parent)
 
         self._title = title

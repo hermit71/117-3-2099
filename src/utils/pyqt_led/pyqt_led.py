@@ -237,9 +237,15 @@ if __name__ == '__main__':
         def _create_leds(self):
             for s in self._shape:
                 for c in self._color:
-                    exec('self._{}_{} = Led(self, on_color=Led.{}, \
-                          shape=Led.{}, build="debug")'.format(s, c, c, s))
-                    exec('self._{}_{}.setFocusPolicy(Qt.FocusPolicy.NoFocus)'.format(s, c))
+                    exec(
+                        'self._{}_{} = Led(self, on_color=Led.{}, '
+                        'shape=Led.{}, build="debug")'.format(s, c, c, s)
+                    )
+                    exec(
+                        'self._{}_{}.setFocusPolicy(Qt.FocusPolicy.NoFocus)'.format(
+                            s, c
+                        )
+                    )
 
         def _arrange_leds(self):
             for r in range(3):

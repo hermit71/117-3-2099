@@ -1,16 +1,25 @@
-# Обмен данными с оборудованием стенда по ModbusTCP
-# Включает в себя данные датчиков, данные состояния оборудования и управляющие команды
-# Все данные передаются в едином цикле обмена с периодом установленным в переменной poll_inteval
-# Обмен данными с ПЛК стенда в программе управления стендом происходит ТОЛЬКО в данном модуле!
+# Обмен данными с оборудованием стенда по ModbusTCP.
+# Включает данные датчиков, состояния оборудования и управляющие команды.
+# Все данные передаются в едином цикле обмена с периодом,
+# установленным в переменной poll_interval.
+# Обмен с ПЛК стенда происходит только в данном модуле.
 import logging
 import time
 from ctypes import c_short
 
 import numpy as np
-from PyQt6.QtCore import Qt, QThread, QTimer, QObject, pyqtSignal as Signal, pyqtSlot as Slot
+from PyQt6.QtCore import (
+    Qt,
+    QThread,
+    QTimer,
+    QObject,
+    pyqtSignal as Signal,
+    pyqtSlot as Slot,
+)
 from pymodbus.client import ModbusTcpClient
 from pymodbus.exceptions import ModbusException
-REALTIME_DATA_WINDOW = 60  # час - временное окно для хранения данных от датчиков в реальном времени в минутах
+
+REALTIME_DATA_WINDOW = 60  # временное окно для хранения данных (мин)
 
 
 class Worker(QObject):
@@ -59,7 +68,9 @@ class Worker(QObject):
                 if not client.connect():
                     raise ConnectionError("Не удалось установить соединение")
 
-                self.result = client.read_holding_registers(address, count=count, unit=unit)
+                self.result = client.read_holding_registers(
+                    address, count=count, unit=unit
+                )
 
                 if self.result is None or self.result.isError():
                     raise Exception(f"Ошибка Modbus: {self.result}")
@@ -115,7 +126,9 @@ class Worker(QObject):
     def get_data(self):
         """Получение данных от ПЛК и отправка их в основной поток."""
         try:
-            # self.result = self.client.read_holding_registers(self.register_address, count=self.register_qty)
+            # self.result = self.client.read_holding_registers(
+            #     self.register_address, count=self.register_qty
+            # )
             self.result = self.client.readwrite_registers(
                 read_address=self.register_address,
                 read_count=self.register_qty,
@@ -144,7 +157,9 @@ class RealTimeData(QObject):
         # период опроса в секундах
         self.poll_interval_s = float(self.poll_interval) / 1000.0
         # Длина массива данных с учётом периода опроса
-        self.data_window_length = int(REALTIME_DATA_WINDOW * 60 * 1000 / self.poll_interval)
+        self.data_window_length = int(
+            REALTIME_DATA_WINDOW * 60 * 1000 / self.poll_interval
+        )
 
         # Слово состояния дискретных сигналов от ПЛК
         self.in_status = 0
