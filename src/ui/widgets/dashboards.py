@@ -1,3 +1,5 @@
+"""Dashboard definitions used by UI widgets."""
+
 from src.ui import labels as lbl
 import pyqtgraph as pg
 
