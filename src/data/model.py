@@ -1,3 +1,11 @@
+"""Application model tying command handling and real-time Modbus data.
+
+The module defines :class:`Model`, a central Qt-based object responsible for
+coordinating communication with the PLC. It subscribes to updates from
+``RealTimeData`` and forwards changes via Qt signals so that other parts of the
+application can react.
+"""
+
 from PyQt6.QtCore import QObject, pyqtSignal as Signal, pyqtSlot as Slot
 
 from src.command_handler import CommandHandler
@@ -5,10 +13,23 @@ from src.data.realtime_data import RealTimeData
 
 
 class Model(QObject):
+    """Central application model managing Modbus registers and signals.
+
+    The model glues together :class:`RealTimeData` and :class:`CommandHandler`
+    while exposing Qt signals when new data arrives or when graphs should be
+    refreshed.
+    """
+
     data_updated = Signal(list)
     graphs_updated = Signal()
 
     def __init__(self, config, parent=None):
+        """Initialize the model.
+
+        Args:
+            config: Application configuration options.
+            parent: Optional QObject parent for Qt ownership.
+        """
         super(Model, self).__init__(parent)
         self.config = config
         # Данные которые (пишем в/получаем из) регистров Modbus ПЛК с частотой опроса
@@ -29,6 +50,15 @@ class Model(QObject):
 
     @Slot(list)
     def rt_data_changed(self, registers):
+        """Handle updates from real-time data polls.
+
+        Args:
+            registers (list): Latest register values retrieved from the PLC.
+
+        Emits:
+            data_updated: With the list of updated registers.
+            graphs_updated: Notification that graph data has changed.
+        """
         self.data_updated.emit(registers)
         self.graphs_updated.emit()
 
