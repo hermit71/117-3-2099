@@ -40,7 +40,9 @@ class LedDashboardPanel(QFrame):
             self.led_dashboards[i].append(led_panel)
             self.vbox.addWidget(led_panel)
 
-        spacer_item = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        spacer_item = QSpacerItem(
+            20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+        )
         self.vbox.addItem(spacer_item)
         self.setLayout(self.vbox)
 

@@ -17,7 +17,9 @@ class DashboardPanel(QFrame):
         self.hbox.addWidget(self.value_tension)
         self.hbox.addWidget(self.value_velocity)
         self.hbox.addWidget(self.value_angle)
-        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        spacer = QSpacerItem(
+            20, 40, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
         self.hbox.addItem(spacer)
         self.setLayout(self.hbox)
         self._setup_ui()

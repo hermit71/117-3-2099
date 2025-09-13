@@ -124,7 +124,7 @@ class FileDataSource(DataSource):
 
     def connect(self) -> bool:
         try:
-            with open(self.filename, 'r') as f:
+            with open(self.filename, 'r'):
                 self._connected = True
             return True
         except FileNotFoundError:

@@ -26,10 +26,16 @@ class MainRightPanel(QFrame):
             return
         else:
             for i, ld in enumerate(self.led_dashboards):
-                led_p = LedPanel(led_number=ld[1]['num'], title=ld[1]['title'], labels=ld[1]['labels'])
+                led_p = LedPanel(
+                    led_number=ld[1]['num'],
+                    title=ld[1]['title'],
+                    labels=ld[1]['labels'],
+                )
                 self.vbox.addWidget(led_p)
-            spacerItem = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-            self.vbox.addItem(spacerItem)
+            spacer_item = QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+            self.vbox.addItem(spacer_item)
             self.setLayout(self.vbox)
 
 

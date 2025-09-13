@@ -7,7 +7,7 @@ commands are reported via the ``error`` signal.
 
 import logging
 
-from PyQt6.QtCore import Qt, QObject, pyqtSignal as Signal, pyqtSlot as Slot
+from PyQt6.QtCore import QObject, pyqtSignal as Signal
 
 
 class CommandHandler(QObject):

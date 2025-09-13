@@ -68,12 +68,12 @@ class AdaptiveGraphic(PlotWidget):
 
     def _plot_pens_define(self):
         # Стили графиков
-        self.plot_pens = [None]*6
-        #col = pg.mkColor()
-        self.plot_pens[0] = pg.mkPen(color='#ff0000', width=2) # Температура
+        self.plot_pens = [None] * 6
+        # col = pg.mkColor()
+        self.plot_pens[0] = pg.mkPen(color='#ff0000', width=2)  # Температура
         self.plot_pens[1] = pg.mkPen(color='#9575f4', width=2)  # Давление в системе
         self.plot_pens[2] = pg.mkPen(color='#006393', width=2)  # Давление над пакером
-        self.plot_pens[3] = pg.mkPen(color='#009f80', width=2)  # Двление в пакере
+        self.plot_pens[3] = pg.mkPen(color='#009f80', width=2)  # Давление в пакере
         self.plot_pens[4] = pg.mkPen(color='#d76b00', width=2)  # Давление под пакером
         self.plot_pens[5] = pg.mkPen(color='#804040', width=2)  # Усилие на пакере
 
@@ -99,7 +99,11 @@ class AdaptiveGraphic(PlotWidget):
         match context:
             case 'force':
                 self.setYRange(self.f_range[0], self.f_range[1], padding=0.02)
-                self.setLabel('left', 'Статический крутящий момент (Н)', **self._styles_left_axis)
+                self.setLabel(
+                    'left',
+                    'Статический крутящий момент (Н)',
+                    **self._styles_left_axis,
+                )
         self.p2.setYRange(self.t_range[0], self.t_range[1], padding=0.02)
         self.context = context
 
@@ -117,8 +121,12 @@ class AdaptiveGraphic(PlotWidget):
     def _set_timing_labels(self):
         txt_font = QFont()
         txt_font.setPixelSize(18)
-        self.txt_pd_start = pg.TextItem('Начальное значение: ', anchor=(0, 0), color='#025b94')
-        self.txt_pd_end = pg.TextItem('Конечное значение: ', anchor=(0, 0), color='#025b94')
+        self.txt_pd_start = pg.TextItem(
+            'Начальное значение: ', anchor=(0, 0), color='#025b94'
+        )
+        self.txt_pd_end = pg.TextItem(
+            'Конечное значение: ', anchor=(0, 0), color='#025b94'
+        )
         self.scene().addItem(self.txt_pd_start)
         self.scene().addItem(self.txt_pd_end)
         self.txt_pd_start.setFont(txt_font)
@@ -128,18 +136,26 @@ class AdaptiveGraphic(PlotWidget):
 
     def _set_proxy(self) -> None:
         """Set Signal Proxy"""
-        self.proxy = pg.SignalProxy(self.getPlotItem().scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
+        self.proxy = pg.SignalProxy(
+            self.getPlotItem().scene().sigMouseMoved,
+            rateLimit=60,
+            slot=self.mouse_moved,
+        )
 
     def _add_line(self):
         """Add a line that moves with the cursor"""
         # Since it is hard to see by default, specify the color and width
-        self.vertical_line = pg.InfiniteLine(angle=90, movable=False, pen=self.crosshair_pen)
-        self.horizontal_line = pg.InfiniteLine(angle=0, movable=False, pen=self.crosshair_pen)
+        self.vertical_line = pg.InfiniteLine(
+            angle=90, movable=False, pen=self.crosshair_pen
+        )
+        self.horizontal_line = pg.InfiniteLine(
+            angle=0, movable=False, pen=self.crosshair_pen
+        )
         self.getPlotItem().addItem(self.vertical_line, ignoreBounds=True)
         self.getPlotItem().addItem(self.horizontal_line, ignoreBounds=True)
 
     def _get_plot_data(self, local_ds):
-        request = f'SELECT * FROM local_data'
+        request = 'SELECT * FROM local_data'
         data = local_ds.select_data(request)
         return data
 
@@ -165,11 +181,20 @@ class AdaptiveGraphic(PlotWidget):
         instant_now = datetime.now()
         # Двигаем график по времени когда приходят новые данные
         if instant_now.timestamp() >= t1:
-            self.setXRange(instant_now.timestamp() - (t1 - t0), instant_now.timestamp(), padding=0)
+            self.setXRange(
+                instant_now.timestamp() - (t1 - t0),
+                instant_now.timestamp(),
+                padding=0,
+            )
 
-        # # Или изменяем диапазон при получении новых данных если мы в режиме проведения испытания
+        # # Или изменяем диапазон при получении новых данных
+        # # если мы в режиме проведения испытания
         # if instant_now.timestamp() >= t1:
-        #     self.setXRange(self.stage_start_time.timestamp(), instant_now.timestamp(), padding=0)
+        #     self.setXRange(
+        #         self.stage_start_time.timestamp(),
+        #         instant_now.timestamp(),
+        #         padding=0,
+        #     )
         #     match self._stage:
         #         case 1 | 2 | 4 | 5 | 7:
         #             self.graph_pp.setYRange(0, 160.0, padding=0.02)
@@ -178,10 +203,15 @@ class AdaptiveGraphic(PlotWidget):
 
         # Обновляем графики
         # Получаем данные из in-memory базы данных для отображения на графике
-        request = f'SELECT * FROM local_data WHERE dt>=\'{t0}\''
+        request = (
+            f"SELECT * FROM local_data WHERE dt>='{t0}'"
+        )
         data = local_ds.select_data(request)
         self.local_plot_data = data
-        graph_x = [datetime.strptime(d[1], '%Y-%m-%d %H:%M:%S.%f').timestamp() for d in data]
+        graph_x = [
+            datetime.strptime(d[1], '%Y-%m-%d %H:%M:%S.%f').timestamp()
+            for d in data
+        ]
         self.local_x_data = graph_x
         #temperature_y = [d[2] for d in data]
         #pressure_y = [d[3] for d in data]

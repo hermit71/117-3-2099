@@ -8,6 +8,12 @@
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from src.ui.widgets.graph_widget import GraphWidget
+from src.ui.widgets.hand_graph_panel import HandGraphPanel
+from src.ui.widgets.hand_right_panel import LedDashboardPanel
+from src.ui.widgets.hand_top_panel import DashboardPanel
+from src.utils.spin_box_int_to_float import AppSpinBox
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -29,7 +35,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setSpacing(4)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.left_panel = QtWidgets.QFrame(parent=self.base_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.left_panel.sizePolicy().hasHeightForWidth())
@@ -74,7 +83,11 @@ class Ui_MainWindow(object):
         self.btnStatic2.setFont(font)
         self.btnStatic2.setObjectName("btnStatic2")
         self.verticalLayout_2.addWidget(self.btnStatic2)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            20, 40,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
         self.verticalLayout_2.addItem(spacerItem)
         self.btnService = QtWidgets.QPushButton(parent=self.left_panel)
         self.btnService.setMinimumSize(QtCore.QSize(0, 42))
@@ -107,13 +120,18 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.setSpacing(4)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.pageHand_pnlTopDashboard = DashboardPanel(parent=self.pageHand)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pageHand_pnlTopDashboard.sizePolicy().hasHeightForWidth())
         self.pageHand_pnlTopDashboard.setSizePolicy(sizePolicy)
         self.pageHand_pnlTopDashboard.setBaseSize(QtCore.QSize(0, 120))
-        self.pageHand_pnlTopDashboard.setStyleSheet("background-color: rgb(242, 252, 255);")
+        self.pageHand_pnlTopDashboard.setStyleSheet(
+            "background-color: rgb(242, 252, 255);"
+        )
         self.pageHand_pnlTopDashboard.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.pageHand_pnlTopDashboard.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
         self.pageHand_pnlTopDashboard.setObjectName("pageHand_pnlTopDashboard")
@@ -146,7 +164,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.addLayout(self.verticalLayout_6)
         self.horizontalLayout_9.addWidget(self.pageHand_pnlGraph)
         self.pageHand_pnlCtrl = QtWidgets.QFrame(parent=self.widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pageHand_pnlCtrl.sizePolicy().hasHeightForWidth())
@@ -168,7 +189,10 @@ class Ui_MainWindow(object):
         self.btnServoPower.setObjectName("btnServoPower")
         self.verticalLayout_8.addWidget(self.groupBox_3)
         self.groupBox = QtWidgets.QGroupBox(parent=self.pageHand_pnlCtrl)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
@@ -185,18 +209,29 @@ class Ui_MainWindow(object):
         self.label_5.setObjectName("label_5")
         self.horizontalLayout_11.addWidget(self.label_5)
         self.dsbHandVelocity_1 = AppSpinBox(parent=self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.dsbHandVelocity_1.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.dsbHandVelocity_1.sizePolicy().hasHeightForWidth()
+        )
         self.dsbHandVelocity_1.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
         self.dsbHandVelocity_1.setFont(font)
         self.dsbHandVelocity_1.setWrapping(False)
-        self.dsbHandVelocity_1.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.dsbHandVelocity_1.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus)
+        self.dsbHandVelocity_1.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignTrailing
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        self.dsbHandVelocity_1.setButtonSymbols(
+            QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus
+        )
         self.dsbHandVelocity_1.setDecimals(1)
         self.dsbHandVelocity_1.setMaximum(60.0)
         self.dsbHandVelocity_1.setSingleStep(0.1)
@@ -221,7 +256,11 @@ class Ui_MainWindow(object):
         self.btnJog_CW.setObjectName("btnJog_CW")
         self.horizontalLayout_12.addWidget(self.btnJog_CW)
         self.verticalLayout_9.addLayout(self.horizontalLayout_12)
-        spacerItem1 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            20, 20,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
         self.verticalLayout_9.addItem(spacerItem1)
         self.verticalLayout_8.addWidget(self.groupBox)
         self.groupBox_2 = QtWidgets.QGroupBox(parent=self.pageHand_pnlCtrl)
@@ -238,8 +277,14 @@ class Ui_MainWindow(object):
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
         self.dsbHandTension.setFont(font)
-        self.dsbHandTension.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.dsbHandTension.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus)
+        self.dsbHandTension.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignTrailing
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        self.dsbHandTension.setButtonSymbols(
+            QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus
+        )
         self.dsbHandTension.setDecimals(2)
         self.dsbHandTension.setMinimum(-50.0)
         self.dsbHandTension.setMaximum(50.0)
@@ -265,8 +310,14 @@ class Ui_MainWindow(object):
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
         self.dsbHandVelocity_2.setFont(font)
-        self.dsbHandVelocity_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.dsbHandVelocity_2.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus)
+        self.dsbHandVelocity_2.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignTrailing
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        self.dsbHandVelocity_2.setButtonSymbols(
+            QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus
+        )
         self.dsbHandVelocity_2.setDecimals(1)
         self.dsbHandVelocity_2.setMaximum(4.0)
         self.dsbHandVelocity_2.setSingleStep(0.1)
@@ -289,8 +340,14 @@ class Ui_MainWindow(object):
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
         self.dsbHandTime_1.setFont(font)
-        self.dsbHandTime_1.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.dsbHandTime_1.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus)
+        self.dsbHandTime_1.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignTrailing
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        self.dsbHandTime_1.setButtonSymbols(
+            QtWidgets.QAbstractSpinBox.ButtonSymbols.PlusMinus
+        )
         self.dsbHandTime_1.setDecimals(0)
         self.dsbHandTime_1.setMaximum(60.0)
         self.dsbHandTime_1.setSingleStep(1.0)
@@ -311,10 +368,18 @@ class Ui_MainWindow(object):
         self.toolButton_2 = QtWidgets.QToolButton(parent=self.groupBox_2)
         self.toolButton_2.setObjectName("toolButton_2")
         self.horizontalLayout_16.addWidget(self.toolButton_2)
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+        )
         self.horizontalLayout_16.addItem(spacerItem2)
         self.verticalLayout_10.addLayout(self.horizontalLayout_16)
-        spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            20, 40,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
         self.verticalLayout_10.addItem(spacerItem3)
         self.verticalLayout_8.addWidget(self.groupBox_2)
         self.verticalLayout_8.setStretch(0, 2)
@@ -329,7 +394,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.setStretch(1, 14)
         self.horizontalLayout_7.addLayout(self.verticalLayout_4)
         self.pageHand_pnlRight = LedDashboardPanel(parent=self.pageHand)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pageHand_pnlRight.sizePolicy().hasHeightForWidth())
@@ -434,12 +502,16 @@ class Ui_MainWindow(object):
         self.btnService.setText(_translate("MainWindow", "Сервис"))
         self.groupBox_3.setTitle(_translate("MainWindow", "Сервопривод"))
         self.btnServoPower.setText(_translate("MainWindow", "Сервопривод ВКЛ"))
-        self.groupBox.setTitle(_translate("MainWindow", "Ручное управление сервоприводом"))
+        self.groupBox.setTitle(
+            _translate("MainWindow", "Ручное управление сервоприводом")
+        )
         self.label_5.setText(_translate("MainWindow", "Угловая скорость:"))
         self.dsbHandVelocity_1.setSuffix(_translate("MainWindow", "°/мин"))
         self.btnJog_CCW.setText(_translate("MainWindow", "Против часовой"))
         self.btnJog_CW.setText(_translate("MainWindow", "По часовой"))
-        self.groupBox_2.setTitle(_translate("MainWindow", "Управление статическим моментом"))
+        self.groupBox_2.setTitle(
+            _translate("MainWindow", "Управление статическим моментом")
+        )
         self.label_6.setText(_translate("MainWindow", "Момент:"))
         self.dsbHandTension.setSuffix(_translate("MainWindow", " Нм"))
         self.label_7.setText(_translate("MainWindow", "Скорость нарастания:"))
@@ -457,13 +529,6 @@ class Ui_MainWindow(object):
         self.menuExit.setTitle(_translate("MainWindow", "Выход"))
         self.menu.setTitle(_translate("MainWindow", "Настройки"))
         self.actionAbout.setText(_translate("MainWindow", "О программе"))
-from src.ui.widgets.graph_widget import GraphWidget
-from src.ui.widgets.hand_graph_panel import HandGraphPanel
-from src.ui.widgets.hand_right_panel import LedDashboardPanel
-from src.ui.widgets.hand_top_panel import DashboardPanel
-from src.utils.spin_box_int_to_float import AppSpinBox
-
-
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

@@ -1,12 +1,6 @@
 from PyQt6.QtWidgets import (
     QMainWindow,
-    QWidget,
-    QHBoxLayout,
     QVBoxLayout,
-    QPushButton,
-    QStackedWidget,
-    QMenuBar,
-    QStatusBar,
     QDialog,
     QFormLayout,
     QLineEdit,
@@ -65,7 +59,8 @@ class AboutDialog(QDialog):
         v = QVBoxLayout(self)
         v.addWidget(
             QLabel(
-                "Шаблон интерфейса стенда крутильных статических испытаний. PyQt6 + pyqtgraph + Modbus TCP."
+                "Шаблон интерфейса стенда крутильных статических "
+                "испытаний. PyQt6 + pyqtgraph + Modbus TCP."
             )
         )
 
