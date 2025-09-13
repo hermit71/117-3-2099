@@ -5,19 +5,23 @@ from pyqtgraph import ValueLabel
 
 
 class valueWidget(QFrame):
+    """Widget that displays a labeled numeric value."""
+
     def __init__(self, parent=None, title='', data_source=None):
+        """Initialize widget with title and optional data source."""
         super(valueWidget, self).__init__(parent)
         self.parent = parent
         self.label = QLabel(title)
-        self.value = ValueLabel(averageTime=0.5) # QLabel(self)
+        self.value = ValueLabel(averageTime=0.5)
         self.data_source = data_source
         self.vbox = QVBoxLayout(self)
         self.vbox.addWidget(self.label)
         self.vbox.addWidget(self.value)
         self.setLayout(self.vbox)
-        self.setupUI()
+        self.setup_ui()
 
-    def setupUI(self):
+    def setup_ui(self):
+        """Configure widget appearance."""
         # Фрейм
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         self.setSizePolicy(sizePolicy)
@@ -43,14 +47,14 @@ class valueWidget(QFrame):
         font = QFont()
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(16)
-        #font.setBold(False)
         self.value.setFont(font)
         self.value.setStyleSheet("color: rgb(0, 85, 127);")
         self.value.formatStr = '{avgValue:0.2f}'
 
     @Slot()
     def update(self):
+        """Update value label with latest data."""
         indx = self.parent.model.realtime_data.ptr - 1
         value = self.data_source[indx]
         self.value.setValue(value)
-        #self.value.setText(f'{value:.2f}')
+

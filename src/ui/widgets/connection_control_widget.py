@@ -3,8 +3,12 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QGri
 from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
 from src.ui.widgets.led_panel import appLed
 
+
 class connectionControl(QWidget):
+    """Widget showing connection status using an LED indicator."""
+
     def __init__(self, parent=None):
+        """Initialize the connection control widget."""
         super().__init__(parent=parent)
         self.status_text = ''
         self.controlLed = appLed()
@@ -13,10 +17,10 @@ class connectionControl(QWidget):
         self.hbox.addWidget(self.controlLed)
         self.hbox.addWidget(self.status)
         self.setLayout(self.hbox)
-        self.setupUI()
+        self.setup_ui()
 
-
-    def setupUI(self):
+    def setup_ui(self):
+        """Configure LED and layout properties."""
         self.controlLed.setEnabled(True)
         self.controlLed.set_shape(appLed.circle)
         self.controlLed.set_on_color(appLed.green)
@@ -25,7 +29,8 @@ class connectionControl(QWidget):
         self.controlLed.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
     @Slot(bool)
-    def setStatus(self, status):
+    def set_status(self, status):
+        """Set LED state and status text based on connection."""
         if status:
             self.controlLed.turn_on()
             self.status_text = 'Соединение установлено'

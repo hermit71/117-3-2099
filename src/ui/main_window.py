@@ -144,4 +144,4 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def statusbar_config(self):
         self.statusbar.addWidget(self.connection_ctrl)
-        self.model.realtime_data.worker.connection_status.connect(self.connection_ctrl.setStatus)
+        self.model.realtime_data.worker.connection_status.connect(self.connection_ctrl.set_status)

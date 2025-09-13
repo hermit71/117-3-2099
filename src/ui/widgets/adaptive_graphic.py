@@ -5,13 +5,15 @@ from PyQt6.QtCore import pyqtSlot as Slot, pyqtSignal as Signal
 from datetime import datetime, timedelta
 
 class AdaptiveGraphic(PlotWidget):
+    """Plot widget for visualizing multiple data series with optional axes."""
 
     mouse_moved_on_plot = Signal(object)
 
     def __init__(self, parent=None):
+        """Initialize the widget with default plot configuration."""
         super().__init__(parent)
-        self.plots = [None]*6
-        self.plots_mask = [1,0,0,1,0,0]
+        self.plots = [None] * 6
+        self.plots_mask = [1, 0, 0, 1, 0, 0]
         self.setBackground('w')
         self.showGrid(x=True, y=True)
         self.context = 'force'
@@ -21,21 +23,17 @@ class AdaptiveGraphic(PlotWidget):
         self.connect_signals_slots()
 
     def initial_graphics_settings(self):
-        self.p_range = [0,100]
+        """Set up initial plot appearance and elements."""
+        self.p_range = [0, 100]
         self.f_range = [-1000, 1000]
         self.t_range = [20, 60]
         self._plot_pens_define()
         self._axis_styles_define()
         self._set_labels()
         self._set_datetime_axis()
-        #self._set_timing_labels()
-        #self._set_value_labels()
         self._set_proxy()
         self._add_line()
         self._add_plots()
-        #self._set_additional_temperature_axis()
-        #self.getViewBox().setMouseEnabled(x=True, y=False)
-        #self.getViewBox().setBorder(self.plot_border_main)
         self.view_box = self.getPlotItem().vb
         self.view_box.setMouseEnabled(x=True, y=False)
         self.view_box.setBorder(self.plot_border_main)
@@ -43,9 +41,11 @@ class AdaptiveGraphic(PlotWidget):
         self._set_plot_context(self.context)
 
     def connect_signals_slots(self):
+        """Connect internal signals and slots."""
         self.getViewBox().sigResized.connect(self._update_views)
 
     def set_plot_mask(self, mask):
+        """Set plot visibility mask."""
         self.plots_mask = mask
 
     def _add_plots(self):
@@ -55,7 +55,7 @@ class AdaptiveGraphic(PlotWidget):
         self._plots_control(self.plots_mask)
 
     def _plots_control(self, mask):
-        for i, v_ in enumerate(self.plots_mask):
+        for i, v_ in enumerate(mask):
             if v_:
                 self.plots[i].show()
             else:
@@ -66,8 +66,7 @@ class AdaptiveGraphic(PlotWidget):
 
     def _plot_pens_define(self):
         # Стили графиков
-        self.plot_pens = [None]*6
-        #col = pg.mkColor()
+        self.plot_pens = [None] * 6
         self.plot_pens[0] = pg.mkPen(color='#ff0000', width=2) # Температура
         self.plot_pens[1] = pg.mkPen(color='#9575f4', width=2)  # Давление в системе
         self.plot_pens[2] = pg.mkPen(color='#006393', width=2)  # Давление над пакером
@@ -76,7 +75,6 @@ class AdaptiveGraphic(PlotWidget):
         self.plot_pens[5] = pg.mkPen(color='#804040', width=2)  # Усилие на пакере
 
         self.plot_border_main = pg.mkPen(color='#808080', width=1)
-        #self.temperature_plot_pen = pg.mkPen(color='ff0000', width=2)
         self.crosshair_pen = pg.mkPen(color='#0000f2', width=0.2)
 
     def _axis_styles_define(self):
@@ -102,7 +100,6 @@ class AdaptiveGraphic(PlotWidget):
         self.context = context
 
     def _set_datetime_axis(self):
-        # initial X axis setting
         now = datetime.now()
         now_ = datetime.now() + timedelta(minutes=20)
         self.date_axis_temperature = pg.DateAxisItem(orientation='bottom')
@@ -123,21 +120,6 @@ class AdaptiveGraphic(PlotWidget):
         self.txt_pd_end.setFont((txt_font))
         self.txt_pd_start.setPos(60, 20)
         self.txt_pd_end.setPos(60, 60)
-
-    '''
-    def _set_value_labels(self):
-        txt_font = QFont()
-        txt_font.setPixelSize(18)
-        self.txt_cur_value = pg.TextItem('', anchor=(0, 0), color='#025b94',
-                                         border=self.plot_border_main)
-        self.scene().addItem(self.txt_cur_value)
-        self.txt_cur_value.setFont(txt_font)
-        self.txt_cur_value.setPos(1000, 10)
-
-        #self.txt_max_value = pg.TextItem('Максимальное значение: ', anchor=(0, 0), color='#025b94',
-        #                                 border= self.plot_border_main)
-        #self.txt_max_value.setPos(600, 60)
-    '''
 
     def _set_proxy(self) -> None:
         """Set Signal Proxy"""
@@ -166,9 +148,9 @@ class AdaptiveGraphic(PlotWidget):
 
     def _update_views(self):
         self.p2.setGeometry(self.getViewBox().sceneBoundingRect())
-        # self.p2.linkedViewChanged(self.getViewBox(), self.p2.XAxis)
 
-    def set_X_range(self, t0, t1):
+    def set_x_range(self, t0, t1):
+        """Set the visible X-axis range."""
         self.setXRange(t0.timestamp(), t1.timestamp(), padding=0)
 
     def _update_plot(self, local_ds):
@@ -179,41 +161,23 @@ class AdaptiveGraphic(PlotWidget):
         if instant_now.timestamp() >= t1:
             self.setXRange(instant_now.timestamp() - (t1 - t0), instant_now.timestamp(), padding=0)
 
-        # # Или изменяем диапазон при получении новых данных если мы в режиме проведения испытания
-        # if instant_now.timestamp() >= t1:
-        #     self.setXRange(self.stage_start_time.timestamp(), instant_now.timestamp(), padding=0)
-        #     match self._stage:
-        #         case 1 | 2 | 4 | 5 | 7:
-        #             self.graph_pp.setYRange(0, 160.0, padding=0.02)
-        #         case 3 | 6:
-        #             self.graph_pp.setYRange(-1000, 1000, padding=0.02)
-
         # Обновляем графики
-        # Получаем данные из in-memory базы данных для отображения на графике
-        request = f'SELECT * FROM local_data WHERE dt>=\'{t0}\''
+        request = f"SELECT * FROM local_data WHERE dt>='{t0}'"
         data = local_ds.select_data(request)
         self.local_plot_data = data
         graph_x = [datetime.strptime(d[1], '%Y-%m-%d %H:%M:%S.%f').timestamp() for d in data]
         self.local_x_data = graph_x
-        #temperature_y = [d[2] for d in data]
-        #pressure_y = [d[3] for d in data]
         for i, v_ in enumerate(self.plots_mask):
             if v_:
-                self.plots[i].setData(graph_x, [d[i+2] for d in data])
-
-        #self.main_plot_line.setData(graph_x, pressure_y)
-        #self.temperature_plot_line.setData(graph_x, temperature_y)
-
-        #self.txt_start_cycle.setText(f'{pd_inner_y[0]:.2f}')
-        #self.txt_end_cycle.setText(f'{pd_inner_y[-1]:.2f}')
+                self.plots[i].setData(graph_x, [d[i + 2] for d in data])
 
     def on_sensor_values_changed(self, last_data_row, local_ds):
-        #plot_data = self._get_plot_data(local_ds)
+        """Update plot when new sensor values are available."""
         self.local_ds = local_ds
         self._update_plot(local_ds)
-        #self._update_views()
 
     def on_change_right_axis_visibility(self, state):
+        """Toggle visibility of the right axis."""
         if state:
             self.getPlotItem().showAxis('right')
             self.plots_mask[0] = 1
@@ -224,6 +188,7 @@ class AdaptiveGraphic(PlotWidget):
             self.plots[0].hide()
 
     def on_visibility_chb(self, num, state):
+        """Handle visibility checkbox changes."""
         if state == 2:
             self.plots_mask[num] = 1
             self.plots[num].show()
@@ -238,10 +203,7 @@ class AdaptiveGraphic(PlotWidget):
 
     @Slot(str, float)
     def on_axis_scale_change(self, axis_name, value):
-        # range_p = self.getPlotItem().viewRange()
-        # range_f = self.getPlotItem().viewRange()
-        # range_t = self.p2.viewRange()
-
+        """Change axis ranges based on provided values."""
         match axis_name:
             case 'p_max':
                 self.p_range[1] = value
@@ -257,9 +219,9 @@ class AdaptiveGraphic(PlotWidget):
                 self.t_range[0] = value
         self._set_plot_context(self.context)
 
-
     @Slot(tuple)
     def mouse_moved(self, evt):
+        """Emit data and move crosshair when mouse moves."""
         pos = evt[0]
         if self.getPlotItem().sceneBoundingRect().contains(pos):
             mouse_point = self.view_box.mapSceneToView(pos)

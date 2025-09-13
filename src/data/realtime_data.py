@@ -10,18 +10,21 @@ from pymodbus.exceptions import ModbusException
 import numpy as np
 from ctypes import *
 
-realtime_data_window = 60 # час - временное окно для хранения данных от датчиков в реальном времени в минутах
+realtime_data_window = 60  # час - временное окно для хранения данных от датчиков в реальном времени в минутах
 
 
 class Worker(QObject):
+    """Background Modbus worker running in its own thread."""
+
     data_received = Signal(list)
     connection_status = Signal(bool)
 
     def __init__(self, data_set):
+        """Store reference to data set and initialize Modbus client."""
         QObject.__init__(self)
         self.data_set = data_set
         print('worker init')
-        self.initModbus()
+        self.init_modbus()
         self.data_received.connect(self.data_set.update)
         self.timer = None
         self.tension = 0
@@ -38,16 +41,14 @@ class Worker(QObject):
         self.angle = 0
         self.result = None
 
-    def initModbus(self):
-        # Настройка Modbus клиента
+    def init_modbus(self):
+        """Настройка Modbus клиента."""
         self.client = ModbusTcpClient('192.168.6.31')  # IP-адрес PLC ('127.0.0.1')
         self.register_address = 0  # Начальный адрес регистра для чтения
-        self.register_qty = 7 # Количество регистров для чтения
+        self.register_qty = 7  # Количество регистров для чтения
 
     def safe_modbus_read(self, host, port, address, count=1, unit=1, max_retries=3):
-        """
-        Безопасное чтение Modbus с обработкой ошибок соединения
-        """
+        """Безопасное чтение Modbus с обработкой ошибок соединения."""
         client = None
         self.result = None
 
@@ -80,7 +81,7 @@ class Worker(QObject):
                         'error': str(e)
                     }
 
-                time.sleep(1)  # Пауза перед повторной попыткой
+                time.sleep(1)
 
             except Exception as e:
                 return {
@@ -105,30 +106,31 @@ class Worker(QObject):
 
     @Slot()
     def on_timer(self):
+        """Handler for polling timer."""
         self.get_data()
-        #self.safe_modbus_read("", "", "")
 
     @Slot()
     def get_data(self):
+        """Read data from PLC and emit signal."""
         try:
-            # self.result = self.client.read_holding_registers(self.register_address, count=self.register_qty)
             self.result = self.client.readwrite_registers(
-                        read_address= self.register_address,
-                        read_count= self.register_qty,
-                        write_address= 7,
-                        values= self.data_set.write_regs)
+                        read_address=self.register_address,
+                        read_count=self.register_qty,
+                        write_address=7,
+                        values=self.data_set.write_regs)
             self.data_received.emit(self.result.registers)
         except ModbusException as e:
 
             print(f"Modbus error: {e}")
 
 class RealTimeData(QObject):
-    # arg#1: регистры Модбас (необработанные данные)
-    # arg#2: новые данные от датчиков в формате [float, ...]
+    """Хранит и обновляет данные датчиков в реальном времени."""
+
     data_updated = Signal(list)
     prev_time = 0
 
     def __init__(self, config, parent=None):
+        """Initialize data buffers and start worker thread."""
         super(RealTimeData, self).__init__(parent)
         self.config = config
 
@@ -158,7 +160,7 @@ class RealTimeData(QObject):
 
         # Слово управления для отправки в ПЛК
         self.plc_control_word = 0
-        self.write_regs = [0] * 6 # 6 шесть регистров для записи в ПЛК
+        self.write_regs = [0] * 6  # 6 шесть регистров для записи в ПЛК
 
         # Для обмена по Modbus создаем отдельный поток
         self.worker = Worker(self)
@@ -176,6 +178,7 @@ class RealTimeData(QObject):
     # Слот вызывается из Worker когда завершено получение новых данных от PLC
     @Slot(list)
     def update(self, registers):
+        """Обновление данных и оповещение подписчиков."""
         # Обновление данных
         self.times[self.ptr] = round((time.time() - self.time_origin) * 1000)
         self.tension_data_c[self.ptr] = self.get_real_tension(registers)
@@ -197,20 +200,24 @@ class RealTimeData(QObject):
         self.data_updated.emit(registers)
 
     def get_real_tension(self, registers):
+        """Преобразовать сырое значение момента в Нм."""
         tension = 50.0 * float(c_short(registers[1]).value) / 32768.0
         return tension
 
     def get_real_angle(self, registers):
+        """Преобразовать сырое значение угла в градусы."""
         angle = float((registers[3] << 16) | registers[2]) / 768.0
         return angle
 
     def get_real_velocity(self):
+        """Вычислить мгновенную скорость изменения момента."""
         velocity = 0.0
         if self.ptr > 0:
             velocity = (self.tension_data_c[self.ptr] - self.tension_data_c[self.ptr - 1]) / self.poll_interval_s
         return velocity
 
     def get_dataset_by_name(self, dataset_name):
+        """Вернуть массив данных по имени."""
         match dataset_name:
             case 'tension_data_c':
                 return self.tension_data_c
@@ -218,8 +225,10 @@ class RealTimeData(QObject):
                 return self.angle_data_c
             case 'velocity_data':
                 return self.velocity_data
+
     @Slot(dict)
-    def modbus_registers_to_PLC_update(self, regs):
+    def modbus_registers_to_plc_update(self, regs):
+        """Обновить регистры для передачи в ПЛК."""
         for key, reg in regs.items():
             match key:
                 case 'Modbus_CTRL':
@@ -234,3 +243,4 @@ class RealTimeData(QObject):
                     self.write_regs[4] = reg
                 case 'Modbus_AUX':
                     self.write_regs[5] = reg
+

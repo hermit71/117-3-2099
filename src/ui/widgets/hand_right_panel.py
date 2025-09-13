@@ -4,20 +4,26 @@ from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
 
 from src.ui.widgets.led_panel import (LedPanel)
 
+
 class LedDashboardPanel(QFrame):
+    """Panel containing multiple LED dashboards."""
+
     def __init__(self, parent=None):
+        """Create an empty dashboard panel."""
         super().__init__(parent)
         self.model = None
         self.led_dashboards = None
         self.vbox = QVBoxLayout()
 
     def config(self, model=None, led_dashboards=None):
+        """Configure panel with model and LED dashboards."""
         self.model = model
         self.led_dashboards = led_dashboards
-        self.setupUI()
+        self.setup_ui()
         self.model.data_updated.connect(self.data_update)
 
-    def setupUI(self):
+    def setup_ui(self):
+        """Create LED widgets and layout."""
         if self.led_dashboards is None:
             print('No led_dashboards defined')
             return
@@ -30,9 +36,9 @@ class LedDashboardPanel(QFrame):
             self.vbox.addItem(spacerItem)
             self.setLayout(self.vbox)
 
-
     @Slot(list)
     def data_update(self, registers):
+        """Update LED dashboards with new register values."""
         for i, ld in enumerate(self.led_dashboards):
             ld[2].update_view(
                 registers[ld[1]['register']],   # Обновляем состояние led панели в соответствии с нужным регистром Modbus

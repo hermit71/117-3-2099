@@ -30,7 +30,7 @@ class CommandHandler(QObject):
         super(CommandHandler, self).__init__(parent)
         self.parent = parent
         self.write_to_plc.connect(
-            self.parent.realtime_data.modbus_registers_to_PLC_update
+            self.parent.realtime_data.modbus_registers_to_plc_update
         )
 
     def set_plc_mode(self, mode):
