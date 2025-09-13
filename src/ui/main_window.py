@@ -50,6 +50,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.config = config
         self.setupUi(self)
+        self.menuAbout.triggered.connect(self.show_about_dialog)
         self.model = Model(self.config)
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.connectionControl()
@@ -80,6 +81,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btnJog_CW.released.connect(self.on_jog_released)
         self.btnJog_CCW.released.connect(self.on_jog_released)
         self.btnHandRegSettings.clicked.connect(self.on_hand_reg_settings_clicked)
+
+    @Slot()
+    def show_about_dialog(self):
+        dlg = AboutDialog(self)
+        dlg.exec()
 
     @Slot()
     def on_btnHand_click(self):
