@@ -73,6 +73,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.config = config
         self.setupUi(self)
         self.menuAbout.triggered.connect(self.show_about_dialog)
+        # Настройки соединения Modbus
+        self.actionConnectionSettings = self.menu.addAction(
+            "Параметры соединения..."
+        )
+        self.actionConnectionSettings.triggered.connect(
+            self.show_connection_settings_dialog
+        )
         self.model = Model(self.config)
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.ConnectionControl()
@@ -112,6 +119,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Display the About dialog."""
         dlg = AboutDialog(self)
         dlg.exec()
+
+    @Slot()
+    def show_connection_settings_dialog(self):
+        """Display and apply connection settings dialog."""
+        dlg = ConnectionSettingsDialog(self, config=self.config)
+        if dlg.exec():
+            self.config.cfg.setdefault("modbus", {})
+            self.config.cfg.setdefault("ui", {})
+            self.config.cfg["modbus"]["host"] = dlg.ed_host.text()
+            self.config.cfg["modbus"]["port"] = int(dlg.ed_port.text())
+            self.config.cfg["modbus"]["timeout"] = float(
+                dlg.ed_timeout.text()
+            )
+            self.config.cfg["ui"]["poll_interval_ms"] = int(
+                dlg.ed_poll.text()
+            )
 
     @Slot()
     def on_btn_hand_click(self):
