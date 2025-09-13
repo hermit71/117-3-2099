@@ -1,37 +1,42 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QGridLayout, QLabel, QGroupBox, QStatusBar, \
-    QHBoxLayout
-from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
-from src.ui.widgets.led_panel import appLed
+"""Widget displaying connection status with an LED indicator."""
 
-class connectionControl(QWidget):
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt6.QtCore import Qt, pyqtSlot as Slot
+
+from src.ui.widgets.led_panel import AppLed
+
+
+class ConnectionControl(QWidget):
+    """Small status widget with an LED indicator showing connection state."""
+
     def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        self.status_text = ''
-        self.controlLed = appLed()
-        self.status = QLabel(f'{self.status_text}')
-        self.hbox = QHBoxLayout()
-        self.hbox.addWidget(self.controlLed)
-        self.hbox.addWidget(self.status)
-        self.setLayout(self.hbox)
-        self.setupUI()
+        super().__init__(parent)
+        self.status_text = ""
+        self.control_led = AppLed()
+        self.status = QLabel(self.status_text)
+        layout = QHBoxLayout(self)
+        layout.addWidget(self.control_led)
+        layout.addWidget(self.status)
+        self.setLayout(layout)
+        self._setup_ui()
 
-
-    def setupUI(self):
-        self.controlLed.setEnabled(True)
-        self.controlLed.set_shape(appLed.circle)
-        self.controlLed.set_on_color(appLed.green)
-        self.controlLed.set_off_color(appLed.red)
-        self.controlLed.setFixedSize(12, 12)
-        self.controlLed.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+    def _setup_ui(self):
+        """Configure LED appearance."""
+        self.control_led.setEnabled(True)
+        self.control_led.set_shape(AppLed.circle)
+        self.control_led.set_on_color(AppLed.green)
+        self.control_led.set_off_color(AppLed.red)
+        self.control_led.setFixedSize(12, 12)
+        self.control_led.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
     @Slot(bool)
-    def setStatus(self, status):
+    def set_status(self, status):
+        """Update LED and text to reflect connection status."""
         if status:
-            self.controlLed.turn_on()
-            self.status_text = 'Соединение установлено'
-            self.status.setText(self.status_text)
+            self.control_led.turn_on()
+            self.status_text = "Соединение установлено"
         else:
-            self.controlLed.turn_off()
-            self.status_text = 'Соединение отсутствует'
-            self.status.setText(self.status_text)
+            self.control_led.turn_off()
+            self.status_text = "Соединение отсутствует"
+        self.status.setText(self.status_text)
 

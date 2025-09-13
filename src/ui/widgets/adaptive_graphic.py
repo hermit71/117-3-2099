@@ -1,17 +1,21 @@
+"""Adaptive graph widget for displaying multiple time-series plots."""
+
 import pyqtgraph as pg
 from pyqtgraph import PlotWidget
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import pyqtSlot as Slot, pyqtSignal as Signal
 from datetime import datetime, timedelta
 
+
 class AdaptiveGraphic(PlotWidget):
+    """Plot widget managing several dynamically shown plots."""
 
     mouse_moved_on_plot = Signal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.plots = [None]*6
-        self.plots_mask = [1,0,0,1,0,0]
+        self.plots = [None] * 6
+        self.plots_mask = [1, 0, 0, 1, 0, 0]
         self.setBackground('w')
         self.showGrid(x=True, y=True)
         self.context = 'force'
@@ -21,21 +25,17 @@ class AdaptiveGraphic(PlotWidget):
         self.connect_signals_slots()
 
     def initial_graphics_settings(self):
-        self.p_range = [0,100]
+        """Initial configuration of plot ranges and styles."""
+        self.p_range = [0, 100]
         self.f_range = [-1000, 1000]
         self.t_range = [20, 60]
         self._plot_pens_define()
         self._axis_styles_define()
         self._set_labels()
         self._set_datetime_axis()
-        #self._set_timing_labels()
-        #self._set_value_labels()
         self._set_proxy()
         self._add_line()
         self._add_plots()
-        #self._set_additional_temperature_axis()
-        #self.getViewBox().setMouseEnabled(x=True, y=False)
-        #self.getViewBox().setBorder(self.plot_border_main)
         self.view_box = self.getPlotItem().vb
         self.view_box.setMouseEnabled(x=True, y=False)
         self.view_box.setBorder(self.plot_border_main)
@@ -43,19 +43,21 @@ class AdaptiveGraphic(PlotWidget):
         self._set_plot_context(self.context)
 
     def connect_signals_slots(self):
+        """Connect internal Qt signals."""
         self.getViewBox().sigResized.connect(self._update_views)
 
     def set_plot_mask(self, mask):
+        """Update mask controlling which plots are visible."""
         self.plots_mask = mask
 
     def _add_plots(self):
-        for i, v_ in enumerate(self.plots_mask):
+        for i, _ in enumerate(self.plots_mask):
             self.plots[i] = pg.PlotCurveItem(pen=self.plot_pens[i])
             self.addItem(self.plots[i])
         self._plots_control(self.plots_mask)
 
     def _plots_control(self, mask):
-        for i, v_ in enumerate(self.plots_mask):
+        for i, v_ in enumerate(mask):
             if v_:
                 self.plots[i].show()
             else:
@@ -120,24 +122,9 @@ class AdaptiveGraphic(PlotWidget):
         self.scene().addItem(self.txt_pd_start)
         self.scene().addItem(self.txt_pd_end)
         self.txt_pd_start.setFont(txt_font)
-        self.txt_pd_end.setFont((txt_font))
+        self.txt_pd_end.setFont(txt_font)
         self.txt_pd_start.setPos(60, 20)
         self.txt_pd_end.setPos(60, 60)
-
-    '''
-    def _set_value_labels(self):
-        txt_font = QFont()
-        txt_font.setPixelSize(18)
-        self.txt_cur_value = pg.TextItem('', anchor=(0, 0), color='#025b94',
-                                         border=self.plot_border_main)
-        self.scene().addItem(self.txt_cur_value)
-        self.txt_cur_value.setFont(txt_font)
-        self.txt_cur_value.setPos(1000, 10)
-
-        #self.txt_max_value = pg.TextItem('Максимальное значение: ', anchor=(0, 0), color='#025b94',
-        #                                 border= self.plot_border_main)
-        #self.txt_max_value.setPos(600, 60)
-    '''
 
     def _set_proxy(self) -> None:
         """Set Signal Proxy"""
@@ -168,7 +155,8 @@ class AdaptiveGraphic(PlotWidget):
         self.p2.setGeometry(self.getViewBox().sceneBoundingRect())
         # self.p2.linkedViewChanged(self.getViewBox(), self.p2.XAxis)
 
-    def set_X_range(self, t0, t1):
+    def set_x_range(self, t0, t1):
+        """Set X axis range using datetime objects."""
         self.setXRange(t0.timestamp(), t1.timestamp(), padding=0)
 
     def _update_plot(self, local_ds):
@@ -199,7 +187,7 @@ class AdaptiveGraphic(PlotWidget):
         #pressure_y = [d[3] for d in data]
         for i, v_ in enumerate(self.plots_mask):
             if v_:
-                self.plots[i].setData(graph_x, [d[i+2] for d in data])
+                self.plots[i].setData(graph_x, [d[i + 2] for d in data])
 
         #self.main_plot_line.setData(graph_x, pressure_y)
         #self.temperature_plot_line.setData(graph_x, temperature_y)
@@ -208,12 +196,12 @@ class AdaptiveGraphic(PlotWidget):
         #self.txt_end_cycle.setText(f'{pd_inner_y[-1]:.2f}')
 
     def on_sensor_values_changed(self, last_data_row, local_ds):
-        #plot_data = self._get_plot_data(local_ds)
+        """Handle incoming sensor data and refresh plots."""
         self.local_ds = local_ds
         self._update_plot(local_ds)
-        #self._update_views()
 
     def on_change_right_axis_visibility(self, state):
+        """Show or hide the right axis along with its plot."""
         if state:
             self.getPlotItem().showAxis('right')
             self.plots_mask[0] = 1
@@ -224,6 +212,7 @@ class AdaptiveGraphic(PlotWidget):
             self.plots[0].hide()
 
     def on_visibility_chb(self, num, state):
+        """Toggle individual plot visibility using checkbox state."""
         if state == 2:
             self.plots_mask[num] = 1
             self.plots[num].show()
@@ -238,10 +227,7 @@ class AdaptiveGraphic(PlotWidget):
 
     @Slot(str, float)
     def on_axis_scale_change(self, axis_name, value):
-        # range_p = self.getPlotItem().viewRange()
-        # range_f = self.getPlotItem().viewRange()
-        # range_t = self.p2.viewRange()
-
+        """Change axis ranges based on UI input."""
         match axis_name:
             case 'p_max':
                 self.p_range[1] = value
@@ -260,6 +246,7 @@ class AdaptiveGraphic(PlotWidget):
 
     @Slot(tuple)
     def mouse_moved(self, evt):
+        """Emit data value under the cursor and move crosshair lines."""
         pos = evt[0]
         if self.getPlotItem().sceneBoundingRect().contains(pos):
             mouse_point = self.view_box.mapSceneToView(pos)

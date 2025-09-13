@@ -272,7 +272,7 @@
                    <number>4</number>
                   </property>
                   <item>
-                   <widget class="dashboardPanel" name="pageHand_pnlTopDashboard">
+                   <widget class="DashboardPanel" name="pageHand_pnlTopDashboard">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -450,7 +450,7 @@
                                 </widget>
                                </item>
                                <item>
-                                <widget class="appSpinBox" name="dsbHandVelocity_1">
+                                <widget class="AppSpinBox" name="dsbHandVelocity_1">
                                  <property name="sizePolicy">
                                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                                    <horstretch>0</horstretch>
@@ -566,7 +566,7 @@
                                 </widget>
                                </item>
                                <item>
-                                <widget class="appSpinBox" name="dsbHandTension">
+                                <widget class="AppSpinBox" name="dsbHandTension">
                                  <property name="font">
                                   <font>
                                    <family>Inconsolata LGC Nerd Font</family>
@@ -627,7 +627,7 @@
                                 </widget>
                                </item>
                                <item>
-                                <widget class="appSpinBox" name="dsbHandVelocity_2">
+                                <widget class="AppSpinBox" name="dsbHandVelocity_2">
                                  <property name="font">
                                   <font>
                                    <family>Inconsolata LGC Nerd Font</family>
@@ -679,7 +679,7 @@
                                 </widget>
                                </item>
                                <item>
-                                <widget class="appSpinBox" name="dsbHandTime_1">
+                                <widget class="AppSpinBox" name="dsbHandTime_1">
                                  <property name="font">
                                   <font>
                                    <family>Inconsolata LGC Nerd Font</family>
@@ -955,13 +955,13 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>dashboardPanel</class>
+   <class>DashboardPanel</class>
    <extends>QFrame</extends>
    <header>hand_top_panel</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>appSpinBox</class>
+   <class>AppSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>spin_box_int_to_float</header>
   </customwidget>
