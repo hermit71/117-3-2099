@@ -1,10 +1,17 @@
-import numpy as np
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QSpacerItem, QSizePolicy, QGridLayout, QLabel, QGroupBox
-from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot
+"""LED dashboard panel for manual control screen."""
 
-from src.ui.widgets.led_panel import (LedPanel)
+import logging
+
+from PyQt6.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot as Slot
+
+from src.ui.widgets.led_panel import LedPanel
+
+logger = logging.getLogger(__name__)
 
 class LedDashboardPanel(QFrame):
+    """Panel containing LED dashboards for manual mode."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.model = None
@@ -12,28 +19,37 @@ class LedDashboardPanel(QFrame):
         self.vbox = QVBoxLayout()
 
     def config(self, model=None, led_dashboards=None):
+        """Configure panel with model and dashboard definitions."""
         self.model = model
         self.led_dashboards = led_dashboards
-        self.setupUI()
+        self.setup_ui()
         self.model.data_updated.connect(self.data_update)
 
-    def setupUI(self):
+    def setup_ui(self):
+        """Create LED panels and layout."""
         if self.led_dashboards is None:
-            print('No led_dashboards defined')
+            logger.info("No led_dashboards defined")
             return
-        else:
-            for i, ld in enumerate(self.led_dashboards):
-                led_p = LedPanel(led_number=ld[1]['num'], title=ld[1]['title'], labels=ld[1]['labels'])
-                self.led_dashboards[i].append(led_p)    # Добавляем в список led панелей созданный экземпляр панели
-                self.vbox.addWidget(led_p)
-            spacerItem = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-            self.vbox.addItem(spacerItem)
-            self.setLayout(self.vbox)
-
+        for i, ld in enumerate(self.led_dashboards):
+            led_p = LedPanel(
+                led_number=ld[1]["num"],
+                title=ld[1]["title"],
+                labels=ld[1]["labels"],
+            )
+            # Добавляем в список led панелей созданный экземпляр панели
+            self.led_dashboards[i].append(led_p)
+            self.vbox.addWidget(led_p)
+        spacer_item = QSpacerItem(
+            20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+        )
+        self.vbox.addItem(spacer_item)
+        self.setLayout(self.vbox)
 
     @Slot(list)
     def data_update(self, registers):
+        """Update LED panels based on Modbus registers."""
         for i, ld in enumerate(self.led_dashboards):
             ld[2].update_view(
-                registers[ld[1]['register']],   # Обновляем состояние led панели в соответствии с нужным регистром Modbus
-                ld[1]['bits'])                  # и нужными битами этого регистра
+                registers[ld[1]["register"]],  # Обновляем состояние led панели
+                ld[1]["bits"],  # и нужными битами этого регистра
+            )

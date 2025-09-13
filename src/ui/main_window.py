@@ -1,15 +1,29 @@
+"""Main application window and supporting dialogs."""
+
+import logging
+
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QStackedWidget,
-    QMenuBar, QStatusBar, QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QLabel
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QLineEdit,
+    QLabel,
+    QMainWindow,
+    QVBoxLayout,
 )
 from PyQt6.QtCore import pyqtSlot as Slot
-from src.ui.main_117_3 import Ui_MainWindow
-from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
+
 from src.data.model import Model
+from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
+from src.ui.main_117_3 import Ui_MainWindow
 from src.ui.widgets import dashboards, connection_control_widget as cw
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionSettingsDialog(QDialog):
+    """Dialog for configuring connection settings."""
+
     def __init__(self, parent=None, config=None):
         super().__init__(parent)
         self.setWindowTitle("Параметры соединения")
@@ -17,35 +31,45 @@ class ConnectionSettingsDialog(QDialog):
 
         form = QFormLayout(self)
 
-        self.ed_host = QLineEdit(self.config.get('modbus', 'host', '127.0.0.1'))
-        self.ed_port = QLineEdit(str(self.config.get('modbus', 'port', 502)))
-        self.ed_timeout = QLineEdit(str(self.config.get('modbus', 'timeout', 2.0)))
-        self.ed_poll = QLineEdit(str(self.config.get('ui', 'poll_interval_ms', 200)))
+        self.ed_host = QLineEdit(self.config.get("modbus", "host", "127.0.0.1"))
+        self.ed_port = QLineEdit(str(self.config.get("modbus", "port", 502)))
+        self.ed_timeout = QLineEdit(str(self.config.get("modbus", "timeout", 2.0)))
+        self.ed_poll = QLineEdit(str(self.config.get("ui", "poll_interval_ms", 200)))
 
         form.addRow("IP-адрес ПЛК:", self.ed_host)
         form.addRow("Порт:", self.ed_port)
         form.addRow("Таймаут (с):", self.ed_timeout)
         form.addRow("Период опроса (мс):", self.ed_poll)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
         form.addRow(buttons)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
     def accept(self):
-        # Валидация данных можно добавить здесь
+        """Validate data and close the dialog."""
         super().accept()
 
 
 class AboutDialog(QDialog):
+    """Simple dialog displaying application information."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("О программе")
-        v = QVBoxLayout(self)
-        v.addWidget(QLabel("Шаблон интерфейса стенда крутильных статических испытаний. PyQt6 + pyqtgraph + Modbus TCP."))
+        vbox = QVBoxLayout(self)
+        vbox.addWidget(
+            QLabel(
+                "Шаблон интерфейса стенда крутильных статических испытаний. PyQt6 + pyqtgraph + Modbus TCP."
+            )
+        )
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
+    """Main application window."""
+
     def __init__(self, config):
         super().__init__()
         self.config = config
@@ -53,11 +77,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.menuAbout.triggered.connect(self.show_about_dialog)
         self.model = Model(self.config)
         self.command_handler = self.model.command_handler
-        self.connection_ctrl = cw.connectionControl()
+        self.connection_ctrl = cw.ConnectionControl()
         self.hand_screen_config()
         self.statusbar_config()
         self.signal_connections()
-        self.btnHand.setStyleSheet("""
+        self.btnHand.setStyleSheet(
+            """
             QPushButton {
                 background-color: #3498db;
                 color: white;
@@ -67,14 +92,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QPushButton:hover {
                 background-color: #2980b9;
             }
-        """)
+            """
+        )
 
     def signal_connections(self):
-        self.btnHand.clicked.connect(self.on_btnHand_click)
-        self.btnInit.clicked.connect(self.on_btnInit_click)
-        self.btnStatic1.clicked.connect(self.on_btnStatic1_click)
-        self.btnStatic2.clicked.connect(self.on_btnStatic2_click)
-        self.btnService.clicked.connect(self.on_btnService_click)
+        """Connect UI elements to their handlers."""
+        self.btnHand.clicked.connect(self.on_btn_hand_click)
+        self.btnInit.clicked.connect(self.on_btn_init_click)
+        self.btnStatic1.clicked.connect(self.on_btn_static1_click)
+        self.btnStatic2.clicked.connect(self.on_btn_static2_click)
+        self.btnService.clicked.connect(self.on_btn_service_click)
 
         self.btnJog_CW.pressed.connect(self.on_jog_cw_pressed)
         self.btnJog_CCW.pressed.connect(self.on_jog_ccw_pressed)
@@ -84,64 +111,82 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def show_about_dialog(self):
+        """Display the About dialog."""
         dlg = AboutDialog(self)
         dlg.exec()
 
     @Slot()
-    def on_btnHand_click(self):
+    def on_btn_hand_click(self):
+        """Handle Hand button click."""
         self.pager.setCurrentIndex(0)
-        self.command_handler.set_plc_mode('hand')
+        self.command_handler.set_plc_mode("hand")
         self.command_handler.servo_power_off()
 
     @Slot()
-    def on_btnInit_click(self):
+    def on_btn_init_click(self):
+        """Handle Init button click."""
         self.pager.setCurrentIndex(1)
-        self.command_handler.set_plc_mode('auto')
+        self.command_handler.set_plc_mode("auto")
         self.command_handler.servo_power_on()
 
     @Slot()
-    def on_btnStatic1_click(self):
+    def on_btn_static1_click(self):
+        """Handle Static1 button click."""
         self.pager.setCurrentIndex(2)
-        self.command_handler.set_plc_mode('auto')
-        self.command_handler.set_tension(222,333)
+        self.command_handler.set_plc_mode("auto")
+        self.command_handler.set_tension(222, 333)
 
     @Slot()
-    def on_btnStatic2_click(self):
+    def on_btn_static2_click(self):
+        """Handle Static2 button click."""
         self.pager.setCurrentIndex(3)
-        self.command_handler.set_plc_mode('auto')
-        self.command_handler.set_tension(0,0)
+        self.command_handler.set_plc_mode("auto")
+        self.command_handler.set_tension(0, 0)
 
     @Slot()
-    def on_btnService_click(self):
+    def on_btn_service_click(self):
+        """Handle Service button click."""
         self.pager.setCurrentIndex(4)
-        self.command_handler.set_plc_mode('service')
+        self.command_handler.set_plc_mode("service")
 
     def on_jog_cw_pressed(self):
-        self.model.command_handler.jog(direction='cw', velocity=0)
-        print('cw')
+        """Start clockwise jog movement."""
+        self.model.command_handler.jog(direction="cw", velocity=0)
+        logger.info("cw")
 
     def on_jog_ccw_pressed(self):
-        self.model.command_handler.jog(direction='ccw', velocity=0)
-        print('ccw')
+        """Start counterclockwise jog movement."""
+        self.model.command_handler.jog(direction="ccw", velocity=0)
+        logger.info("ccw")
 
     def on_jog_released(self):
+        """Stop jog movement."""
         self.model.command_handler.stop()
-        print('stop')
+        logger.info("stop")
 
     def on_hand_reg_settings_clicked(self):
+        """Show hand regulator settings dialog."""
         dlg = QDialog()
         ui = Ui_dlgHandRegulatorSettings()
         ui.setupUi(dlg)
         dlg.exec()
 
     def hand_screen_config(self):
+        """Configure widgets for the hand control screen."""
         # Конфигурация правой индикаторной панели
-        self.pageHand_pnlRight.config(model=self.model, led_dashboards=dashboards.hand_right_panel_led_dashboards)
+        self.pageHand_pnlRight.config(
+            model=self.model, led_dashboards=dashboards.hand_right_panel_led_dashboards
+        )
         # Конфигурация графиков
-        self.pageHand_pnlGraph.graph_config(model=self.model, plots_description=dashboards.hand_graphs)
+        self.pageHand_pnlGraph.graph_config(
+            model=self.model, plots_description=dashboards.hand_graphs
+        )
         # Конфигурация дашборда (показания датчиков)
         self.pageHand_pnlTopDashboard.config(model=self.model)
 
     def statusbar_config(self):
+        """Configure status bar and connection indicator."""
         self.statusbar.addWidget(self.connection_ctrl)
-        self.model.realtime_data.worker.connection_status.connect(self.connection_ctrl.setStatus)
+        self.model.realtime_data.worker.connection_status.connect(
+            self.connection_ctrl.set_status
+        )
