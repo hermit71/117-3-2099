@@ -80,7 +80,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.menuAbout.triggered.connect(self.show_about_dialog)
         self.model = Model(self.config)
         self.command_handler = self.model.command_handler
-        self.connection_ctrl = cw.connectionControl()
+        self.connection_ctrl = cw.ConnectionControl()
         self.hand_screen_config()
         self.statusbar_config()
         self.signal_connections()
@@ -191,6 +191,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Add the connection control widget to the status bar."""
         self.statusbar.addWidget(self.connection_ctrl)
         self.model.realtime_data.worker.connection_status.connect(
-            self.connection_ctrl.setStatus
+            self.connection_ctrl.set_status
         )
 

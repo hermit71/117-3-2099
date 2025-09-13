@@ -106,7 +106,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setSpacing(4)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
-        self.pageHand_pnlTopDashboard = dashboardPanel(parent=self.pageHand)
+        self.pageHand_pnlTopDashboard = DashboardPanel(parent=self.pageHand)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -184,7 +184,7 @@ class Ui_MainWindow(object):
         self.label_5 = QtWidgets.QLabel(parent=self.groupBox)
         self.label_5.setObjectName("label_5")
         self.horizontalLayout_11.addWidget(self.label_5)
-        self.dsbHandVelocity_1 = appSpinBox(parent=self.groupBox)
+        self.dsbHandVelocity_1 = AppSpinBox(parent=self.groupBox)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -233,7 +233,7 @@ class Ui_MainWindow(object):
         self.label_6 = QtWidgets.QLabel(parent=self.groupBox_2)
         self.label_6.setObjectName("label_6")
         self.horizontalLayout_13.addWidget(self.label_6)
-        self.dsbHandTension = appSpinBox(parent=self.groupBox_2)
+        self.dsbHandTension = AppSpinBox(parent=self.groupBox_2)
         font = QtGui.QFont()
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
@@ -260,7 +260,7 @@ class Ui_MainWindow(object):
         self.label_7 = QtWidgets.QLabel(parent=self.groupBox_2)
         self.label_7.setObjectName("label_7")
         self.horizontalLayout_14.addWidget(self.label_7)
-        self.dsbHandVelocity_2 = appSpinBox(parent=self.groupBox_2)
+        self.dsbHandVelocity_2 = AppSpinBox(parent=self.groupBox_2)
         font = QtGui.QFont()
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
@@ -284,7 +284,7 @@ class Ui_MainWindow(object):
         self.label_8 = QtWidgets.QLabel(parent=self.groupBox_2)
         self.label_8.setObjectName("label_8")
         self.horizontalLayout_15.addWidget(self.label_8)
-        self.dsbHandTime_1 = appSpinBox(parent=self.groupBox_2)
+        self.dsbHandTime_1 = AppSpinBox(parent=self.groupBox_2)
         font = QtGui.QFont()
         font.setFamily("Inconsolata LGC Nerd Font")
         font.setPointSize(11)
@@ -460,8 +460,8 @@ class Ui_MainWindow(object):
 from src.ui.widgets.graph_widget import GraphWidget
 from src.ui.widgets.hand_graph_panel import HandGraphPanel
 from src.ui.widgets.hand_right_panel import LedDashboardPanel
-from src.ui.widgets.hand_top_panel import dashboardPanel
-from src.utils.spin_box_int_to_float import appSpinBox
+from src.ui.widgets.hand_top_panel import DashboardPanel
+from src.utils.spin_box_int_to_float import AppSpinBox
 
 
 if __name__ == "__main__":
