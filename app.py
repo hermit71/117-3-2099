@@ -1,5 +1,9 @@
+"""Entry point for the GUI application."""
+
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog
+
+from PyQt6.QtWidgets import QApplication
+
 from src.ui.main_window import MainWindow
 from src.utils.config import Config
 
