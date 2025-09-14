@@ -1,11 +1,9 @@
 from PyQt6.QtWidgets import (
     QMainWindow,
     QDialog,
-    QFormLayout,
-    QLineEdit,
-    QDialogButtonBox,
     QMessageBox,
 )
+
 from PyQt6.QtCore import pyqtSlot as Slot
 from PyQt6.QtGui import QIntValidator
 import ipaddress
@@ -13,42 +11,25 @@ import logging
 from src.ui.main_117_3 import Ui_MainWindow
 from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
 from src.ui.about_dialog import Ui_AboutDialog
+from src.ui.connection_settings_dialog import Ui_ConnectionSettingsDialog
 from src.data.model import Model
 from src.ui.widgets import dashboards, connection_control_widget as cw
 
 logger = logging.getLogger(__name__)
 
 
-class ConnectionSettingsDialog(QDialog):
+class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
     """Dialog window for editing Modbus connection parameters."""
 
     def __init__(self, parent=None, config=None):
         super().__init__(parent)
-        self.setWindowTitle("Параметры соединения")
         self.config = config
-
-        form = QFormLayout(self)
-
-        self.ed_host = QLineEdit(self.config.get("modbus", "host", "127.0.0.1"))
-        self.ed_port = QLineEdit(str(self.config.get("modbus", "port", 502)))
-        self.ed_timeout = QLineEdit(str(self.config.get("modbus", "timeout", 2.0)))
-        self.ed_poll = QLineEdit(str(self.config.get("ui", "poll_interval_ms", 200)))
-
-        self.ed_host.setPlaceholderText("например, 192.168.0.1")
-        self.ed_port.setPlaceholderText("например, 502")
+        self.setupUi(self)
+        self.ed_host.setText(self.config.get("modbus", "host", "127.0.0.1"))
+        self.ed_port.setText(str(self.config.get("modbus", "port", 502)))
+        self.ed_timeout.setText(str(self.config.get("modbus", "timeout", 2.0)))
+        self.ed_poll.setText(str(self.config.get("ui", "poll_interval_ms", 200)))
         self.ed_port.setValidator(QIntValidator(1, 65535, self))
-
-        form.addRow("IP-адрес ПЛК:", self.ed_host)
-        form.addRow("Порт:", self.ed_port)
-        form.addRow("Таймаут (с):", self.ed_timeout)
-        form.addRow("Период опроса (мс):", self.ed_poll)
-
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-        form.addRow(buttons)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
 
     def accept(self):
         """Validate and accept the dialog."""
