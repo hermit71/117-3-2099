@@ -12,6 +12,7 @@ from src.ui.main_117_3 import Ui_MainWindow
 from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
 from src.ui.about_dialog import Ui_AboutDialog
 from src.ui.connection_settings_dialog import Ui_ConnectionSettingsDialog
+from src.ui.graph_settings_dialog import GraphSettingsDialog
 from src.data.model import Model
 from src.ui.widgets import dashboards, connection_control_widget as cw
 
@@ -88,6 +89,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionConnectionSettings.triggered.connect(
             self.show_connection_settings_dialog
         )
+        # Настройки графиков
+        self.actionGraphSettings = self.menu.addAction("Настройки графиков")
+        self.actionGraphSettings.triggered.connect(
+            self.show_graph_settings_dialog
+        )
         self.model = Model(self.config)
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.ConnectionControl()
@@ -148,6 +154,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
             self.model.realtime_data.update_connection_settings()
             self.config.save()
+
+    @Slot()
+    def show_graph_settings_dialog(self):
+        """Display dialog to edit graph appearance settings."""
+        dlg = GraphSettingsDialog(
+            self,
+            config=self.config,
+            plots_description=dashboards.hand_graphs,
+            graph_widgets=self.pageHand_pnlGraph.plots,
+        )
+        dlg.exec()
 
     @Slot()
     def on_btn_hand_click(self):
@@ -227,6 +244,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             model=self.model, led_dashboards=dashboards.hand_right_panel_led_dashboards
         )
         # Конфигурация графиков
+        graphs_cfg = self.config.cfg.get("graphs", {})
+        for name, desc in dashboards.hand_graphs:
+            cfg = graphs_cfg.get(name, {})
+            desc["line_color"] = cfg.get("line_color", desc["line_color"])
+            desc["background"] = cfg.get("background", desc["background"])
+            desc["grid_color"] = cfg.get("grid_color", desc["grid_color"])
+            desc["line_width"] = cfg.get("line_width", desc["line_width"])
         self.pageHand_pnlGraph.graph_config(
             model=self.model, plots_description=dashboards.hand_graphs
         )

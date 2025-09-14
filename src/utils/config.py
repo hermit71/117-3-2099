@@ -16,9 +16,11 @@ class Config:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 self.cfg = yaml.safe_load(f) or {}
-        except FileNotFoundError as exc:
-            logger.error("Configuration file not found: %s", path)
-            raise exc
+        except FileNotFoundError:
+            logger.warning(
+                "Configuration file not found: %s. Using default settings.", path
+            )
+            self.cfg = {}
         except yaml.YAMLError as exc:
             logger.error("Invalid YAML configuration in %s: %s", path, exc)
             raise
@@ -26,7 +28,6 @@ class Config:
 
     def get(self, section, key, default=None):
         """Retrieve ``key`` from ``section`` returning ``default`` if absent."""
-        pass
         return self.cfg.get(section, {}).get(key, default)
 
     def save(self):
