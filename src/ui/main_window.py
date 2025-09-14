@@ -143,6 +143,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.config.cfg["ui"]["poll_interval_ms"] = int(
                 dlg.ed_poll.text()
             )
+            self.model.realtime_data.update_connection_settings()
 
     @Slot()
     def on_btn_hand_click(self):
