@@ -1,11 +1,9 @@
 from PyQt6.QtWidgets import (
     QMainWindow,
-    QVBoxLayout,
     QDialog,
     QFormLayout,
     QLineEdit,
     QDialogButtonBox,
-    QLabel,
 )
 from PyQt6.QtCore import pyqtSlot as Slot
 import logging
@@ -100,6 +98,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btnInit.clicked.connect(self.on_btn_init_click)
         self.btnStatic1.clicked.connect(self.on_btn_static1_click)
         self.btnStatic2.clicked.connect(self.on_btn_static2_click)
+        self.btnCalibration.clicked.connect(self.on_btn_calibration_click)
+        self.btnProtocol.clicked.connect(self.on_btn_protocol_click)
+        self.btnArchive.clicked.connect(self.on_btn_archive_click)
         self.btnService.clicked.connect(self.on_btn_service_click)
 
         self.btnJog_CW.pressed.connect(self.on_jog_cw_pressed)
@@ -161,8 +162,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @Slot()
     def on_btn_service_click(self):
         """Switch to service mode screen."""
-        self.pager.setCurrentIndex(4)
+        self.pager.setCurrentIndex(7)
         self.command_handler.set_plc_mode("service")
+
+    @Slot()
+    def on_btn_calibration_click(self):
+        """Open sensors calibration screen."""
+        self.pager.setCurrentIndex(4)
+
+    @Slot()
+    def on_btn_protocol_click(self):
+        """Open protocol and results screen."""
+        self.pager.setCurrentIndex(5)
+
+    @Slot()
+    def on_btn_archive_click(self):
+        """Open archive screen."""
+        self.pager.setCurrentIndex(6)
 
     def on_jog_cw_pressed(self):
         """Jog clockwise while button is pressed."""
