@@ -4,8 +4,11 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QLineEdit,
     QDialogButtonBox,
+    QMessageBox,
 )
 from PyQt6.QtCore import pyqtSlot as Slot
+from PyQt6.QtGui import QIntValidator
+import ipaddress
 import logging
 from src.ui.main_117_3 import Ui_MainWindow
 from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
@@ -31,6 +34,10 @@ class ConnectionSettingsDialog(QDialog):
         self.ed_timeout = QLineEdit(str(self.config.get("modbus", "timeout", 2.0)))
         self.ed_poll = QLineEdit(str(self.config.get("ui", "poll_interval_ms", 200)))
 
+        self.ed_host.setPlaceholderText("например, 192.168.0.1")
+        self.ed_port.setPlaceholderText("например, 502")
+        self.ed_port.setValidator(QIntValidator(1, 65535, self))
+
         form.addRow("IP-адрес ПЛК:", self.ed_host)
         form.addRow("Порт:", self.ed_port)
         form.addRow("Таймаут (с):", self.ed_timeout)
@@ -45,7 +52,35 @@ class ConnectionSettingsDialog(QDialog):
 
     def accept(self):
         """Validate and accept the dialog."""
-        # Валидация данных можно добавить здесь
+        host = self.ed_host.text().strip()
+        port_text = self.ed_port.text().strip()
+        try:
+            ipaddress.ip_address(host)
+        except ValueError:
+            QMessageBox.warning(
+                self,
+                "Неверный IP",
+                "Введите IP-адрес в формате 192.168.0.1",
+            )
+            return
+
+        if not port_text.isdigit():
+            QMessageBox.warning(
+                self,
+                "Неверный порт",
+                "Введите порт в диапазоне 1-65535, например, 502",
+            )
+            return
+
+        port = int(port_text)
+        if not (1 <= port <= 65535):
+            QMessageBox.warning(
+                self,
+                "Неверный порт",
+                "Введите порт в диапазоне 1-65535, например, 502",
+            )
+            return
+
         super().accept()
 
 
@@ -131,6 +166,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 dlg.ed_poll.text()
             )
             self.model.realtime_data.update_connection_settings()
+            self.config.save()
 
     @Slot()
     def on_btn_hand_click(self):
