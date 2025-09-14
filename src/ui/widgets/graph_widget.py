@@ -19,7 +19,7 @@ class GraphWidget(pg.PlotWidget):
 
         # Base curve pen and default styling
         self.base_pen = pg.mkPen(color="#1C1CF0", width=2)
-        self.apply_style(
+        self.apply_axes_style(
             background="#FEFEFA",
             axis_pen="#000000",
             tick_pen="#C0C0C0",
@@ -44,7 +44,7 @@ class GraphWidget(pg.PlotWidget):
                 gridPen=pg.mkPen(color=grid_color)
             )
 
-    def apply_style(
+    def apply_axes_style(
         self,
         background: str,
         axis_pen: str,
