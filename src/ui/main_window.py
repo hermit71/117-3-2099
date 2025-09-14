@@ -11,6 +11,7 @@ from PyQt6.QtCore import pyqtSlot as Slot
 import logging
 from src.ui.main_117_3 import Ui_MainWindow
 from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
+from src.ui.about_dialog import Ui_AboutDialog
 from src.data.model import Model
 from src.ui.widgets import dashboards, connection_control_widget as cw
 
@@ -50,11 +51,13 @@ class ConnectionSettingsDialog(QDialog):
         super().accept()
 
 
-class AboutDialog(QDialog):
+class AboutDialog(QDialog, Ui_AboutDialog):
     """Dialog displaying information about the application."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setupUi(self)
+        '''
         self.setWindowTitle("О программе")
         v = QVBoxLayout(self)
         v.addWidget(
@@ -64,8 +67,9 @@ class AboutDialog(QDialog):
             )
         )
         btn_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
-        btn_box.accepted.connect(self.accept)
         v.addWidget(btn_box)
+        self.buttonBox.accepted.connect(self.accept)
+        '''
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
