@@ -14,12 +14,18 @@ class GraphWidget(pg.PlotWidget):
         self.x_view_range_ms = {'start': 0, 'end': 1000 * self.parent.time_window}
         # Диапазон данных для отображения
         self.x_data_range = {'start': 0, 'end': 0}
-        self.base_pen = pg.mkPen(color="#1C1CF0", width=2)
-        self.setBackground('#FEFEFA')
         self.setXRange(self.x_view_range_ms['start'], self.x_view_range_ms['end'])
         self.getPlotItem().setLabel('bottom', 'мс')
 
-        self.showGrid(x=True, y=True)
+        # Base curve pen and default styling
+        self.base_pen = pg.mkPen(color="#1C1CF0", width=2)
+        self.apply_style(
+            background="#FEFEFA",
+            axis_pen="#000000",
+            tick_pen="#C0C0C0",
+            text_pen="#000000",
+            grid_alpha=80,
+        )
         self.curve = self.plot(pen=self.base_pen)
         self.apply_style(
             line_color="#1C1CF0",
@@ -37,6 +43,39 @@ class GraphWidget(pg.PlotWidget):
             self.getPlotItem().getAxis(axis).setStyle(
                 gridPen=pg.mkPen(color=grid_color)
             )
+
+    def apply_style(
+        self,
+        background: str,
+        axis_pen: str,
+        tick_pen: str,
+        text_pen: str,
+        grid_alpha: int = 80,
+    ) -> None:
+        """Apply styling for background, axes and grid.
+
+        Parameters
+        ----------
+        background: str
+            Background color of the plot area.
+        axis_pen: str
+            Color for axis lines.
+        tick_pen: str
+            Color for ticks and grid lines.
+        text_pen: str
+            Color for axis text.
+        grid_alpha: int, optional
+            Opacity (0-255) for grid lines.
+        """
+
+        self.setBackground(background)
+        plot_item = self.getPlotItem()
+        plot_item.showGrid(x=True, y=True, alpha=grid_alpha / 255.0)
+        for axis in ("left", "bottom"):
+            axis_item = plot_item.getAxis(axis)
+            axis_item.setPen(pg.mkPen(axis_pen))
+            axis_item.setTickPen(pg.mkPen(tick_pen))
+            axis_item.setTextPen(pg.mkPen(text_pen))
 
     def update_plot(self, dataset_name):
         """Redraw the graph using the specified dataset."""
