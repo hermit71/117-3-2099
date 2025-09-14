@@ -111,24 +111,6 @@
              <number>10</number>
             </property>
             <item>
-             <widget class="QPushButton" name="btnHand">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>42</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Ручное управление</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="btnInit">
               <property name="minimumSize">
                <size>
@@ -142,7 +124,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Инициализация</string>
+               <string>Инициализация испытания</string>
               </property>
              </widget>
             </item>
@@ -179,6 +161,78 @@
               </property>
               <property name="text">
                <string>Статика 2</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnHand">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Ручное управление</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnCalibration">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Калибровка датчиков</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnProtocol">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Протокол/Результаты</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnArchive">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Архив</string>
               </property>
              </widget>
             </item>
@@ -823,7 +877,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Инициализация</string>
+                 <string>Инициализация испытания</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -862,6 +916,63 @@
                 </property>
                 <property name="text">
                  <string>Статика 2</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="pageCalibration">
+             <layout class="QHBoxLayout" name="horizontalLayout_calib">
+              <item>
+               <widget class="QLabel" name="label_calib">
+                <property name="font">
+                 <font>
+                  <pointsize>24</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Калибровка датчиков</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="pageProtocol">
+             <layout class="QHBoxLayout" name="horizontalLayout_protocol">
+              <item>
+               <widget class="QLabel" name="label_protocol">
+                <property name="font">
+                 <font>
+                  <pointsize>24</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Протокол/Результаты</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="pageArchive">
+             <layout class="QHBoxLayout" name="horizontalLayout_archive">
+              <item>
+               <widget class="QLabel" name="label_archive">
+                <property name="font">
+                 <font>
+                  <pointsize>24</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Архив</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
