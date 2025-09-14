@@ -27,6 +27,22 @@ class GraphWidget(pg.PlotWidget):
             grid_alpha=80,
         )
         self.curve = self.plot(pen=self.base_pen)
+        self.apply_style(
+            line_color="#1C1CF0",
+            background="#FEFEFA",
+            grid_color="#C8C8C8",
+            line_width=2,
+        )
+
+    def apply_style(self, line_color, background, grid_color, line_width):
+        """Apply visual style parameters to the graph."""
+        self.setBackground(background)
+        pen = pg.mkPen(color=line_color, width=line_width)
+        self.curve.setPen(pen)
+        for axis in ('left', 'bottom'):
+            self.getPlotItem().getAxis(axis).setStyle(
+                gridPen=pg.mkPen(color=grid_color)
+            )
 
     def apply_style(
         self,

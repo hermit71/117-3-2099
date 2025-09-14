@@ -27,12 +27,18 @@ class HandGraphPanel(QFrame):
         self.plots_description = plots_description
         self.plots = self._get_graph_widgets()
         for i, plot in enumerate(self.plots):
-            plot.setBackground(self.plots_description[i][1]['background'])
+            desc = self.plots_description[i][1]
+            plot.apply_style(
+                line_color=desc['line_color'],
+                background=desc['background'],
+                grid_color=desc['grid_color'],
+                line_width=desc['line_width'],
+            )
             plot.setLimits(
-                yMin=self.plots_description[i][1]['y_limits'][0],
-                yMax=self.plots_description[i][1]['y_limits'][1],
-                minYRange=self.plots_description[i][1]['y_limits'][0],
-                maxYRange=self.plots_description[i][1]['y_limits'][1],
+                yMin=desc['y_limits'][0],
+                yMax=desc['y_limits'][1],
+                minYRange=desc['y_limits'][0],
+                maxYRange=desc['y_limits'][1],
             )
         if self.model:
             self.model.data_updated.connect(self.update_plots)

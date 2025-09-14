@@ -1,20 +1,31 @@
 """Dashboard definitions used by UI widgets."""
 
 from src.ui import labels as lbl
-import pyqtgraph as pg
 
 # Панели экрана ручного режима
 hand_graphs = [
-    ['tension plot',
-     {'pen': pg.mkPen(color='#1C1CF0', width=2),
-      'background': '#FEFEFA',
-      'dataset_name': 'tension_data_c',
-      'y_limits': (-100.0, 100.0)}],
-    ['velocity plot',
-     {'pen': pg.mkPen(color='#1C1CF0', width=2),
-      'background': '#FEFEFA',
-      'dataset_name': 'velocity_data',
-      'y_limits': (-10.0, 10.0)}],
+    [
+        "tension plot",
+        {
+            "line_color": "#1C1CF0",
+            "background": "#FEFEFA",
+            "grid_color": "#C8C8C8",
+            "line_width": 2,
+            "dataset_name": "tension_data_c",
+            "y_limits": (-100.0, 100.0),
+        },
+    ],
+    [
+        "velocity plot",
+        {
+            "line_color": "#1C1CF0",
+            "background": "#FEFEFA",
+            "grid_color": "#C8C8C8",
+            "line_width": 2,
+            "dataset_name": "velocity_data",
+            "y_limits": (-10.0, 10.0),
+        },
+    ],
 ]
 
 # Индикаторы состояния дискретных входов
