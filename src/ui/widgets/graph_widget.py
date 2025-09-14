@@ -39,10 +39,16 @@ class GraphWidget(pg.PlotWidget):
         self.setBackground(background)
         pen = pg.mkPen(color=line_color, width=line_width)
         self.curve.setPen(pen)
-        for axis in ('left', 'bottom'):
-            self.getPlotItem().getAxis(axis).setStyle(
-                gridPen=pg.mkPen(color=grid_color)
-            )
+        grid_pen = pg.mkPen(color=grid_color)
+        for axis in ("left", "bottom"):
+            # AxisItem.setStyle() does not support a ``gridPen`` argument. Instead,
+            # the grid color follows the tick pen.  Previously this method used an
+            # unsupported ``gridPen`` keyword which caused a NameError at runtime
+            # (see issue trace in the task description).  By updating the tick pen
+            # we effectively apply the desired colour to both the ticks and the
+            # grid lines without triggering errors on newer versions of
+            # pyqtgraph.
+            self.getPlotItem().getAxis(axis).setTickPen(grid_pen)
 
     def apply_axes_style(
         self,
