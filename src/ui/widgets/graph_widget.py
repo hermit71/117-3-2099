@@ -14,13 +14,29 @@ class GraphWidget(pg.PlotWidget):
         self.x_view_range_ms = {'start': 0, 'end': 1000 * self.parent.time_window}
         # Диапазон данных для отображения
         self.x_data_range = {'start': 0, 'end': 0}
-        self.setBackground('#FEFEFA')
         self.base_pen = pg.mkPen(color="#1C1CF0", width=2)
+        self.setBackground('#FEFEFA')
         self.setXRange(self.x_view_range_ms['start'], self.x_view_range_ms['end'])
         self.getPlotItem().setLabel('bottom', 'мс')
 
         self.showGrid(x=True, y=True)
         self.curve = self.plot(pen=self.base_pen)
+        self.apply_style(
+            line_color="#1C1CF0",
+            background="#FEFEFA",
+            grid_color="#C8C8C8",
+            line_width=2,
+        )
+
+    def apply_style(self, line_color, background, grid_color, line_width):
+        """Apply visual style parameters to the graph."""
+        self.setBackground(background)
+        pen = pg.mkPen(color=line_color, width=line_width)
+        self.curve.setPen(pen)
+        for axis in ('left', 'bottom'):
+            self.getPlotItem().getAxis(axis).setStyle(
+                gridPen=pg.mkPen(color=grid_color)
+            )
 
     def update_plot(self, dataset_name):
         """Redraw the graph using the specified dataset."""
