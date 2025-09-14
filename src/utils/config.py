@@ -23,4 +23,5 @@ class Config:
 
     def get(self, section, key, default=None):
         """Retrieve ``key`` from ``section`` returning ``default`` if absent."""
+        pass
         return self.cfg.get(section, {}).get(key, default)

@@ -78,19 +78,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.hand_screen_config()
         self.statusbar_config()
         self.signal_connections()
-        self.btnHand.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #3498db;
-                color: white;
-                border-radius: 5px;
-                padding: 5px 10px;
-            }
-            QPushButton:hover {
-                background-color: #2980b9;
-            }
-        """
-        )
+        # self.btnHand.setStyleSheet(
+        #     """
+        #     QPushButton {
+        #         background-color: #3498db;
+        #         color: white;
+        #         border-radius: 5px;
+        #         padding: 5px 10px;
+        #     }
+        #     QPushButton:hover {
+        #         background-color: #2980b9;
+        #     }
+        # """
+        # )
 
     def signal_connections(self):
         """Connect UI signals to their respective handlers."""
