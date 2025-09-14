@@ -19,7 +19,8 @@
    ```bash
    pip install -r requirements.txt
    ```
-3. Настройте параметры подключения к ПЛК в файле [`config/config.yaml`](config/config.yaml).
+3. Настройте параметры подключения к ПЛК в файле [`config/config.yaml`](config/config.yaml)
+   или во время работы программы через пункт меню «Параметры соединения…».
 4. Запустите приложение:
    ```bash
    python app.py

@@ -51,19 +51,28 @@ class Worker(QObject):
         self.result = None
 
     def init_modbus(self):
-        """Настройка Modbus клиента."""
-        self.client = ModbusTcpClient('192.168.6.31')  # IP-адрес PLC ('127.0.0.1')
+        """Настройка Modbus клиента на основе конфигурации."""
+        cfg = self.data_set.config
+        host = cfg.get('modbus', 'host', '127.0.0.1')
+        port = cfg.get('modbus', 'port', 502)
+        timeout = cfg.get('modbus', 'timeout', 2.0)
+        self.client = ModbusTcpClient(host, port=port, timeout=timeout)
         self.register_address = 0  # Начальный адрес регистра для чтения
         self.register_qty = 7  # Количество регистров для чтения
 
-    def safe_modbus_read(self, host, port, address, count=1, unit=1, max_retries=3):
+    def safe_modbus_read(self, address, count=1, unit=1):
         """Безопасное чтение Modbus с обработкой ошибок соединения."""
+        cfg = self.data_set.config
+        host = cfg.get('modbus', 'host', '127.0.0.1')
+        port = cfg.get('modbus', 'port', 502)
+        timeout = cfg.get('modbus', 'timeout', 2.0)
+        max_retries = cfg.get('modbus', 'retry_attempts', 3)
         client = None
         self.result = None
 
         for attempt in range(max_retries):
             try:
-                client = ModbusTcpClient(host, port=port)
+                client = ModbusTcpClient(host, port=port, timeout=timeout)
 
                 if not client.connect():
                     raise ConnectionError("Не удалось установить соединение")
@@ -264,3 +273,12 @@ class RealTimeData(QObject):
                     self.write_regs[4] = reg
                 case 'Modbus_AUX':
                     self.write_regs[5] = reg
+
+    @Slot()
+    def update_connection_settings(self):
+        """Применение настроек Modbus и периода опроса из конфигурации."""
+        self.poll_interval = self.config.get('ui', 'poll_interval_ms', 25)
+        self.poll_interval_s = float(self.poll_interval) / 1000.0
+        if self.worker.timer:
+            self.worker.timer.setInterval(self.poll_interval)
+        self.worker.init_modbus()
