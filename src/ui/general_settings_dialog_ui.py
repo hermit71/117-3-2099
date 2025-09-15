@@ -12,11 +12,14 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_GeneralSettingsDialog(object):
     def setupUi(self, GeneralSettingsDialog):
         GeneralSettingsDialog.setObjectName("GeneralSettingsDialog")
-        GeneralSettingsDialog.resize(400, 300)
+        GeneralSettingsDialog.resize(406, 301)
         self.verticalLayout = QtWidgets.QVBoxLayout(GeneralSettingsDialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.settingsLayout = QtWidgets.QVBoxLayout()
         self.settingsLayout.setObjectName("settingsLayout")
+        self.widget = QtWidgets.QWidget(parent=GeneralSettingsDialog)
+        self.widget.setObjectName("widget")
+        self.settingsLayout.addWidget(self.widget)
         self.verticalLayout.addLayout(self.settingsLayout)
         self.buttonBox = QtWidgets.QDialogButtonBox(parent=GeneralSettingsDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
