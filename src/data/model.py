@@ -4,6 +4,12 @@ The module defines :class:`Model`, a central Qt-based object responsible for
 coordinating communication with the PLC. It subscribes to updates from
 ``RealTimeData`` and forwards changes via Qt signals so that other parts of the
 application can react.
+
+Модель приложения, объединяющая обработку команд и данные Modbus в реальном времени.
+
+Модуль определяет :class:`Model` — центральный объект на базе Qt, отвечающий за
+координацию связи с ПЛК. Он подписывается на обновления от ``RealTimeData`` и
+передает изменения через сигналы Qt, чтобы другие части приложения могли реагировать.
 """
 
 from PyQt6.QtCore import QObject, pyqtSignal as Signal, pyqtSlot as Slot
@@ -18,6 +24,11 @@ class Model(QObject):
     The model glues together :class:`RealTimeData` and :class:`CommandHandler`
     while exposing Qt signals when new data arrives or when graphs should be
     refreshed.
+
+    Центральная модель приложения, управляющая регистрами и сигналами Modbus.
+
+    Модель объединяет :class:`RealTimeData` и :class:`CommandHandler`, отправляя
+    сигналы Qt при поступлении новых данных или необходимости обновления графиков.
     """
 
     data_updated = Signal(list)
@@ -26,9 +37,15 @@ class Model(QObject):
     def __init__(self, config, parent=None):
         """Initialize the model.
 
+        Инициализировать модель.
+
         Args:
             config: Application configuration options.
             parent: Optional QObject parent for Qt ownership.
+
+        Аргументы:
+            config: Параметры конфигурации приложения.
+            parent: Необязательный родитель QObject для управления владением Qt.
         """
         super(Model, self).__init__(parent)
         self.config = config
@@ -52,12 +69,21 @@ class Model(QObject):
     def rt_data_changed(self, registers):
         """Handle updates from real-time data polls.
 
+        Обрабатывать обновления данных опроса в реальном времени.
+
         Args:
             registers (list): Latest register values retrieved from the PLC.
+
+        Параметры:
+            registers (list): Последние значения регистров, полученные от ПЛК.
 
         Emits:
             data_updated: With the list of updated registers.
             graphs_updated: Notification that graph data has changed.
+
+        Сигналы:
+            data_updated: Список обновлённых регистров.
+            graphs_updated: Уведомление об изменении данных графиков.
         """
         self.data_updated.emit(registers)
         self.graphs_updated.emit()
