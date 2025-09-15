@@ -1,29 +1,30 @@
-"""Dialog for editing graph appearance settings."""
+"""Диалог настройки отображения графиков."""
 
 from PyQt6.QtWidgets import (
     QDialog,
-    QDialogButtonBox,
     QFormLayout,
     QGroupBox,
     QPushButton,
     QSpinBox,
-    QVBoxLayout,
     QColorDialog,
 )
 
+from src.ui.graph_settings_dialog_ui import Ui_GraphSettingsDialog
 
-class GraphSettingsDialog(QDialog):
-    """Allow the user to customize graph colors and line width."""
+
+class GraphSettingsDialog(QDialog, Ui_GraphSettingsDialog):
+    """Позволяет пользователю настроить цвета и толщину линий графиков."""
 
     def __init__(self, parent, config, plots_description, graph_widgets):
         super().__init__(parent)
         self.config = config
         self.plots_description = plots_description
         self.graph_widgets = graph_widgets
-        self.setWindowTitle("Настройки графиков")
+        self.setupUi(self)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
         self.controls = []
-        layout = QVBoxLayout(self)
         for name, desc in plots_description:
             group = QGroupBox(name, self)
             form = QFormLayout(group)
@@ -55,7 +56,7 @@ class GraphSettingsDialog(QDialog):
             form.addRow("Цвет сетки", btn_grid)
             form.addRow("Толщина линии", spin_width)
             group.setLayout(form)
-            layout.addWidget(group)
+            self.graphsLayout.addWidget(group)
 
             self.controls.append(
                 {
@@ -67,20 +68,17 @@ class GraphSettingsDialog(QDialog):
                 }
             )
 
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-
     def _choose_color(self, button):
+        """Открыть диалог выбора цвета и применить выбранный цвет к кнопке."""
+
         color = QColorDialog.getColor(parent=self)
         if color.isValid():
             button.setProperty("color", color.name())
             button.setStyleSheet(f"background-color: {color.name()}")
 
     def accept(self):
+        """Сохранить выбранные настройки графиков и применить их."""
+
         self.config.cfg.setdefault("graphs", {})
         for idx, ctrl in enumerate(self.controls):
             name = ctrl["name"]
