@@ -18,6 +18,6 @@ class GeneralSettingsDialog(QDialog, Ui_GeneralSettingsDialog):
 
         self.categoryList.currentRowChanged.connect(self.pagesStack.setCurrentIndex)
         self.splitter.setStretchFactor(0, 2)
-        self.splitter.setStretchFactor(1, 3)
+        self.splitter.setStretchFactor(1, 6)
         total_width = self.size().width()
-        self.splitter.setSizes([2 * total_width // 5, 3 * total_width // 5])
+        self.splitter.setSizes([2 * total_width // 8, 6 * total_width // 8])
