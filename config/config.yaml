@@ -13,10 +13,10 @@ graphs:
   tension plot:
     line_color: '#5500ff'
     background: '#ffffff'
-    grid_color: '#C8C8C8'
+    grid_color: '#4d99e6'
     line_width: 2
   velocity plot:
-    line_color: '#1C1CF0'
+    line_color: '#7eafff'
     background: '#FEFEFA'
     grid_color: '#C8C8C8'
     line_width: 2
