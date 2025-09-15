@@ -9,9 +9,9 @@ from PyQt6.QtGui import QIntValidator
 import ipaddress
 import logging
 from src.ui.main_117_3 import Ui_MainWindow
-from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
-from src.ui.about_dialog import Ui_AboutDialog
-from src.ui.connection_settings_dialog import Ui_ConnectionSettingsDialog
+from src.ui.dlgPID_settings_ui import Ui_dlgHandRegulatorSettings
+from src.ui.about_dialog_ui import Ui_AboutDialog
+from src.ui.connection_settings_dialog_ui import Ui_ConnectionSettingsDialog
 from src.ui.graph_settings_dialog import GraphSettingsDialog
 from src.ui.general_settings_dialog import GeneralSettingsDialog
 from src.data.model import Model
