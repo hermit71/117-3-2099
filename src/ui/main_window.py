@@ -13,6 +13,7 @@ from src.ui.dlgPID_settings import Ui_dlgHandRegulatorSettings
 from src.ui.about_dialog import Ui_AboutDialog
 from src.ui.connection_settings_dialog import Ui_ConnectionSettingsDialog
 from src.ui.graph_settings_dialog import GraphSettingsDialog
+from src.ui.general_settings_dialog import GeneralSettingsDialog
 from src.data.model import Model
 from src.ui.widgets import dashboards, connection_control_widget as cw
 
@@ -106,6 +107,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionGraphSettings.triggered.connect(
             self.show_graph_settings_dialog
         )
+        # Общие настройки системы
+        self.actionGeneralSettings = self.menu.addAction("Общие настройки")
+        self.actionGeneralSettings.triggered.connect(
+            self.show_general_settings_dialog
+        )
         self.model = Model(self.config)
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.ConnectionControl()
@@ -188,6 +194,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             plots_description=dashboards.hand_graphs,
             graph_widgets=self.pageHand_pnlGraph.plots,
         )
+        dlg.exec()
+
+    @Slot()
+    def show_general_settings_dialog(self):
+        """Display dialog for general system settings.
+
+        Показать диалог общих настроек системы.
+        """
+        dlg = GeneralSettingsDialog(self)
         dlg.exec()
 
     @Slot()
