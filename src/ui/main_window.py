@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
-    """Dialog window for editing Modbus connection parameters."""
+    """Dialog window for editing Modbus connection parameters.
+
+    Диалоговое окно для редактирования параметров соединения Modbus.
+    """
 
     def __init__(self, parent=None, config=None):
         super().__init__(parent)
@@ -33,7 +36,10 @@ class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
         self.ed_port.setValidator(QIntValidator(1, 65535, self))
 
     def accept(self):
-        """Validate and accept the dialog."""
+        """Validate and accept the dialog.
+
+        Проверить и применить данные диалога.
+        """
         host = self.ed_host.text().strip()
         port_text = self.ed_port.text().strip()
         try:
@@ -67,7 +73,10 @@ class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
 
 
 class AboutDialog(QDialog, Ui_AboutDialog):
-    """Dialog displaying information about the application."""
+    """Dialog displaying information about the application.
+
+    Диалог, отображающий информацию о приложении.
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -75,7 +84,10 @@ class AboutDialog(QDialog, Ui_AboutDialog):
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    """Main application window coordinating UI components and actions."""
+    """Main application window coordinating UI components and actions.
+
+    Главное окно приложения, координирующее компоненты интерфейса и действия.
+    """
 
     def __init__(self, config):
         super().__init__()
@@ -115,7 +127,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # )
 
     def signal_connections(self):
-        """Connect UI signals to their respective handlers."""
+        """Connect UI signals to their respective handlers.
+
+        Подключить сигналы интерфейса к соответствующим обработчикам.
+        """
         self.btnHand.clicked.connect(self.on_btn_hand_click)
         self.btnInit.clicked.connect(self.on_btn_init_click)
         self.btnStatic1.clicked.connect(self.on_btn_static1_click)
@@ -133,13 +148,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def show_about_dialog(self):
-        """Display the About dialog."""
+        """Display the About dialog.
+
+        Отобразить диалог «О программе».
+        """
         dlg = AboutDialog(self)
         dlg.exec()
 
     @Slot()
     def show_connection_settings_dialog(self):
-        """Display and apply connection settings dialog."""
+        """Display and apply connection settings dialog.
+
+        Показать диалог настроек соединения и применить изменения.
+        """
         dlg = ConnectionSettingsDialog(self, config=self.config)
         if dlg.exec():
             self.config.cfg.setdefault("modbus", {})
@@ -157,7 +178,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def show_graph_settings_dialog(self):
-        """Display dialog to edit graph appearance settings."""
+        """Display dialog to edit graph appearance settings.
+
+        Показать диалог изменения параметров отображения графиков.
+        """
         dlg = GraphSettingsDialog(
             self,
             config=self.config,
@@ -168,77 +192,116 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def on_btn_hand_click(self):
-        """Switch to manual control mode."""
+        """Switch to manual control mode.
+
+        Переключиться в режим ручного управления.
+        """
         self.pager.setCurrentIndex(0)
         self.command_handler.set_plc_mode("hand")
         self.command_handler.servo_power_off()
 
     @Slot()
     def on_btn_init_click(self):
-        """Switch to initialization screen and enable servo."""
+        """Switch to initialization screen and enable servo.
+
+        Перейти на экран инициализации и включить сервопривод.
+        """
         self.pager.setCurrentIndex(1)
         self.command_handler.set_plc_mode("auto")
         self.command_handler.servo_power_on()
 
     @Slot()
     def on_btn_static1_click(self):
-        """Switch to first static test screen."""
+        """Switch to first static test screen.
+
+        Перейти на экран первого статического теста.
+        """
         self.pager.setCurrentIndex(2)
         self.command_handler.set_plc_mode("auto")
         self.command_handler.set_tension(222, 333)
 
     @Slot()
     def on_btn_static2_click(self):
-        """Switch to second static test screen."""
+        """Switch to second static test screen.
+
+        Перейти на экран второго статического теста.
+        """
         self.pager.setCurrentIndex(3)
         self.command_handler.set_plc_mode("auto")
         self.command_handler.set_tension(0, 0)
 
     @Slot()
     def on_btn_service_click(self):
-        """Switch to service mode screen."""
+        """Switch to service mode screen.
+
+        Перейти на экран сервисного режима.
+        """
         self.pager.setCurrentIndex(7)
         self.command_handler.set_plc_mode("service")
 
     @Slot()
     def on_btn_calibration_click(self):
-        """Open sensors calibration screen."""
+        """Open sensors calibration screen.
+
+        Открыть экран калибровки датчиков.
+        """
         self.pager.setCurrentIndex(4)
 
     @Slot()
     def on_btn_protocol_click(self):
-        """Open protocol and results screen."""
+        """Open protocol and results screen.
+
+        Открыть экран протокола и результатов.
+        """
         self.pager.setCurrentIndex(5)
 
     @Slot()
     def on_btn_archive_click(self):
-        """Open archive screen."""
+        """Open archive screen.
+
+        Открыть экран архива.
+        """
         self.pager.setCurrentIndex(6)
 
     def on_jog_cw_pressed(self):
-        """Jog clockwise while button is pressed."""
+        """Jog clockwise while button is pressed.
+
+        Поворот по часовой стрелке, пока кнопка нажата.
+        """
         self.model.command_handler.jog(direction="cw", velocity=0)
         logger.info("cw")
 
     def on_jog_ccw_pressed(self):
-        """Jog counter-clockwise while button is pressed."""
+        """Jog counter-clockwise while button is pressed.
+
+        Поворот против часовой стрелки, пока кнопка нажата.
+        """
         self.model.command_handler.jog(direction="ccw", velocity=0)
         logger.info("ccw")
 
     def on_jog_released(self):
-        """Stop jogging when button is released."""
+        """Stop jogging when button is released.
+
+        Остановить поворот при отпускании кнопки.
+        """
         self.model.command_handler.stop()
         logger.info("stop")
 
     def on_hand_reg_settings_clicked(self):
-        """Open dialog for hand regulator settings."""
+        """Open dialog for hand regulator settings.
+
+        Открыть диалог настроек ручного регулятора.
+        """
         dlg = QDialog()
         ui = Ui_dlgHandRegulatorSettings()
         ui.setupUi(dlg)
         dlg.exec()
 
     def hand_screen_config(self):
-        """Configure widgets and graphs for the hand control screen."""
+        """Configure widgets and graphs for the hand control screen.
+
+        Настроить виджеты и графики для экрана ручного управления.
+        """
         # Конфигурация правой индикаторной панели
         self.pageHand_pnlRight.config(
             model=self.model, led_dashboards=dashboards.hand_right_panel_led_dashboards
@@ -258,7 +321,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pageHand_pnlTopDashboard.config(model=self.model)
 
     def statusbar_config(self):
-        """Add the connection control widget to the status bar."""
+        """Add the connection control widget to the status bar.
+
+        Добавить виджет управления соединением на строку состояния.
+        """
         self.statusbar.addWidget(self.connection_ctrl)
         self.model.realtime_data.worker.connection_status.connect(
             self.connection_ctrl.set_status

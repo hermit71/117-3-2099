@@ -23,13 +23,19 @@ REALTIME_DATA_WINDOW = 60  # временное окно для хранения
 
 
 class Worker(QObject):
-    """Background worker handling Modbus communication."""
+    """Background worker handling Modbus communication.
+
+    Фоновый рабочий объект, управляющий обменом по Modbus.
+    """
 
     data_received = Signal(list)
     connection_status = Signal(bool)
 
     def __init__(self, data_set):
-        """Initialize worker with a reference to the data set."""
+        """Initialize worker with a reference to the data set.
+
+        Инициализировать рабочий объект со ссылкой на набор данных.
+        """
         QObject.__init__(self)
         self.data_set = data_set
         logging.debug('worker init')

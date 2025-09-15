@@ -1,4 +1,7 @@
-"""Entry point for the GUI application."""
+"""Entry point for the GUI application.
+
+Точка входа для графического приложения.
+"""
 
 import sys
 import logging
