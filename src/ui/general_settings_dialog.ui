@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>406</width>
-    <height>301</height>
+    <width>600</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,11 +15,45 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QVBoxLayout" name="settingsLayout">
-     <item>
-      <widget class="QWidget" name="widget" native="true"/>
-     </item>
-    </layout>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QListWidget" name="categoryList">
+      <item>
+       <property name="text">
+        <string>Система</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Общие настройки</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Соединение</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Отчеты</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Архив</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QStackedWidget" name="pagesStack">
+      <widget class="QWidget" name="page_system"/>
+      <widget class="QWidget" name="page_general"/>
+      <widget class="QWidget" name="page_connection"/>
+      <widget class="QWidget" name="page_reports"/>
+      <widget class="QWidget" name="page_archive"/>
+     </widget>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
