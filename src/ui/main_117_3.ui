@@ -237,19 +237,6 @@
              </widget>
             </item>
             <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
              <widget class="QPushButton" name="btnService">
               <property name="minimumSize">
                <size>
@@ -264,6 +251,47 @@
               </property>
               <property name="text">
                <string>Сервис</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_4">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_5">
+              <property name="text">
+               <string>PushButton</string>
               </property>
              </widget>
             </item>
@@ -1019,12 +1047,12 @@
      <height>22</height>
     </rect>
    </property>
-    <widget class="QMenu" name="menuAbout">
-     <property name="title">
-      <string>О программе</string>
-     </property>
-     <addaction name="actionAbout"/>
-    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>О программе</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <widget class="QMenu" name="menuExit">
     <property name="title">
      <string>Выход</string>
@@ -1037,44 +1065,44 @@
    </widget>
    <addaction name="menuExit"/>
    <addaction name="menu"/>
-    <addaction name="menuAbout"/>
-   </widget>
-   <widget class="QStatusBar" name="statusbar"/>
-   <action name="actionAbout">
-    <property name="text">
-     <string>О программе</string>
-    </property>
-   </action>
+   <addaction name="menuAbout"/>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAbout">
+   <property name="text">
+    <string>О программе</string>
+   </property>
+  </action>
+ </widget>
  <customwidgets>
   <customwidget>
    <class>GraphWidget</class>
    <extends>QWidget</extends>
-   <header>graph_widget</header>
+   <header>src.ui.widgets.graph_widget</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>HandGraphPanel</class>
    <extends>QFrame</extends>
-   <header>hand_graph_panel</header>
+   <header>src.ui.widgets.hand_graph_panel</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>LedDashboardPanel</class>
    <extends>QFrame</extends>
-   <header>hand_right_panel</header>
+   <header>src.ui.widgets.hand_right_panel</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>DashboardPanel</class>
    <extends>QFrame</extends>
-   <header>hand_top_panel</header>
+   <header>src.ui.widgets.hand_top_panel</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>AppSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header>spin_box_int_to_float</header>
+   <header>src.utils.spin_box_int_to_float</header>
   </customwidget>
  </customwidgets>
  <resources/>

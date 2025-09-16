@@ -8,7 +8,7 @@ from PyQt6.QtCore import pyqtSlot as Slot
 from PyQt6.QtGui import QIntValidator
 import ipaddress
 import logging
-from src.ui.main_117_3 import Ui_MainWindow
+from src.ui.main_117_3_ui import Ui_MainWindow
 from src.ui.dlgPID_settings_ui import Ui_dlgHandRegulatorSettings
 from src.ui.about_dialog_ui import Ui_AboutDialog
 from src.ui.connection_settings_dialog_ui import Ui_ConnectionSettingsDialog
