@@ -117,6 +117,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.connection_ctrl = cw.ConnectionControl()
         self.hand_screen_config()
         self.statusbar_config()
+        self.control_buttons_config()
         self.signal_connections()
         # self.btnHand.setStyleSheet(
         #     """
@@ -145,6 +146,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btnProtocol.clicked.connect(self.on_btn_protocol_click)
         self.btnArchive.clicked.connect(self.on_btn_archive_click)
         self.btnService.clicked.connect(self.on_btn_service_click)
+
+        self.btnStart.clicked.connect(self.on_btn_start_clicked)
+        self.btnPause.clicked.connect(self.on_btn_pause_clicked)
+        self.btnStop.clicked.connect(self.on_btn_stop_clicked)
+        self.btnEmergencyReset.clicked.connect(
+            self.on_btn_emergency_reset_clicked
+        )
 
         self.btnJog_CW.pressed.connect(self.on_jog_cw_pressed)
         self.btnJog_CCW.pressed.connect(self.on_jog_ccw_pressed)
@@ -278,6 +286,62 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.pager.setCurrentIndex(6)
 
+    @Slot(bool)
+    def on_btn_start_clicked(self, checked):
+        """Handle start button clicks and manage control buttons state.
+
+        Обработать нажатие кнопки запуска и управлять состоянием кнопок
+        управления.
+        """
+
+        if not checked:
+            self.btnStart.blockSignals(True)
+            self.btnStart.setChecked(True)
+            self.btnStart.blockSignals(False)
+            return
+
+        self.btnPause.setEnabled(True)
+        self.btnPause.blockSignals(True)
+        self.btnPause.setChecked(False)
+        self.btnPause.blockSignals(False)
+        self.handle_start_command()
+
+    @Slot(bool)
+    def on_btn_pause_clicked(self, checked):
+        """Handle pause button clicks when start is active.
+
+        Обработать нажатия кнопки паузы, когда активен режим запуска.
+        """
+
+        if not self.btnStart.isChecked():
+            self.btnPause.blockSignals(True)
+            self.btnPause.setChecked(False)
+            self.btnPause.blockSignals(False)
+            self.btnPause.setEnabled(False)
+            return
+
+        self.handle_pause_command(checked)
+
+    @Slot()
+    def on_btn_stop_clicked(self):
+        """Handle stop button clicks and reset button states.
+
+        Обработать нажатие кнопки стоп и вернуть кнопки в исходное
+        состояние.
+        """
+
+        self.reset_control_buttons_state()
+        self.handle_stop_command()
+
+    @Slot()
+    def on_btn_emergency_reset_clicked(self):
+        """Handle emergency reset button clicks.
+
+        Обработать нажатие кнопки сброса аварии.
+        """
+
+        self.handle_emergency_reset_command()
+
     def on_jog_cw_pressed(self):
         """Jog clockwise while button is pressed.
 
@@ -344,4 +408,81 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.model.realtime_data.worker.connection_status.connect(
             self.connection_ctrl.set_status
         )
+
+    def control_buttons_config(self):
+        """Configure control buttons appearance and default state.
+
+        Настроить внешний вид и исходное состояние кнопок управления
+        испытанием.
+        """
+
+        self.btnStart.setCheckable(True)
+        self.btnPause.setCheckable(True)
+        self.btnPause.setEnabled(False)
+
+        self.btnStart.setStyleSheet(
+            """
+            QPushButton:checked {
+                background-color: #4caf50;
+                color: white;
+            }
+            """
+        )
+        self.btnPause.setStyleSheet(
+            """
+            QPushButton:checked {
+                background-color: #f9f2a8;
+                color: black;
+            }
+            """
+        )
+
+    def reset_control_buttons_state(self):
+        """Return control buttons to their default state.
+
+        Вернуть кнопки управления в исходное состояние.
+        """
+
+        self.btnStart.blockSignals(True)
+        self.btnPause.blockSignals(True)
+        self.btnStart.setChecked(False)
+        self.btnPause.setChecked(False)
+        self.btnStart.blockSignals(False)
+        self.btnPause.blockSignals(False)
+        self.btnPause.setEnabled(False)
+
+    def handle_start_command(self):
+        """Placeholder for start command handling.
+
+        Заглушка обработчика команды запуска.
+        """
+
+        pass
+
+    def handle_pause_command(self, is_paused: bool):
+        """Placeholder for pause/resume command handling.
+
+        Заглушка обработчика команды паузы или продолжения.
+
+        :param is_paused: Текущее состояние кнопки паузы.
+        """
+
+        del is_paused
+        pass
+
+    def handle_stop_command(self):
+        """Placeholder for stop command handling.
+
+        Заглушка обработчика команды остановки.
+        """
+
+        pass
+
+    def handle_emergency_reset_command(self):
+        """Placeholder for emergency reset command handling.
+
+        Заглушка обработчика команды сброса аварии.
+        """
+
+        pass
 
