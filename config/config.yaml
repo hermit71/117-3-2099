@@ -20,3 +20,8 @@ graphs:
     background: '#FEFEFA'
     grid_color: '#C8C8C8'
     line_width: 2
+stand:
+  lab_address: ""
+  brand_and_model: ""
+  serial_number: ""
+  certification_date: ""
