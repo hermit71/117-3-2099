@@ -210,7 +210,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Показать диалог общих настроек системы.
         """
-        dlg = GeneralSettingsDialog(self)
+        dlg = GeneralSettingsDialog(self, config=self.config)
         dlg.exec()
 
     @Slot()
