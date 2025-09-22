@@ -93,7 +93,7 @@ class TrialInitializationController:
         self.trial_number_field.setObjectName("lineTrialNumber")
         self.trial_number_field.setReadOnly(True)
         self.trial_number_field.setMinimumSize(self.window.lineEdit.minimumSize())
-        form.insertRow(0, self.trial_number_field, label)
+        form.insertRow(0, label, self.trial_number_field)
         self.window.lineTrialNumber = self.trial_number_field
 
     def _prepare_text_fields(self) -> None:
@@ -191,7 +191,13 @@ class TrialInitializationController:
         index = layout.indexOf(old_widget)
         if index == -1:
             return
-        row, role, _, _ = layout.getItemPosition(index)
+        position = layout.getItemPosition(index)
+        if len(position) == 2:
+            row, role = position
+        elif len(position) == 4:
+            row, role, _, _ = position
+        else:
+            row, role = 0, QFormLayout.ItemRole.FieldRole
         layout.removeWidget(old_widget)
         old_widget.deleteLater()
         layout.setWidget(row, role, new_widget)
