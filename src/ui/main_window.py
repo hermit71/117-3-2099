@@ -15,6 +15,7 @@ from src.ui.connection_settings_dialog_ui import Ui_ConnectionSettingsDialog
 from src.ui.graph_settings_dialog import GraphSettingsDialog
 from src.ui.general_settings_dialog import GeneralSettingsDialog
 from src.data.model import Model
+from src.ui.trial_initialization_controller import TrialInitializationController
 from src.ui.widgets import dashboards, connection_control_widget as cw
 
 logger = logging.getLogger(__name__)
@@ -119,6 +120,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar_config()
         self.control_buttons_config()
         self.signal_connections()
+        self.trial_controller = TrialInitializationController(self, self.config)
         # self.btnHand.setStyleSheet(
         #     """
         #     QPushButton {
