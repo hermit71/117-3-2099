@@ -1,31 +1,31 @@
 """Диалог общих настроек системы."""
 
-from typing import Optional
+from __future__ import annotations
 
-from PyQt6.QtWidgets import QDialog
+from typing import Dict, Optional
 
-from src.ui.general_settings_dialog_view import GeneralSettingsDialogView
+from PyQt6.QtWidgets import QDialog, QLineEdit
+
+from src.ui.designer_loader import load_ui
 from src.utils.config import Config
 
 
-class GeneralSettingsDialog(QDialog, GeneralSettingsDialogView):
+class GeneralSettingsDialog(QDialog):
     """Диалог с категориями общих настроек."""
 
-    def __init__(self, parent=None, config: Optional[Config] = None):
-        """Инициализирует диалог, загружая данные о стенде из настроек."""
+    def __init__(self, parent=None, config: Optional[Config] = None) -> None:
         super().__init__(parent)
         self.config = config
-        self.setup_ui(self)
-
+        load_ui(self, "general_settings_dialog.ui")
         self.category_list.currentRowChanged.connect(
             self.pages_stack.setCurrentIndex
         )
         self.splitter.setStretchFactor(0, 2)
         self.splitter.setStretchFactor(1, 6)
-        total_width = self.size().width()
+        total_width = max(self.size().width(), 1)
         self.splitter.setSizes([2 * total_width // 8, 6 * total_width // 8])
 
-        self._stand_fields = {
+        self._stand_fields: Dict[str, QLineEdit] = {
             "lab_address": self.line_lab_address,
             "brand_and_model": self.line_stand_model,
             "serial_number": self.line_serial_number,
@@ -55,10 +55,11 @@ class GeneralSettingsDialog(QDialog, GeneralSettingsDialogView):
         for key, line_edit in self._stand_fields.items():
             stand_section[key] = line_edit.text().strip()
 
-    def accept(self) -> None:
+    def accept(self) -> None:  # noqa: D401
         """Сохранить данные и закрыть диалог."""
 
         self._save_stand_info()
         if self.config:
             self.config.save()
         super().accept()
+
