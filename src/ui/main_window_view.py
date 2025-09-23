@@ -714,7 +714,6 @@ class MainWindowView:
         self._build_init_main_info_group()
         self._build_init_sample_info_group()
         self._build_init_test_info_group()
-        self._finalize_init_groupboxes()
 
         spacer = QtWidgets.QSpacerItem(
             20,
@@ -812,27 +811,50 @@ class MainWindowView:
         self.verticalLayout_11.addWidget(self.groupBox_6)
 
     def _finalize_init_groupboxes(self) -> None:
-        """Фиксирует размеры групп с данными об испытании."""
-        group_boxes = [self.groupBox_4, self.groupBox_5, self.groupBox_6]
-        max_width = 0
-        max_height = 0
+        """Выравнивает размеры групп с данными об испытании."""
 
-        for box in group_boxes:
+        group_boxes = [
+            getattr(self, "groupBox_4", None),
+            getattr(self, "groupBox_5", None),
+            getattr(self, "groupBox_6", None),
+        ]
+        boxes = [box for box in group_boxes if box is not None]
+        if not boxes:
+            return
+
+        widths: list[int] = []
+        for box in boxes:
             box.ensurePolished()
+            layout = box.layout()
+            if layout is not None:
+                layout.activate()
             size_hint = box.sizeHint()
-            if size_hint.width() == 0 or size_hint.height() == 0:
+            if size_hint.width() <= 0 or size_hint.height() <= 0:
                 size_hint = size_hint.expandedTo(box.minimumSizeHint())
-            max_width = max(max_width, size_hint.width())
-            max_height = max(max_height, size_hint.height())
+            widths.append(size_hint.width())
 
-        fixed_size = QtCore.QSize(max(max_width, 1), max(max_height, 1))
-        for box in group_boxes:
+        target_width = max(widths, default=0)
+        if target_width <= 0:
+            return
+
+        for box in boxes:
             box.setSizePolicy(
                 QtWidgets.QSizePolicy.Policy.Fixed,
                 QtWidgets.QSizePolicy.Policy.Fixed,
             )
-            box.setMinimumSize(fixed_size)
-            box.setMaximumSize(fixed_size)
+            box.setMinimumWidth(target_width)
+            box.setMaximumWidth(target_width)
+
+            layout = box.layout()
+            if layout is not None:
+                layout.activate()
+            size_hint = box.sizeHint()
+            height_hint = size_hint.height()
+            if height_hint <= 0:
+                height_hint = box.minimumSizeHint().height()
+            box.setMinimumHeight(max(height_hint, 1))
+            box.setMaximumHeight(max(height_hint, 1))
+            box.adjustSize()
 
     def _build_init_placeholder_panel(self) -> None:
         """Создает правый заполнитель на странице инициализации."""
@@ -1002,6 +1024,16 @@ class MainWindowView:
         layout.setFieldGrowthPolicy(
             QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
         )
+        layout.setHorizontalSpacing(12)
+        layout.setVerticalSpacing(10)
+        layout.setLabelAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        layout.setFormAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft
+            | QtCore.Qt.AlignmentFlag.AlignTop
+        )
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setObjectName(layout_name)
         return group_box, layout
@@ -1026,8 +1058,8 @@ class MainWindowView:
         self._configure_form_line_edit(line_edit, line_edit_name, align_left=align_left)
         self._configure_form_label(label, label_name, with_min_size=label_min)
 
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, line_edit)
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, line_edit)
 
     def _add_list_label_row(
         self,
@@ -1047,8 +1079,8 @@ class MainWindowView:
         self._configure_form_list_widget(list_widget, list_name)
         self._configure_form_label(label, label_name, with_min_size=True)
 
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, list_widget)
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, list_widget)
 
     def _add_sample_reuse_checkbox(
         self,
@@ -1069,7 +1101,7 @@ class MainWindowView:
     ) -> None:
         """Настраивает параметры текстовых полей форм."""
         size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
             QtWidgets.QSizePolicy.Policy.Fixed,
         )
         size_policy.setHeightForWidth(line_edit.sizePolicy().hasHeightForWidth())
@@ -1102,6 +1134,11 @@ class MainWindowView:
         font = QtGui.QFont()
         font.setPointSize(10)
         label.setFont(font)
+        label.setWordWrap(True)
+        label.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
         if with_min_size:
             label.setMinimumSize(QtCore.QSize(0, 0))
         label.setObjectName(object_name)
@@ -1113,7 +1150,7 @@ class MainWindowView:
     ) -> None:
         """Настраивает список выбора в форме."""
         size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
             QtWidgets.QSizePolicy.Policy.Maximum,
         )
         size_policy.setHeightForWidth(list_widget.sizePolicy().hasHeightForWidth())
@@ -1137,6 +1174,7 @@ class MainWindowView:
         self._retranslate_init_test_info(_translate)
         self._retranslate_placeholder_pages(_translate)
         self._retranslate_menu(_translate)
+        self._finalize_init_groupboxes()
 
     def _retranslate_left_panel(self, translate) -> None:
         self.btnInit.setText(translate("MainWindow", "Инициализация испытания"))
