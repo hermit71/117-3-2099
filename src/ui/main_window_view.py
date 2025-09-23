@@ -12,6 +12,22 @@ from src.utils.spin_box_int_to_float import AppSpinBox
 class MainWindowView:
     """Формирует графический интерфейс главного окна приложения."""
 
+    INIT_HEADER_BUTTON_COUNT = 3
+    INIT_HEADER_BUTTON_WIDTH = 260
+    INIT_HEADER_BUTTON_SPACING = 10
+    INIT_FORM_MARGIN = 10
+    INIT_FORM_SPACING = 12
+    INIT_GROUPBOX_WIDTH = (
+        INIT_HEADER_BUTTON_COUNT * INIT_HEADER_BUTTON_WIDTH
+        + (INIT_HEADER_BUTTON_COUNT - 1) * INIT_HEADER_BUTTON_SPACING
+    )
+    INIT_FORM_AVAILABLE_WIDTH = (
+        INIT_GROUPBOX_WIDTH - 2 * INIT_FORM_MARGIN - INIT_FORM_SPACING
+    )
+    INIT_LABEL_WIDTH = (INIT_FORM_AVAILABLE_WIDTH * 2) // 5
+    INIT_FIELD_WIDTH = INIT_FORM_AVAILABLE_WIDTH - INIT_LABEL_WIDTH
+    INIT_LABEL_MIN_HEIGHT_MULTIPLIER = 2.2
+
     def setup_ui(self, MainWindow: QtWidgets.QMainWindow) -> None:
         """Создает и настраивает все элементы пользовательского интерфейса."""
         # === Настройка основного окна и создание каркаса ===
@@ -624,13 +640,16 @@ class MainWindowView:
         self.verticalLayout_12 = QtWidgets.QVBoxLayout()
 
         self.pageInit.setObjectName("pageInit")
+        self.verticalLayout_13.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_13.setObjectName("verticalLayout_13")
+        self.verticalLayout_12.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_12.setObjectName("verticalLayout_12")
 
     def _build_init_header(self) -> None:
         """Создает заголовочную панель страницы инициализации."""
         self.horizontalLayout_17 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_17.setSpacing(10)
+        self.horizontalLayout_17.setSpacing(self.INIT_HEADER_BUTTON_SPACING)
+        self.horizontalLayout_17.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_17.setObjectName("horizontalLayout_17")
 
         button_font = QtGui.QFont()
@@ -664,6 +683,7 @@ class MainWindowView:
         self.horizontalLayout_17.addWidget(self.btnInitSave)
         self.horizontalLayout_17.addItem(spacer)
         self.verticalLayout_12.addLayout(self.horizontalLayout_17)
+        self.verticalLayout_12.addSpacing(16)
 
     def _create_init_header_button(
         self,
@@ -671,11 +691,13 @@ class MainWindowView:
         parent: QtWidgets.QWidget,
         object_name: str,
         font: QtGui.QFont,
-        width: int = 260,
+        width: int | None = None,
     ) -> QtWidgets.QPushButton:
         """Создает кнопку заголовочной панели страницы инициализации."""
 
         button = QtWidgets.QPushButton(parent=parent)
+        if width is None:
+            width = self.INIT_HEADER_BUTTON_WIDTH
         size_policy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed,
             QtWidgets.QSizePolicy.Policy.Fixed,
@@ -708,6 +730,10 @@ class MainWindowView:
     def _build_init_info_column(self) -> None:
         """Создает колонку с группами данных об испытании."""
         self.verticalLayout_11 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_11.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop
+        )
         self.verticalLayout_11.setObjectName("verticalLayout_11")
 
         self._build_init_main_info_group()
@@ -808,6 +834,39 @@ class MainWindowView:
             )
 
         self.verticalLayout_11.addWidget(self.groupBox_6)
+
+    def _finalize_init_groupboxes(self) -> None:
+        """Выравнивает размеры групп с данными об испытании."""
+
+        group_boxes = [
+            getattr(self, "groupBox_4", None),
+            getattr(self, "groupBox_5", None),
+            getattr(self, "groupBox_6", None),
+        ]
+        boxes = [box for box in group_boxes if box is not None]
+        if not boxes:
+            return
+
+        target_width = self.INIT_GROUPBOX_WIDTH
+        for box in boxes:
+            box.ensurePolished()
+            box.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
+            box.setMinimumWidth(target_width)
+            box.setMaximumWidth(target_width)
+
+            layout = box.layout()
+            if layout is not None:
+                layout.activate()
+            size_hint = box.sizeHint()
+            height_hint = size_hint.height()
+            if height_hint <= 0:
+                height_hint = box.minimumSizeHint().height()
+            box.setMinimumHeight(max(height_hint, 1))
+            box.setMaximumHeight(max(height_hint, 1))
+            box.adjustSize()
 
     def _build_init_placeholder_panel(self) -> None:
         """Создает правый заполнитель на странице инициализации."""
@@ -968,12 +1027,31 @@ class MainWindowView:
         font = QtGui.QFont()
         font.setPointSize(10)
         group_box.setFont(font)
+        group_box.setStyleSheet(
+            "QGroupBox { background-color: transparent; }"
+            "QGroupBox::title { background-color: transparent; }"
+        )
 
         layout = QtWidgets.QFormLayout(group_box)
         layout.setFieldGrowthPolicy(
             QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
         )
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setHorizontalSpacing(self.INIT_FORM_SPACING)
+        layout.setVerticalSpacing(10)
+        layout.setLabelAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        layout.setFormAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft
+            | QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        layout.setContentsMargins(
+            self.INIT_FORM_MARGIN,
+            self.INIT_FORM_MARGIN,
+            self.INIT_FORM_MARGIN,
+            self.INIT_FORM_MARGIN,
+        )
         layout.setObjectName(layout_name)
         return group_box, layout
 
@@ -997,8 +1075,8 @@ class MainWindowView:
         self._configure_form_line_edit(line_edit, line_edit_name, align_left=align_left)
         self._configure_form_label(label, label_name, with_min_size=label_min)
 
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, line_edit)
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, line_edit)
 
     def _add_list_label_row(
         self,
@@ -1018,8 +1096,8 @@ class MainWindowView:
         self._configure_form_list_widget(list_widget, list_name)
         self._configure_form_label(label, label_name, with_min_size=True)
 
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, list_widget)
-        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.LabelRole, label)
+        layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, list_widget)
 
     def _add_sample_reuse_checkbox(
         self,
@@ -1031,8 +1109,8 @@ class MainWindowView:
         self.checkBox.setObjectName("checkBox")
         layout.setWidget(row, QtWidgets.QFormLayout.ItemRole.FieldRole, self.checkBox)
 
-    @staticmethod
     def _configure_form_line_edit(
+        self,
         line_edit: QtWidgets.QLineEdit,
         object_name: str,
         *,
@@ -1040,15 +1118,24 @@ class MainWindowView:
     ) -> None:
         """Настраивает параметры текстовых полей форм."""
         size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Fixed,
             QtWidgets.QSizePolicy.Policy.Fixed,
         )
-        size_policy.setHeightForWidth(line_edit.sizePolicy().hasHeightForWidth())
         line_edit.setSizePolicy(size_policy)
-        line_edit.setMinimumSize(QtCore.QSize(300, 0))
+        line_edit.setMinimumWidth(self.INIT_FIELD_WIDTH)
+        line_edit.setMaximumWidth(self.INIT_FIELD_WIDTH)
         font = QtGui.QFont()
         font.setPointSize(10)
         line_edit.setFont(font)
+        line_edit.ensurePolished()
+        base_height = line_edit.sizeHint().height()
+        if base_height > 0:
+            increased_height = max(int(base_height * 1.1), base_height + 1)
+            line_edit.setFixedHeight(increased_height)
+        else:
+            metrics = line_edit.fontMetrics()
+            fallback_height = max(int(metrics.lineSpacing() * 1.1), 1)
+            line_edit.setFixedHeight(fallback_height)
         if align_left:
             line_edit.setAlignment(
                 QtCore.Qt.AlignmentFlag.AlignLeading
@@ -1057,8 +1144,8 @@ class MainWindowView:
             )
         line_edit.setObjectName(object_name)
 
-    @staticmethod
     def _configure_form_label(
+        self,
         label: QtWidgets.QLabel,
         object_name: str,
         *,
@@ -1068,23 +1155,42 @@ class MainWindowView:
         font = QtGui.QFont()
         font.setPointSize(10)
         label.setFont(font)
+        label.setWordWrap(True)
+        label.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
+        label.setSizePolicy(size_policy)
+        label.setMinimumWidth(self.INIT_LABEL_WIDTH)
+        label.setMaximumWidth(self.INIT_LABEL_WIDTH)
+        metrics = label.fontMetrics()
+        base_line = max(metrics.lineSpacing(), 1)
+        min_height = max(
+            int(base_line * self.INIT_LABEL_MIN_HEIGHT_MULTIPLIER),
+            base_line,
+        )
         if with_min_size:
-            label.setMinimumSize(QtCore.QSize(0, 0))
+            min_height = max(min_height, int(base_line * (self.INIT_LABEL_MIN_HEIGHT_MULTIPLIER + 0.2)))
+        label.setMinimumHeight(min_height)
         label.setObjectName(object_name)
 
-    @staticmethod
     def _configure_form_list_widget(
+        self,
         list_widget: QtWidgets.QListWidget,
         object_name: str,
     ) -> None:
         """Настраивает список выбора в форме."""
         size_policy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Fixed,
             QtWidgets.QSizePolicy.Policy.Maximum,
         )
-        size_policy.setHeightForWidth(list_widget.sizePolicy().hasHeightForWidth())
         list_widget.setSizePolicy(size_policy)
-        list_widget.setMinimumSize(QtCore.QSize(300, 0))
+        list_widget.setMinimumWidth(self.INIT_FIELD_WIDTH)
+        list_widget.setMaximumWidth(self.INIT_FIELD_WIDTH)
         list_widget.setMaximumHeight(25)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -1103,6 +1209,7 @@ class MainWindowView:
         self._retranslate_init_test_info(_translate)
         self._retranslate_placeholder_pages(_translate)
         self._retranslate_menu(_translate)
+        self._finalize_init_groupboxes()
 
     def _retranslate_left_panel(self, translate) -> None:
         self.btnInit.setText(translate("MainWindow", "Инициализация испытания"))
