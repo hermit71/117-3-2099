@@ -17,7 +17,7 @@ if __name__ == '__main__':
     app.setStyle('Fusion')
     config = Config('config/config.yaml')
     window = MainWindow(config)
-    window.setGeometry(250, 50, 900, 600)
+    window.setGeometry(50, 50, 1800, 950)
     window.on_btn_hand_click()
     window.show()
     # window.showMaximized()
