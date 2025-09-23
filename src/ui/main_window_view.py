@@ -630,10 +630,28 @@ class MainWindowView:
     def _build_init_header(self) -> None:
         """Создает заголовочную панель страницы инициализации."""
         self.horizontalLayout_17 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_17.setSpacing(10)
         self.horizontalLayout_17.setObjectName("horizontalLayout_17")
 
-        self.pushButton = QtWidgets.QPushButton(parent=self.pageInit)
-        self.pushButton_3 = QtWidgets.QPushButton(parent=self.pageInit)
+        button_font = QtGui.QFont()
+        button_font.setPointSize(10)
+
+        self.btnInitNewTest = self._create_init_header_button(
+            parent=self.pageInit,
+            object_name="btnInitNewTest",
+            font=button_font,
+        )
+        self.btnInitEdit = self._create_init_header_button(
+            parent=self.pageInit,
+            object_name="btnInitEdit",
+            font=button_font,
+        )
+        self.btnInitSave = self._create_init_header_button(
+            parent=self.pageInit,
+            object_name="btnInitSave",
+            font=button_font,
+        )
+
         spacer = QtWidgets.QSpacerItem(
             40,
             20,
@@ -641,17 +659,33 @@ class MainWindowView:
             QtWidgets.QSizePolicy.Policy.Minimum,
         )
 
-        button_font = QtGui.QFont()
-        button_font.setPointSize(10)
-        self.pushButton.setFont(button_font)
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_3.setFont(button_font)
-        self.pushButton_3.setObjectName("pushButton_3")
-
-        self.horizontalLayout_17.addWidget(self.pushButton)
-        self.horizontalLayout_17.addWidget(self.pushButton_3)
+        self.horizontalLayout_17.addWidget(self.btnInitNewTest)
+        self.horizontalLayout_17.addWidget(self.btnInitEdit)
+        self.horizontalLayout_17.addWidget(self.btnInitSave)
         self.horizontalLayout_17.addItem(spacer)
         self.verticalLayout_12.addLayout(self.horizontalLayout_17)
+
+    def _create_init_header_button(
+        self,
+        *,
+        parent: QtWidgets.QWidget,
+        object_name: str,
+        font: QtGui.QFont,
+        width: int = 260,
+    ) -> QtWidgets.QPushButton:
+        """Создает кнопку заголовочной панели страницы инициализации."""
+
+        button = QtWidgets.QPushButton(parent=parent)
+        size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
+        button.setSizePolicy(size_policy)
+        button.setMinimumSize(QtCore.QSize(width, 42))
+        button.setMaximumSize(QtCore.QSize(width, 42))
+        button.setFont(font)
+        button.setObjectName(object_name)
+        return button
 
     def _build_init_content(self) -> None:
         """Формирует основное содержимое страницы инициализации."""
@@ -1104,8 +1138,13 @@ class MainWindowView:
         self.toolButton_2.setText(translate("MainWindow", "..."))
 
     def _retranslate_init_controls(self, translate) -> None:
-        self.pushButton.setText(translate("MainWindow", "Новое испытание"))
-        self.pushButton_3.setText(translate("MainWindow", "PushButton"))
+        self.btnInitNewTest.setText(
+            translate("MainWindow", "Новое испытание")
+        )
+        self.btnInitEdit.setText(translate("MainWindow", "Редактировать"))
+        self.btnInitSave.setText(
+            translate("MainWindow", "Сохранить данные испытания")
+        )
 
     def _retranslate_init_main_info(self, translate) -> None:
         self.groupBox_4.setTitle(translate("MainWindow", "Основная информация"))

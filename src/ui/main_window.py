@@ -148,6 +148,11 @@ class MainWindow(QMainWindow, MainWindowView):
         self.btnProtocol.clicked.connect(self.on_btn_protocol_click)
         self.btnArchive.clicked.connect(self.on_btn_archive_click)
         self.btnService.clicked.connect(self.on_btn_service_click)
+        self.btnInitNewTest.clicked.connect(
+            self.on_btn_init_new_test_clicked
+        )
+        self.btnInitEdit.clicked.connect(self.on_btn_init_edit_clicked)
+        self.btnInitSave.clicked.connect(self.on_btn_init_save_clicked)
 
         self.btnStart.clicked.connect(self.on_btn_start_clicked)
         self.btnPause.clicked.connect(self.on_btn_pause_clicked)
@@ -234,6 +239,36 @@ class MainWindow(QMainWindow, MainWindowView):
         self.pager.setCurrentIndex(1)
         self.command_handler.set_plc_mode("auto")
         self.command_handler.servo_power_on()
+
+    @Slot()
+    def on_btn_init_new_test_clicked(self) -> None:
+        """Prepare UI for creating a new test entry.
+
+        Подготовить интерфейс к созданию записи нового испытания.
+        """
+
+        # Заглушка обработчика кнопки создания нового испытания.
+        pass
+
+    @Slot()
+    def on_btn_init_edit_clicked(self) -> None:
+        """Enable editing of the current test data set.
+
+        Включить редактирование текущего набора данных испытания.
+        """
+
+        # Заглушка обработчика кнопки редактирования данных испытания.
+        pass
+
+    @Slot()
+    def on_btn_init_save_clicked(self) -> None:
+        """Persist the entered initialization test data.
+
+        Сохранить введенные данные инициализации испытания.
+        """
+
+        # Заглушка обработчика кнопки сохранения данных испытания.
+        pass
 
     @Slot()
     def on_btn_static1_click(self):
