@@ -664,6 +664,7 @@ class MainWindowView:
         self.horizontalLayout_17.addWidget(self.btnInitSave)
         self.horizontalLayout_17.addItem(spacer)
         self.verticalLayout_12.addLayout(self.horizontalLayout_17)
+        self.verticalLayout_12.addSpacing(16)
 
     def _create_init_header_button(
         self,
@@ -713,6 +714,7 @@ class MainWindowView:
         self._build_init_main_info_group()
         self._build_init_sample_info_group()
         self._build_init_test_info_group()
+        self._finalize_init_groupboxes()
 
         spacer = QtWidgets.QSpacerItem(
             20,
@@ -808,6 +810,29 @@ class MainWindowView:
             )
 
         self.verticalLayout_11.addWidget(self.groupBox_6)
+
+    def _finalize_init_groupboxes(self) -> None:
+        """Фиксирует размеры групп с данными об испытании."""
+        group_boxes = [self.groupBox_4, self.groupBox_5, self.groupBox_6]
+        max_width = 0
+        max_height = 0
+
+        for box in group_boxes:
+            box.ensurePolished()
+            size_hint = box.sizeHint()
+            if size_hint.width() == 0 or size_hint.height() == 0:
+                size_hint = size_hint.expandedTo(box.minimumSizeHint())
+            max_width = max(max_width, size_hint.width())
+            max_height = max(max_height, size_hint.height())
+
+        fixed_size = QtCore.QSize(max(max_width, 1), max(max_height, 1))
+        for box in group_boxes:
+            box.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
+            box.setMinimumSize(fixed_size)
+            box.setMaximumSize(fixed_size)
 
     def _build_init_placeholder_panel(self) -> None:
         """Создает правый заполнитель на странице инициализации."""
@@ -968,6 +993,10 @@ class MainWindowView:
         font = QtGui.QFont()
         font.setPointSize(10)
         group_box.setFont(font)
+        group_box.setStyleSheet(
+            "QGroupBox { background-color: transparent; }"
+            "QGroupBox::title { background-color: transparent; }"
+        )
 
         layout = QtWidgets.QFormLayout(group_box)
         layout.setFieldGrowthPolicy(
@@ -1049,6 +1078,11 @@ class MainWindowView:
         font = QtGui.QFont()
         font.setPointSize(10)
         line_edit.setFont(font)
+        line_edit.ensurePolished()
+        base_height = line_edit.sizeHint().height()
+        if base_height > 0:
+            increased_height = max(int(base_height * 1.1), base_height + 1)
+            line_edit.setFixedHeight(increased_height)
         if align_left:
             line_edit.setAlignment(
                 QtCore.Qt.AlignmentFlag.AlignLeading
