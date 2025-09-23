@@ -4,33 +4,32 @@ from typing import Optional
 
 from PyQt6.QtWidgets import QDialog
 
-from src.ui.general_settings_dialog_ui import Ui_GeneralSettingsDialog
+from src.ui.general_settings_dialog_view import GeneralSettingsDialogView
 from src.utils.config import Config
 
 
-class GeneralSettingsDialog(QDialog, Ui_GeneralSettingsDialog):
+class GeneralSettingsDialog(QDialog, GeneralSettingsDialogView):
     """Диалог с категориями общих настроек."""
 
     def __init__(self, parent=None, config: Optional[Config] = None):
         """Инициализирует диалог, загружая данные о стенде из настроек."""
         super().__init__(parent)
         self.config = config
-        self.setupUi(self)
+        self.setup_ui(self)
 
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-
-        self.categoryList.currentRowChanged.connect(self.pagesStack.setCurrentIndex)
+        self.category_list.currentRowChanged.connect(
+            self.pages_stack.setCurrentIndex
+        )
         self.splitter.setStretchFactor(0, 2)
         self.splitter.setStretchFactor(1, 6)
         total_width = self.size().width()
         self.splitter.setSizes([2 * total_width // 8, 6 * total_width // 8])
 
         self._stand_fields = {
-            "lab_address": self.lineLabAddress,
-            "brand_and_model": self.lineStandModel,
-            "serial_number": self.lineSerialNumber,
-            "certification_date": self.lineCertificationDate,
+            "lab_address": self.line_lab_address,
+            "brand_and_model": self.line_stand_model,
+            "serial_number": self.line_serial_number,
+            "certification_date": self.line_certification_date,
         }
 
         self._load_stand_info()

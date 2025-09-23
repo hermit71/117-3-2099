@@ -8,10 +8,12 @@ from PyQt6.QtCore import pyqtSlot as Slot
 from PyQt6.QtGui import QIntValidator
 import ipaddress
 import logging
-from src.ui.main_117_3_ui import Ui_MainWindow
-from src.ui.dlgPID_settings_ui import Ui_dlgHandRegulatorSettings
-from src.ui.about_dialog_ui import Ui_AboutDialog
-from src.ui.connection_settings_dialog_ui import Ui_ConnectionSettingsDialog
+from src.ui.main_window_view import MainWindowView
+from src.ui.hand_regulator_settings_dialog import (
+    HandRegulatorSettingsDialogView,
+)
+from src.ui.about_dialog_view import AboutDialogView
+from src.ui.connection_settings_dialog_view import ConnectionSettingsDialogView
 from src.ui.graph_settings_dialog import GraphSettingsDialog
 from src.ui.general_settings_dialog import GeneralSettingsDialog
 from src.data.model import Model
@@ -20,7 +22,7 @@ from src.ui.widgets import dashboards, connection_control_widget as cw
 logger = logging.getLogger(__name__)
 
 
-class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
+class ConnectionSettingsDialog(QDialog, ConnectionSettingsDialogView):
     """Dialog window for editing Modbus connection parameters.
 
     Диалоговое окно для редактирования параметров соединения Modbus.
@@ -29,7 +31,7 @@ class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
     def __init__(self, parent=None, config=None):
         super().__init__(parent)
         self.config = config
-        self.setupUi(self)
+        self.setup_ui(self)
         self.ed_host.setText(self.config.get("modbus", "host", "127.0.0.1"))
         self.ed_port.setText(str(self.config.get("modbus", "port", 502)))
         self.ed_timeout.setText(str(self.config.get("modbus", "timeout", 2.0)))
@@ -73,7 +75,7 @@ class ConnectionSettingsDialog(QDialog, Ui_ConnectionSettingsDialog):
         super().accept()
 
 
-class AboutDialog(QDialog, Ui_AboutDialog):
+class AboutDialog(QDialog, AboutDialogView):
     """Dialog displaying information about the application.
 
     Диалог, отображающий информацию о приложении.
@@ -81,10 +83,10 @@ class AboutDialog(QDialog, Ui_AboutDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        self.setup_ui(self)
 
 
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow, MainWindowView):
     """Main application window coordinating UI components and actions.
 
     Главное окно приложения, координирующее компоненты интерфейса и действия.
@@ -93,7 +95,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.setupUi(self)
+        self.setup_ui(self)
         self.menuAbout.triggered.connect(self.show_about_dialog)
         # Настройки соединения Modbus
         self.actionConnectionSettings = self.menu.addAction(
@@ -371,9 +373,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Открыть диалог настроек ручного регулятора.
         """
-        dlg = QDialog()
-        ui = Ui_dlgHandRegulatorSettings()
-        ui.setupUi(dlg)
+        dlg = QDialog(self)
+        view = HandRegulatorSettingsDialogView()
+        view.setup_ui(dlg)
         dlg.exec()
 
     def hand_screen_config(self):
