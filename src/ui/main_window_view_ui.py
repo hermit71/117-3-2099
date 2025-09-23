@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'src/ui/main_window_view.ui'
+# Form implementation generated from reading ui file 'main_window_view.ui'
 #
 # Created by: PyQt6 UI code generator 6.9.1
 #
@@ -673,8 +673,18 @@ class Ui_MainWindow(object):
         self.menuExit.setTitle(_translate("MainWindow", "Выход"))
         self.menuAbout.setTitle(_translate("MainWindow", "О программе"))
         self.actionAbout.setText(_translate("MainWindow", "О программе"))
-from src.ui.widgets.graph_widget import GraphWidget  # noqa: E402
-from src.ui.widgets.hand_graph_panel import HandGraphPanel  # noqa: E402
-from src.ui.widgets.hand_right_panel import LedDashboardPanel  # noqa: E402
-from src.ui.widgets.hand_top_panel import DashboardPanel  # noqa: E402
-from src.utils.spin_box_int_to_float import AppSpinBox  # noqa: E402
+from src.ui.widgets.graph_widget import GraphWidget
+from src.ui.widgets.hand_graph_panel import HandGraphPanel
+from src.ui.widgets.hand_right_panel import LedDashboardPanel
+from src.ui.widgets.hand_top_panel import DashboardPanel
+from src.utils.spin_box_int_to_float import AppSpinBox
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
