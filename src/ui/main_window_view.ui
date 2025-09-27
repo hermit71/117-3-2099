@@ -1600,53 +1600,18 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="horizontalLayoutWidget">
+           <widget class="QWidget" name="verticalLayoutWidget">
             <property name="geometry">
              <rect>
-              <x>80</x>
+              <x>50</x>
               <y>320</y>
-              <width>781</width>
-              <height>341</height>
+              <width>621</width>
+              <height>431</height>
              </rect>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <layout class="QVBoxLayout" name="verticalLayout_18">
              <item>
-              <widget class="QTableWidget" name="tableWidget">
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Plain</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="sizeAdjustPolicy">
-                <enum>QAbstractScrollArea::AdjustToContents</enum>
-               </property>
-               <property name="rowCount">
-                <number>10</number>
-               </property>
-               <property name="columnCount">
-                <number>3</number>
-               </property>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <row/>
-               <column/>
-               <column/>
-               <column/>
-              </widget>
+              <widget class="QTableWidget" name="table_calibrate_points"/>
              </item>
             </layout>
            </widget>
