@@ -5,8 +5,27 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from PyQt6.QtCore import pyqtSlot as Slot
-from PyQt6.QtWidgets import QMainWindow, QPushButton
+from PyQt6.QtCore import Qt, pyqtSlot as Slot
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QPushButton,
+    QLabel,
+    QLineEdit,
+    QFileDialog,
+    QMessageBox,
+    QTabWidget,
+    QAbstractItemView,
+    QStyledItemDelegate,
+    QSpinBox,
+    QMenu,
+)
 
 from src.data.model import Model
 from src.ui.designer_loader import load_ui
@@ -22,6 +41,9 @@ from src.utils.config import Config
 
 logger = logging.getLogger(__name__)
 
+from typing import TYPE_CHECKING, cast, Iterable, List
+if TYPE_CHECKING:
+    from src.ui.main_window_view_ui import Ui_MainWindow
 
 @dataclass
 class ControlButtons:
@@ -98,6 +120,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.config = config
         load_ui(self, "main_window_view.ui")
+
         self._setup_menu()
 
         self.model = Model(self.config)
@@ -112,6 +135,7 @@ class MainWindow(QMainWindow):
         self.control_buttons.setup()
 
         self._configure_hand_screen()
+        self._configure_calibration_screen()
         self._configure_status_bar()
         self._connect_signals()
 
@@ -158,6 +182,29 @@ class MainWindow(QMainWindow):
             plots_description=dashboards.hand_graphs,
         )
         self.pageHand_pnlTopDashboard.config(model=self.model)
+
+    def _configure_calibration_screen(self) -> None:
+        # подсказки IDE для self: Ui_MainWindow
+        self: "Ui_MainWindow" = cast("Ui_MainWindow", self)
+
+        headers = ["Задание момента", "Значение", "Эталон"]
+        data = [
+            [0.0, "", ""],
+            [5.0, "", ""],
+            [10.0, "", ""],
+            [15.0, "", ""],
+            [20.0, "", ""],
+            [25.0, "", ""],
+            [30.0, "", ""],
+            [35.0, "", ""],
+            [40.0, "", ""],
+            [45.0, "", ""],
+            [50.0, "", ""],
+        ]
+        new_table = self.make_table(headers, data)
+        new_table.setObjectName(u"table_calibrate_points")
+        lay = self.table_calibrate_points.parentWidget().layout()
+        lay.replaceWidget(self.table_calibrate_points, new_table)
 
     def _configure_status_bar(self) -> None:
         """Добавить виджет состояния соединения в строку состояния."""
@@ -399,3 +446,58 @@ class MainWindow(QMainWindow):
 
         pass
 
+    # ===========================================
+    # Вспомогательные функции работы с таблицами
+    # ===========================================
+    def make_table(self, headers: List[str], rows: Iterable[Iterable[object]]) -> QTableWidget:
+        table = QTableWidget()
+        table.setColumnCount(len(headers))
+        table.setHorizontalHeaderLabels(headers)
+
+        # Базовые настройки UX
+        #table.setAlternatingRowColors(True)
+        table.setSortingEnabled(False)
+        table.setWordWrap(False)
+
+        header = table.horizontalHeader()
+        header.setStretchLastSection(True)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+
+        # Выделение строк целиком и редактирование по двойному клику
+        table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        table.setEditTriggers(
+            QAbstractItemView.EditTrigger.DoubleClicked
+            | QAbstractItemView.EditTrigger.EditKeyPressed
+            | QAbstractItemView.EditTrigger.AnyKeyPressed
+        )
+
+        # Заполнение
+        rows = list(rows)
+        table.setRowCount(len(rows))
+        for r, row in enumerate(rows):
+            for c, value in enumerate(row):
+                item = QTableWidgetItem(str(value))
+                # Пример выравнивания: числа — по правому краю
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                table.setItem(r, c, item)
+        self.resize_to_contents(table)
+        self.center_column(table, 0)
+        return table
+
+    # Ресайз таблицы по содержимому
+    def resize_to_contents(self, table: QTableWidget) -> None:
+        header = table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # Немного увеличить последнюю колонку, чтобы не было прижатия
+        header.setStretchLastSection(True)
+
+    # Выравнивание n-ого столбца таблицы по ценру
+    def center_column(self, table: QTableWidget, col: int):
+        for r in range(table.rowCount()):
+            it = table.item(r, col)
+            if it is None:
+                it = QTableWidgetItem("")
+                table.setItem(r, col, it)
+            it.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
