@@ -493,7 +493,7 @@ class MainWindow(QMainWindow):
         # Немного увеличить последнюю колонку, чтобы не было прижатия
         header.setStretchLastSection(True)
 
-    # Выравнивание n-ого столбца таблицы по ценру
+    # Выравнивание n-ого столбца таблицы по центру
     def center_column(self, table: QTableWidget, col: int):
         for r in range(table.rowCount()):
             it = table.item(r, col)
