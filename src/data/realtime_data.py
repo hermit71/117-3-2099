@@ -235,7 +235,8 @@ class RealTimeData(QObject):
 
     def get_real_tension(self, registers):
         """Преобразование регистра в значение крутящего момента."""
-        tension = 50.0 * float(c_short(registers[1]).value) / 32768.0
+        tension = c_short(registers[0]).value
+        # tension = 50.0 * float(c_short(registers[1]).value) / 32768.0
         return tension
 
     def get_real_angle(self, registers):
@@ -288,3 +289,6 @@ class RealTimeData(QObject):
         if self.worker.timer:
             self.worker.timer.setInterval(self.poll_interval)
         self.worker.init_modbus()
+
+if __name__ == '__main__':
+    print(__doc__)
