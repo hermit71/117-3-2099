@@ -64,7 +64,7 @@ class Worker(QObject):
         timeout = cfg.get('modbus', 'timeout', 2.0)
         self.client = ModbusTcpClient(host, port=port, timeout=timeout)
         self.register_address = 0  # Начальный адрес регистра для чтения
-        self.register_qty = 7  # Количество регистров для чтения
+        self.register_qty = 10  # Количество регистров для чтения
 
     def safe_modbus_read(self, address, count=1, unit=1):
         """Безопасное чтение Modbus с обработкой ошибок соединения."""
@@ -141,13 +141,10 @@ class Worker(QObject):
     def get_data(self):
         """Получение данных от ПЛК и отправка их в основной поток."""
         try:
-            # self.result = self.client.read_holding_registers(
-            #     self.register_address, count=self.register_qty
-            # )
             self.result = self.client.readwrite_registers(
                 read_address=self.register_address,
                 read_count=self.register_qty,
-                write_address=7,
+                write_address=10,
                 values=self.data_set.write_regs,
             )
             self.data_received.emit(self.result.registers)
@@ -178,20 +175,32 @@ class RealTimeData(QObject):
 
         # Слово состояния дискретных сигналов от ПЛК
         self.in_status = 0
+
         # данные от датчика угла поворота, в градусах
         self.angle_data = np.zeros(self.data_window_length, dtype=np.int32)
+
         # Данные от датчика угла поворота (преобразованные, в градусах)
         self.angle_data_c = np.zeros(self.data_window_length, dtype=np.float16)
-        # данные от датчика крутящего момента, в Нм
+
+        # данные от датчика крутящего момента, RAW АЦП
         self.tension_data = np.zeros(self.data_window_length, dtype=np.int16)
+
         # Данные от датчика крутящего момента (преобразованные к Нм)
-        self.tension_data_c = np.zeros(self.data_window_length, dtype=np.float16)
+        self.tension_data_c = np.zeros(self.data_window_length, dtype=np.float32)
+
         # Скорость нарастания момента (моментальные значения в Нм/с)
         self.velocity_data = np.zeros(self.data_window_length, dtype=np.float16)
 
         # временные метки для потока данных, в мс
         self.times = np.zeros(self.data_window_length, dtype=np.int64)
         self.ptr = 0  # Указатель текущей позиции данных
+
+        # Текущие значения датчиков (данные ПЛК)
+        self.tension_adc = 0        # Данные АЦП датчика момента
+        self.tension_nc = 0         # Момент нескорректированный, Нм
+        self.tension = 0            # Момент скорректированный, Нм
+        self.angle = 0              # Угол поворота в градусах нескорректированный
+        self.velocity = 0           # Скорость нарастания момента
 
         # Слово управления для отправки в ПЛК
         self.plc_control_word = 0
@@ -228,14 +237,31 @@ class RealTimeData(QObject):
             self.velocity_data[:-1] = self.velocity_data[1:]
             self.ptr = self.data_window_length - 1
 
+        # Фиксируем текущие данные от датчика момента
+        self.tension_adc = registers[1]
+        self.tension_nc = self.get_real_tension_nc(registers)
+        self.tension = self.get_real_tension(registers)
+
+        # Фиксируем текущие данные от датчика угла
+        self.angle = self.get_real_angle(registers)
+
+        # Фиксируем текущую скорость нарастания момента
+        self.velocity = self.velocity_data[self.ptr-1]
+
         # Считываем состояние регистров
         self.in_status = c_short(registers[0]).value
-
         self.data_updated.emit(registers)
 
+    def get_real_tension_nc(self, registers):
+        """Преобразование регистров в значение крутящего момента (нескорректированного)"""
+        client = self.worker.client
+        tension = client.convert_from_registers(registers[6:8], client.DATATYPE.FLOAT32)
+        return tension
+
     def get_real_tension(self, registers):
-        """Преобразование регистра в значение крутящего момента."""
-        tension = 50.0 * float(c_short(registers[1]).value) / 32768.0
+        """Преобразование регистров в значение крутящего момента (корректированного в соответствии с калибровочной моделью)"""
+        client = self.worker.client
+        tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
         return tension
 
     def get_real_angle(self, registers):

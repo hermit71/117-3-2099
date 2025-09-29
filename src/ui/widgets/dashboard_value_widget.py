@@ -9,7 +9,7 @@ from pyqtgraph import ValueLabel
 class ValueWidget(QFrame):
     """Widget combining a label and a live numeric value."""
 
-    def __init__(self, parent=None, title="", data_source=None):
+    def __init__(self, parent=None, title="", data_source=""):
         super().__init__(parent)
         self.parent = parent
         self.label = QLabel(title)
@@ -55,6 +55,13 @@ class ValueWidget(QFrame):
     @Slot()
     def update(self):
         """Fetch data from source and update value display."""
-        indx = self.parent.model.realtime_data.ptr - 1
-        value = self.data_source[indx]
+        #indx = self.parent.model.realtime_data.ptr - 1
+        if self.data_source == "tension":
+            value = self.parent.model.realtime_data.tension
+        elif self.data_source == "velocity":
+            value = self.parent.model.realtime_data.velocity
+        elif self.data_source == "angle":
+            value = self.parent.model.realtime_data.angle
+        else:
+            value = 0.0
         self.value.setValue(value)

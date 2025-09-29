@@ -32,9 +32,9 @@ class DashboardPanel(QFrame):
         """Attach the application model and connect updates."""
         if model:
             self.model = model
-            self.value_tension.data_source = self.model.realtime_data.tension_data_c
-            self.value_velocity.data_source = self.model.realtime_data.velocity_data
-            self.value_angle.data_source = self.model.realtime_data.angle_data_c
+            self.value_tension.data_source = "tension"
+            self.value_velocity.data_source = "velocity"
+            self.value_angle.data_source = "angle"
             self.model.graphs_updated.connect(self.value_tension.update)
             self.model.graphs_updated.connect(self.value_velocity.update)
             self.model.graphs_updated.connect(self.value_angle.update)
