@@ -135,7 +135,6 @@ class Worker(QObject):
     def on_timer(self):
         """Обработчик таймера опроса."""
         self.get_data()
-        # self.safe_modbus_read("", "", "")
 
     @Slot()
     def get_data(self):
