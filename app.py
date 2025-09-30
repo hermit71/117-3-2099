@@ -77,7 +77,7 @@ if __name__ == '__main__':
     app.setStyleSheet(STYLE_SHEET)
     config = Config('config/config.yaml')
     window = MainWindow(config)
-    window.setGeometry(50, 50, 1800, 950)
+    window.setGeometry(50, 50, 1700, 900)
     window.on_btn_hand_click()
     window.show()
     # window.showMaximized()
