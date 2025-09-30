@@ -52,9 +52,6 @@ class Worker(QObject):
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.on_timer)
         self.timer.start(self.data_set.poll_interval)
-        self.tension = 0
-        self.angle = 0
-        self.result = None
 
     def init_modbus(self):
         """Настройка Modbus клиента на основе конфигурации."""
