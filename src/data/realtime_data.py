@@ -16,13 +16,15 @@ from PyQt6.QtCore import (
     pyqtSignal as Signal,
     pyqtSlot as Slot,
 )
+import asyncio
 from pymodbus.client import ModbusTcpClient
+from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
 REALTIME_DATA_WINDOW = 60  # временное окно для хранения данных (мин)
 
 
-class Worker(QObject):
+class ModbusPoller(QObject):
     """Background worker handling Modbus communication.
 
     Фоновый рабочий объект, управляющий обменом по Modbus.
@@ -39,22 +41,29 @@ class Worker(QObject):
         QObject.__init__(self)
         self.data_set = data_set
         logging.debug('worker init')
-        self.init_modbus()
-        self.data_received.connect(self.data_set.update)
-        self.timer = None
+        self.cfg = None
+        self.client = None
+        # self.init_modbus()
         self.tension = 0
         self.angle = 0
         self.result = None
-
-    def start(self):
+        self.data_received.connect(self.data_set.update)
         """Настройка и запуск таймера опроса ПЛК."""
         self.timer = QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.on_timer)
         self.timer.start(self.data_set.poll_interval)
-        self.tension = 0
-        self.angle = 0
-        self.result = None
+
+    async def poll_modbus(self):
+        self.init_modbus()
+        await self.client.connect()
+        response = None
+        try:
+            response = await self.client.read_holding_registers(0, count=100, device_id=1)
+        finally:
+            if response is not None:
+                self.data_received.emit(response.registers)
+            self.client.close()
 
     def init_modbus(self):
         """Настройка Modbus клиента на основе конфигурации."""
@@ -62,7 +71,7 @@ class Worker(QObject):
         host = cfg.get('modbus', 'host', '127.0.0.1')
         port = cfg.get('modbus', 'port', 502)
         timeout = cfg.get('modbus', 'timeout', 2.0)
-        self.client = ModbusTcpClient(host, port=port, timeout=timeout)
+        self.client = AsyncModbusTcpClient(host, port=port, timeout=timeout)
         self.register_address = 0  # Начальный адрес регистра для чтения
         self.register_qty = 10  # Количество регистров для чтения
 
@@ -133,8 +142,9 @@ class Worker(QObject):
 
     @Slot()
     def on_timer(self):
+        asyncio.run(self.poll_modbus())
         """Обработчик таймера опроса."""
-        self.get_data()
+        # self.get_data()
 
     @Slot()
     def get_data(self):
@@ -206,19 +216,17 @@ class RealTimeData(QObject):
         self.write_regs = [0] * 6  # 6 шесть регистров для записи в ПЛК
 
         # Для обмена по Modbus создаем отдельный поток
-        self.worker = Worker(self)
-        self.worker_thread = QThread()
+        self.poller = ModbusPoller(self)
+        self.poller_thread = QThread()
         # переносим worker в отдельный поток
-        self.worker.moveToThread(self.worker_thread)
-        # запускаем worker из главного потока после переноса
-        QTimer.singleShot(0, self.worker.start)
+        self.poller.moveToThread(self.poller_thread)
         # запускаем поток
-        self.worker_thread.start()
+        self.poller_thread.start()
 
         self.time_origin = time.time()  # Начальная временная метка для датасета
         self.prev_time = time.time()
 
-    # Слот вызывается из Worker когда завершено получение новых данных от PLC
+    # Слот вызывается из ModbusPoller когда завершено получение новых данных от PLC
     @Slot(list)
     def update(self, registers):
         """Обновление данных по полученным регистрам."""
@@ -253,13 +261,13 @@ class RealTimeData(QObject):
 
     def get_real_tension_nc(self, registers):
         """Преобразование регистров в значение крутящего момента (нескорректированного)"""
-        client = self.worker.client
+        client = self.poller.client
         tension = client.convert_from_registers(registers[6:8], client.DATATYPE.FLOAT32)
         return tension
 
     def get_real_tension(self, registers):
         """Преобразование регистров в значение крутящего момента (корректированного в соответствии с калибровочной моделью)"""
-        client = self.worker.client
+        client = self.poller.client
         tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
         return tension
 

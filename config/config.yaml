@@ -4,7 +4,7 @@ modbus:
   timeout: 2.0
   retry_attempts: 3
 ui:
-  poll_interval_ms: 25
+  poll_interval_ms: 100
   max_graph_points: 2000
 logging:
   level: INFO
