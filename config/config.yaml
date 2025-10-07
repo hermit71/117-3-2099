@@ -3,9 +3,10 @@ modbus:
   port: 502
   timeout: 2.0
   retry_attempts: 3
+  poll_interval_ms: 250
 ui:
-  poll_interval_ms: 100
   max_graph_points: 2000
+  poll_interval_ms: 100
 logging:
   level: INFO
   file: stand_control.log
