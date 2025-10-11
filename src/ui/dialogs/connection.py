@@ -34,7 +34,7 @@ class ConnectionSettingsDialog(QDialog):
             str(self.config.get("modbus", "timeout", 2.0))
         )
         self.ed_poll.setText(
-            str(self.config.get("ui", "poll_interval_ms", 200))
+            str(self.config.get("modbus", "poll_interval_ms", 100))
         )
 
     def _validate(self) -> bool:
@@ -122,7 +122,7 @@ class ConnectionSettingsDialog(QDialog):
         config.cfg["modbus"]["host"] = self._settings["host"]
         config.cfg["modbus"]["port"] = int(self._settings["port"])
         config.cfg["modbus"]["timeout"] = float(self._settings["timeout"])
-        config.cfg["ui"]["poll_interval_ms"] = int(
+        config.cfg["modbus"]["poll_interval_ms"] = int(
             self._settings["poll_interval_ms"]
         )
 

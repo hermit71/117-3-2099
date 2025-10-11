@@ -16,157 +16,108 @@ from PyQt6.QtCore import (
     pyqtSignal as Signal,
     pyqtSlot as Slot,
 )
+import asyncio
 from pymodbus.client import ModbusTcpClient
+from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
-REALTIME_DATA_WINDOW = 60  # временное окно для хранения данных (мин)
+REALTIME_DATA_WINDOW = 60   # временное окно для хранения данных (мин)
+PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
+
+READ_BUFFER_SIZE = 110
+BUFFER_LENGTH = 50          # размер буфера данных от ПЛК
+DI_ADDRESS = 0
+ADC_ADDRESS = 1
+ANGLE_ADDRESS = 2
+DQ_ADDRESS = 4
+STATE_ADDRESS = 5
+BUFFER_ADDRESS = 10
+INDEX_ADDRESS = 60
+WRITE_BUFFER_ADDRESS = 110
 
 
-class Worker(QObject):
+class ModbusPoller(QObject):
     """Background worker handling Modbus communication.
-
     Фоновый рабочий объект, управляющий обменом по Modbus.
     """
-
     data_received = Signal(list)
     connection_status = Signal(bool)
 
     def __init__(self, data_set):
-        """Initialize worker with a reference to the data set.
-
-        Инициализировать рабочий объект со ссылкой на набор данных.
+        """Initialize poller with a reference to the data set.
+        Инициализировать опрос ПЛК со ссылкой на набор данных.
         """
         QObject.__init__(self)
-        self.data_set = data_set
         logging.debug('worker init')
-        self.init_modbus()
-        self.data_received.connect(self.data_set.update)
-        self.timer = None
-        self.tension = 0
-        self.angle = 0
+        self.data_set = data_set
+        self.cfg = self.data_set.config
+        self.client = None
+        self.poll_interval = self.cfg.get('modbus', 'poll_interval', 100)
         self.result = None
+        self.read_holding_register_address = 0      # Начальный адрес регистра для чтения
+        self.registers_number = READ_BUFFER_SIZE    # Количество регистров для чтения
+        self.data_received.connect(self.data_set.update)
 
-    def start(self):
-        """Настройка и запуск таймера опроса ПЛК."""
+        # Настройка и запуск таймера опроса ПЛК
         self.timer = QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.on_timer)
-        self.timer.start(self.data_set.poll_interval)
+        self.timer.start(self.poll_interval)
 
-    def init_modbus(self):
-        """Настройка Modbus клиента на основе конфигурации."""
-        cfg = self.data_set.config
-        host = cfg.get('modbus', 'host', '127.0.0.1')
-        port = cfg.get('modbus', 'port', 502)
-        timeout = cfg.get('modbus', 'timeout', 2.0)
-        self.client = ModbusTcpClient(host, port=port, timeout=timeout)
-        self.register_address = 0  # Начальный адрес регистра для чтения
-        self.register_qty = 10  # Количество регистров для чтения
+    async def poll_modbus(self):
+        self.init_modbus()
+        await self.client.connect()
+        response = None
+        if self.client.connected:
+            self.connection_status.emit(True)
+        else:
+            self.connection_status.emit(False)
 
-    def safe_modbus_read(self, address, count=1, unit=1):
-        """Безопасное чтение Modbus с обработкой ошибок соединения."""
-        cfg = self.data_set.config
-        host = cfg.get('modbus', 'host', '127.0.0.1')
-        port = cfg.get('modbus', 'port', 502)
-        timeout = cfg.get('modbus', 'timeout', 2.0)
-        max_retries = cfg.get('modbus', 'retry_attempts', 3)
-        client = None
-        self.result = None
-
-        for attempt in range(max_retries):
-            try:
-                client = ModbusTcpClient(host, port=port, timeout=timeout)
-
-                if not client.connect():
-                    raise ConnectionError("Не удалось установить соединение")
-
-                self.result = client.read_holding_registers(
-                    address, count=count, unit=unit
-                )
-
-                if self.result is None or self.result.isError():
-                    raise Exception(f"Ошибка Modbus: {self.result}")
-
-                return {
-                    'status': 'успешно',
-                    'data': self.result.registers,
-                    'connected': True
-                }
-
-            except (ConnectionResetError, ConnectionError, OSError) as e:
-                logging.warning(f"Попытка {attempt + 1}: Ошибка соединения - {e}")
-
-                if attempt == max_retries - 1:
-                    return {
-                        'status': 'отсутствие соединения',
-                        'data': None,
-                        'connected': False,
-                        'error': str(e)
-                    }
-
-                time.sleep(1)  # Пауза перед повторной попыткой
-
-            except Exception as e:
-                logging.error(f"Modbus read error: {e}")
-                return {
-                    'status': 'ошибка выполнения',
-                    'data': None,
-                    'connected': False,
-                    'error': str(e)
-                }
-
-            finally:
-                if client:
-                    try:
-                        client.close()
-                    except Exception:
-                        pass
-
-        return {
-            'status': 'отсутствие соединения',
-            'data': None,
-            'connected': False
-        }
-
-    @Slot()
-    def on_timer(self):
-        """Обработчик таймера опроса."""
-        self.get_data()
-
-    @Slot()
-    def get_data(self):
-        """Получение данных от ПЛК и отправка их в основной поток."""
         try:
-            self.result = self.client.readwrite_registers(
-                read_address=self.register_address,
-                read_count=self.register_qty,
-                write_address=10,
-                values=self.data_set.write_regs,
+            response = await self.client.readwrite_registers(
+                read_address=self.read_holding_register_address,
+                read_count=self.registers_number,
+                write_address=WRITE_BUFFER_ADDRESS,
+                values= self.data_set.write_regs,
             )
-            self.data_received.emit(self.result.registers)
         except ModbusException as e:
             logging.error(f"Modbus error: {e}")
+        finally:
+            if response is not None:
+                self.data_received.emit(response.registers)
+            self.client.close()
+
+    def init_modbus(self):
+        # Настройка Modbus клиента на основе конфигурации
+        host = self.cfg.get('modbus', 'host', '127.0.0.1')
+        port = self.cfg.get('modbus', 'port', 502)
+        timeout = self.cfg.get('modbus', 'timeout', 1.0)
+        self.client = AsyncModbusTcpClient(host, port=port, timeout=timeout)
+
+    @Slot()
+    # Обработчик таймера опроса
+    def on_timer(self):
+        asyncio.run(self.poll_modbus())
+
 
 class RealTimeData(QObject):
     """Хранение и обработка данных, получаемых по Modbus."""
 
-    # arg#1: регистры Модбас (необработанные данные)
-    # arg#2: новые данные от датчиков в формате [float, ...]
     data_updated = Signal(list)
     prev_time = 0
 
     def __init__(self, config, parent=None):
         """Инициализация параметров и запуск рабочего потока."""
-        super(RealTimeData, self).__init__(parent)
+        QObject.__init__(self)
         self.config = config
 
         # период опроса датчиков в миллисекундах
-        self.poll_interval = self.config.get('ui', 'poll_interval_ms', 25)
+        self.poll_interval = self.config.get('modbus', 'poll_interval_ms', 100)
         # период опроса в секундах
         self.poll_interval_s = float(self.poll_interval) / 1000.0
-        # Длина массива данных с учётом периода опроса
+        # Длина массива данных с учётом интервала опроса датчиков
         self.data_window_length = int(
-            REALTIME_DATA_WINDOW * 60 * 1000 / self.poll_interval
+            REALTIME_DATA_WINDOW * 60 * 1000 / PLC_POLLING_INTERVAL
         )
 
         # Слово состояния дискретных сигналов от ПЛК
@@ -179,10 +130,13 @@ class RealTimeData(QObject):
         self.angle_data_c = np.zeros(self.data_window_length, dtype=np.float16)
 
         # данные от датчика крутящего момента, RAW АЦП
-        self.tension_data = np.zeros(self.data_window_length, dtype=np.int16)
+        self.torque_data = np.zeros(self.data_window_length, dtype=np.int16)
+
+        # данные от датчика крутящего момента, масштабированные 500:1 (25000 = 50 Нм)
+        self.torque_data_scaled = np.zeros(self.data_window_length, dtype=np.int16)
 
         # Данные от датчика крутящего момента (преобразованные к Нм)
-        self.tension_data_c = np.zeros(self.data_window_length, dtype=np.float32)
+        self.torque_data_c = np.zeros(self.data_window_length, dtype=np.float32)
 
         # Скорость нарастания момента (моментальные значения в Нм/с)
         self.velocity_data = np.zeros(self.data_window_length, dtype=np.float16)
@@ -190,6 +144,9 @@ class RealTimeData(QObject):
         # временные метки для потока данных, в мс
         self.times = np.zeros(self.data_window_length, dtype=np.int64)
         self.ptr = 0  # Указатель текущей позиции данных
+        self.curr_index = 0
+        self.prev_index = 0
+        self.index_offset = 0
 
         # Текущие значения датчиков (данные ПЛК)
         self.tension_adc = 0        # Данные АЦП датчика момента
@@ -200,27 +157,38 @@ class RealTimeData(QObject):
 
         # Слово управления для отправки в ПЛК
         self.plc_control_word = 0
-        self.write_regs = [0] * 6  # 6 шесть регистров для записи в ПЛК
+        self.write_regs = [0] * 10  # 10 регистров для записи в ПЛК
 
         # Для обмена по Modbus создаем отдельный поток
-        self.worker = Worker(self)
-        self.worker_thread = QThread()
-        # переносим worker в отдельный поток
-        self.worker.moveToThread(self.worker_thread)
-        # запускаем worker из главного потока после переноса
-        QTimer.singleShot(0, self.worker.start)
+        # переносим в отдельный поток
         # запускаем поток
-        self.worker_thread.start()
+        self.poller = ModbusPoller(self)
+        self.poller_thread = QThread()
+        self.poller.moveToThread(self.poller_thread)
+        self.poller_thread.start()
 
         self.time_origin = time.time()  # Начальная временная метка для датасета
         self.prev_time = time.time()
 
-    # Слот вызывается из Worker когда завершено получение новых данных от PLC
+    # Слот вызывается из ModbusPoller когда завершено получение новых данных от PLC
     @Slot(list)
     def update(self, registers):
         """Обновление данных по полученным регистрам."""
+        """ От ПЛК приходит индекс начала буфера в виде целого цисла (2 байта)
+            Полученный буфер записывается в локальный массив по этому индексу
+            При переполнении индекса отсчет начинается с 0 и необходимо добавлять накопленное смещение
+            чтобы запись в локальный массив происходила последовательно
+        """
+        self.curr_index = registers[INDEX_ADDRESS]
+        if self.curr_index < self.prev_index:
+            self.index_offset += 2**16
+        self.prev_index = self.curr_index
+        buffer = registers[BUFFER_ADDRESS:BUFFER_ADDRESS + BUFFER_LENGTH]
+        index = self.curr_index + self.index_offset
+        self._write_torque_buffer(buffer, index)
+
         self.times[self.ptr] = round((time.time() - self.time_origin) * 1000)
-        self.tension_data_c[self.ptr] = self.get_real_tension(registers)
+        self.torque_data_c[self.ptr] = self.get_real_tension(registers)
         self.angle_data_c[self.ptr] = self.get_real_angle(registers)
         self.velocity_data[self.ptr] = self.get_real_velocity()
         self.ptr += 1
@@ -228,7 +196,7 @@ class RealTimeData(QObject):
         # Если массив заполнен, сдвигаем данные
         if self.ptr >= self.data_window_length:
             self.times[:-1] = self.times[1:]
-            self.tension_data_c[:-1] = self.tension_data_c[1:]
+            self.torque_data_c[:-1] = self.torque_data_c[1:]
             self.angle_data_c[:-1] = self.angle_data_c[1:]
             self.velocity_data[:-1] = self.velocity_data[1:]
             self.ptr = self.data_window_length - 1
@@ -248,15 +216,21 @@ class RealTimeData(QObject):
         self.in_status = c_short(registers[0]).value
         self.data_updated.emit(registers)
 
+    def _write_torque_buffer(self, buf: list, index):
+        if index > (self.data_window_length - BUFFER_LENGTH - 1):
+            self.torque_data_scaled[:-BUFFER_LENGTH] = self.torque_data_scaled[BUFFER_LENGTH:]
+            index = self.data_window_length - BUFFER_LENGTH
+        self.torque_data_scaled[index:index+BUFFER_LENGTH] = buf[:]
+
     def get_real_tension_nc(self, registers):
         """Преобразование регистров в значение крутящего момента (нескорректированного)"""
-        client = self.worker.client
+        client = self.poller.client
         tension = client.convert_from_registers(registers[6:8], client.DATATYPE.FLOAT32)
         return tension
 
     def get_real_tension(self, registers):
         """Преобразование регистров в значение крутящего момента (корректированного в соответствии с калибровочной моделью)"""
-        client = self.worker.client
+        client = self.poller.client
         tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
         return tension
 
@@ -270,7 +244,7 @@ class RealTimeData(QObject):
         velocity = 0.0
         if self.ptr > 0:
             velocity = (
-                self.tension_data_c[self.ptr] - self.tension_data_c[self.ptr - 1]
+                self.torque_data_c[self.ptr] - self.torque_data_c[self.ptr - 1]
             ) / self.poll_interval_s
         return velocity
 
@@ -278,7 +252,7 @@ class RealTimeData(QObject):
         """Возврат массива данных по имени."""
         match dataset_name:
             case 'tension_data_c':
-                return self.tension_data_c
+                return self.torque_data_c
             case 'angle_data_c':
                 return self.angle_data_c
             case 'velocity_data':
@@ -305,8 +279,8 @@ class RealTimeData(QObject):
     @Slot()
     def update_connection_settings(self):
         """Применение настроек Modbus и периода опроса из конфигурации."""
-        self.poll_interval = self.config.get('ui', 'poll_interval_ms', 25)
+        self.poll_interval = self.config.get('modbus', 'poll_interval_ms', 100)
         self.poll_interval_s = float(self.poll_interval) / 1000.0
-        if self.worker.timer:
-            self.worker.timer.setInterval(self.poll_interval)
-        self.worker.init_modbus()
+        if self.poller.timer:
+            self.poller.timer.setInterval(self.poll_interval)
+        # self.poller.init_modbus()

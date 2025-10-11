@@ -210,7 +210,7 @@ class MainWindow(QMainWindow):
         """Добавить виджет состояния соединения в строку состояния."""
 
         self.statusbar.addWidget(self.connection_ctrl)
-        self.model.realtime_data.worker.connection_status.connect(
+        self.model.realtime_data.poller.connection_status.connect(
             self.connection_ctrl.set_status
         )
 
