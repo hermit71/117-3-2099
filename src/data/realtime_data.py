@@ -133,7 +133,7 @@ class RealTimeData(QObject):
         self.torque_data = np.zeros(self.data_window_length, dtype=np.int16)
 
         # данные от датчика крутящего момента, масштабированные 500:1 (25000 = 50 Нм)
-        self.torque_data_scaled = np.zeros(self.data_window_length, dtype=np.int16)
+        self.torque_data_scaled = np.zeros(self.data_window_length, dtype=np.int32)
 
         # Данные от датчика крутящего момента (преобразованные к Нм)
         self.torque_data_c = np.zeros(self.data_window_length, dtype=np.float32)
@@ -190,7 +190,7 @@ class RealTimeData(QObject):
         self.times[self.ptr] = round((time.time() - self.time_origin) * 1000)
         self.torque_data_c[self.ptr] = self.get_real_tension(registers)
         self.angle_data_c[self.ptr] = self.get_real_angle(registers)
-        self.velocity_data[self.ptr] = self.get_real_velocity()
+        self.velocity_data[self.ptr] = 0 #self.get_real_velocity()
         self.ptr += 1
 
         # Если массив заполнен, сдвигаем данные
@@ -231,8 +231,9 @@ class RealTimeData(QObject):
     def get_real_tension(self, registers):
         """Преобразование регистров в значение крутящего момента (корректированного в соответствии с калибровочной моделью)"""
         client = self.poller.client
-        tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
-        return tension
+        # tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
+        tension = client.convert_from_registers(registers[10:11], client.DATATYPE.INT16)
+        return float(tension)
 
     def get_real_angle(self, registers):
         """Преобразование регистров в значение угла."""
