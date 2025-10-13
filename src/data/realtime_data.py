@@ -21,7 +21,7 @@ from pymodbus.client import ModbusTcpClient
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
-REALTIME_DATA_WINDOW = 60   # временное окно для хранения данных (мин)
+REALTIME_DATA_WINDOW = 1    # временное окно для хранения данных (мин)
 PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
 
 READ_BUFFER_SIZE = 110
@@ -33,7 +33,7 @@ DQ_ADDRESS = 4
 STATE_ADDRESS = 5
 BUFFER_ADDRESS = 10
 INDEX_ADDRESS = 60
-WRITE_BUFFER_ADDRESS = 110
+WRITE_BUFFER_ADDRESS = 111
 
 
 class ModbusPoller(QObject):
@@ -173,7 +173,7 @@ class RealTimeData(QObject):
     # Слот вызывается из ModbusPoller когда завершено получение новых данных от PLC
     @Slot(list)
     def update(self, registers):
-        """Обновление данных по полученным регистрам."""
+        """ Обновление данных по полученным регистрам."""
         """ От ПЛК приходит индекс начала буфера в виде целого цисла (2 байта)
             Полученный буфер записывается в локальный массив по этому индексу
             При переполнении индекса отсчет начинается с 0 и необходимо добавлять накопленное смещение

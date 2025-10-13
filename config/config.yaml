@@ -3,7 +3,7 @@ modbus:
   port: 502
   timeout: 2.0
   retry_attempts: 3
-  poll_interval_ms: 250
+  poll_interval_ms: 100
 ui:
   max_graph_points: 2000
   poll_interval_ms: 100
@@ -12,9 +12,9 @@ logging:
   file: stand_control.log
 graphs:
   tension plot:
-    line_color: '#5500ff'
+    line_color: '#55aaff'
     background: '#ffffff'
-    grid_color: '#4d99e6'
+    grid_color: '#bec8c7'
     line_width: 2
   velocity plot:
     line_color: '#7eafff'
