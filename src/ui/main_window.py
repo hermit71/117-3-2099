@@ -124,10 +124,7 @@ class MainWindow(QMainWindow):
         self._setup_menu()
 
         self.model = Model(self.config)
-        self.data_source = ModbusDataSource(
-            self.config.get('modbus', 'host', '127.0.0.1'),
-            self.config.get('modbus', 'port', '127.0.0.1')
-        )
+        self.data_source = ModbusDataSource(self.config.cfg)
 
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.ConnectionControl()
