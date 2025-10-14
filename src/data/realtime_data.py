@@ -21,7 +21,7 @@ from pymodbus.client import ModbusTcpClient
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 
-REALTIME_DATA_WINDOW = 1    # временное окно для хранения данных (мин)
+REALTIME_DATA_WINDOW = 60    # временное окно для хранения данных (мин)
 PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
 
 READ_BUFFER_SIZE = 110
@@ -133,7 +133,7 @@ class RealTimeData(QObject):
         self.torque_data = np.zeros(self.data_window_length, dtype=np.int16)
 
         # данные от датчика крутящего момента, масштабированные 500:1 (25000 = 50 Нм)
-        self.torque_data_scaled = np.zeros(self.data_window_length, dtype=np.int32)
+        self.torque_data_scaled = np.zeros(self.data_window_length, dtype=np.int16)
 
         # Данные от датчика крутящего момента (преобразованные к Нм)
         self.torque_data_c = np.zeros(self.data_window_length, dtype=np.float32)
@@ -183,7 +183,10 @@ class RealTimeData(QObject):
         if self.curr_index < self.prev_index:
             self.index_offset += 2**16
         self.prev_index = self.curr_index
-        buffer = registers[BUFFER_ADDRESS:BUFFER_ADDRESS + BUFFER_LENGTH]
+
+        buffer_ = registers[BUFFER_ADDRESS:BUFFER_ADDRESS + BUFFER_LENGTH]
+        buffer = [c_short(i).value/500 for i in buffer_]
+
         index = self.curr_index + self.index_offset
         self._write_torque_buffer(buffer, index)
 
@@ -221,6 +224,7 @@ class RealTimeData(QObject):
             self.torque_data_scaled[:-BUFFER_LENGTH] = self.torque_data_scaled[BUFFER_LENGTH:]
             index = self.data_window_length - BUFFER_LENGTH
         self.torque_data_scaled[index:index+BUFFER_LENGTH] = buf[:]
+        # print(f'{index} : {self.torque_data_scaled[index-100:index+100]}')
 
     def get_real_tension_nc(self, registers):
         """Преобразование регистров в значение крутящего момента (нескорректированного)"""
@@ -233,7 +237,7 @@ class RealTimeData(QObject):
         client = self.poller.client
         # tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
         tension = client.convert_from_registers(registers[10:11], client.DATATYPE.INT16)
-        return float(tension)
+        return float(tension)/6400.0
 
     def get_real_angle(self, registers):
         """Преобразование регистров в значение угла."""
@@ -249,7 +253,7 @@ class RealTimeData(QObject):
             ) / self.poll_interval_s
         return velocity
 
-    def get_dataset_by_name(self, dataset_name):
+    def _get_dataset_by_name(self, dataset_name):
         """Возврат массива данных по имени."""
         match dataset_name:
             case 'tension_data_c':
@@ -258,6 +262,15 @@ class RealTimeData(QObject):
                 return self.angle_data_c
             case 'velocity_data':
                 return self.velocity_data
+        return None
+
+    def get_visible_chunk(self, dataset_name):
+        ds = self.torque_data_scaled # self._get_dataset_by_name(dataset_name)
+        points = self.config.get('ui', 'max_graph_points', 1000)
+        max_buffer_index = self.data_window_length - points
+        if self.curr_index <= max_buffer_index:
+            return ds[self.curr_index-points:self.curr_index]
+
 
     @Slot(dict)
     def modbus_registers_to_PLC_update(self, regs):

@@ -88,16 +88,26 @@ class GraphWidget(pg.PlotWidget):
         model = self.parent.model
         if not model:
             return
-        ds = model.realtime_data.get_dataset_by_name(dataset_name)
+        ds = model.realtime_data._get_dataset_by_name(dataset_name)
         start_indx = max(
             0, model.realtime_data.ptr - (self.parent.time_window * 40 + 100)
         )
-        time_data = model.realtime_data.times[
-            start_indx:model.realtime_data.ptr
-        ]
-        value_data = ds[start_indx:model.realtime_data.ptr]
+        #time_data = model.realtime_data.times[
+        #    start_indx:model.realtime_data.ptr
+        #]
+        # value_data = ds[start_indx:model.realtime_data.ptr]
+        value_data = model.realtime_data.get_visible_chunk(dataset_name)
+        time_data = [i for i in range(model.config.get('ui', 'max_graph_points', 1000))]
         self.curve.setData(time_data, value_data)
 
+        self.x_view_range_ms['start'] = 0
+        self.x_view_range_ms['end'] = model.config.get('ui', 'max_graph_points', 1000)
+        self.setXRange(
+            self.x_view_range_ms['start'],
+            self.x_view_range_ms['end'],
+        )
+
+        '''
         if (
             model.realtime_data.times[model.realtime_data.ptr - 1]
             > self.x_view_range_ms['end']
@@ -109,3 +119,4 @@ class GraphWidget(pg.PlotWidget):
                 self.x_view_range_ms['start'],
                 self.x_view_range_ms['end'],
             )
+        '''
