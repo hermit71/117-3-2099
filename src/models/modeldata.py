@@ -4,7 +4,12 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
+# Настройка обработчика для вывода в файл
+file_handler = logging.FileHandler('../../117-3-2099.log')
+formatter = logging.Formatter('%(name)s %(asctime)s %(levelname)s %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 class DataSource(ABC):
     """Абстрактный базовый класс для всех источников данных"""
@@ -34,13 +39,17 @@ class DataSource(ABC):
         pass
 
 
-# Реальная реализация для Modbus
+# Реализация для Modbus TCP
 class ModbusDataSource(DataSource):
     """Data source for real Modbus communication."""
 
-    def __init__(self, host: str, port: int):
-        self.host = host
-        self.port = port
+    def __init__(self, config: dict): # host: str, port: int):
+        self.host = config.get('host', '127.0.0.1')
+        self.port = config.get('port', '502')
+        self.timeout = config.get('timeout', 2.0)
+        self.retry_attempts = config.get('retry_attempts', 3)
+        self.polling_interval = config.get('poll_interval_ms', 100)
+
         self.client = None
         self._connected = False
 
@@ -174,3 +183,8 @@ def process_data(data_source: DataSource):
 # process_data(modbus_source)  # Работает с Modbus
 # process_data(mock_source)  # Работает с Mock
 # process_data(file_source)  # Работает с файлом
+
+if __name__ == "__main__":
+    logger.info('Информация о старте работы')
+    logger.warning('Предупреждение!')
+    logger.error('Произошла ошибка')

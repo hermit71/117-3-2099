@@ -174,7 +174,7 @@ class RealTimeData(QObject):
     @Slot(list)
     def update(self, registers):
         """ Обновление данных по полученным регистрам."""
-        """ От ПЛК приходит индекс начала буфера в виде целого цисла (2 байта)
+        """ От ПЛК приходит индекс начала буфера в виде целого числа (2 байта)
             Полученный буфер записывается в локальный массив по этому индексу
             При переполнении индекса отсчет начинается с 0 и необходимо добавлять накопленное смещение
             чтобы запись в локальный массив происходила последовательно
@@ -185,7 +185,7 @@ class RealTimeData(QObject):
         self.prev_index = self.curr_index
 
         buffer_ = registers[BUFFER_ADDRESS:BUFFER_ADDRESS + BUFFER_LENGTH]
-        buffer = [c_short(i).value/500 for i in buffer_]
+        buffer = [c_short(i).value for i in buffer_]
 
         index = self.curr_index + self.index_offset
         self._write_torque_buffer(buffer, index)

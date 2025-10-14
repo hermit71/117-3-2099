@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import QApplication
 from src.ui.main_window import MainWindow
 from src.utils.config import Config
 
+
 # ==========================
 # Оформление (QSS стили)
 # ==========================

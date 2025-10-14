@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.data.model import Model
+from  src.models.modeldata import ModbusDataSource
 from src.ui.designer_loader import load_ui
 from src.ui.dialogs import (
     AboutDialog,
@@ -120,10 +121,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.config = config
         load_ui(self, "main_window_view.ui")
-
         self._setup_menu()
 
         self.model = Model(self.config)
+        self.data_source = ModbusDataSource(
+            self.config.get('modbus', 'host', '127.0.0.1'),
+            self.config.get('modbus', 'port', '127.0.0.1')
+        )
+
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.ConnectionControl()
         self.control_buttons = ControlButtons(

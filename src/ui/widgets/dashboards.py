@@ -12,7 +12,7 @@ hand_graphs = [
             "grid_color": "#C8C8C8",
             "line_width": 2,
             "dataset_name": "tension_data_c",
-            "y_limits": (-500.0, 500.0),
+            "y_limits": (-65000.0, 65000.0),
         },
     ],
     [
