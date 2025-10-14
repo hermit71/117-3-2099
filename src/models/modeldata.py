@@ -48,7 +48,7 @@ class ModbusDataSource(DataSource):
         self.port = config.get('port', '502')
         self.timeout = config.get('timeout', 2.0)
         self.retry_attempts = config.get('retry_attempts', 3)
-        self.polling_interval = config.get('poll_interval_ms', 100)
+        self.poll_interval = config.get('poll_interval_ms', 100)
 
         self.client = None
         self._connected = False
