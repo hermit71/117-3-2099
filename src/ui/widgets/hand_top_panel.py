@@ -43,8 +43,8 @@ class DashboardPanel(QFrame):
         pass
         if model:
             self.model = model
-            tension_source = ValueSource(self.model.realtime_data.get_tension)
-            self.value_tension._set_data_source(tension_source)
+            # tension_source = ValueSource(self.model.realtime_data.get_tension)
+            self.value_tension._set_data_source(self.model.realtime_data.get_tension)
             #self.value_velocity.data_source = "velocity"
             #self.value_angle.data_source = "angle"
             #self.model.graphs_updated.connect(self.value_tension.update)

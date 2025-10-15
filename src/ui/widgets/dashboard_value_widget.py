@@ -71,15 +71,11 @@ class ValueDisplay(QFrame):
         self.value.setAverageTime(average_time)
 
     @Slot()
-    def update(self):
+    def on_timer(self):
         if self.data_source is None:
             self.value.setValue(0.0)
         else:
-            self.value.setValue(self.data_source.get_value())
-
-    @Slot()
-    def on_timer(self):
-        self.update()
+            self.value.setValue(self.data_source())
 
 class ValueWidget(QFrame):
     """Widget combining a label and a live numeric value."""
