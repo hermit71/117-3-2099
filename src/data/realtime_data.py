@@ -271,6 +271,9 @@ class RealTimeData(QObject):
         if self.curr_index <= max_buffer_index:
             return ds[self.curr_index-points:self.curr_index]
 
+    def get_tension(self):
+        return self.tension
+
 
     @Slot(dict)
     def modbus_registers_to_PLC_update(self, regs):

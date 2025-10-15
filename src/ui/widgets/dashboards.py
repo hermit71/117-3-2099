@@ -3,6 +3,16 @@
 from src.ui import labels as lbl
 
 # Панели экрана ручного режима
+hand_graphs_setting_default = {
+    'default': {
+        "line_color": "#1C1CF0",
+        "background": "#FEFEFE",
+        "grid_color": "#C8C8C8",
+        "line_width": 2,
+        "dataset_name": "defaut",
+        "y_limits": (-100.0, 100.0),
+    }
+}
 hand_graphs = [
     [
         "tension plot",

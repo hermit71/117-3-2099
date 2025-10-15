@@ -10,12 +10,13 @@ class GraphWidget(pg.PlotWidget):
         super().__init__(parent)
         self.parent = parent
         # Диапазон оси X графика (в единицах времени)
-        self.x_view_range = {'start': 0, 'end': self.parent.time_window}
-        self.x_view_range_ms = {'start': 0, 'end': 1000 * self.parent.time_window}
+        # self.x_view_range = {'start': 0, 'end': self.parent.time_window}
+        self.x_view_range = {'start': 0, 'end': 30}
+        self.x_view_range_ms = {'start': 0, 'end': 1000 * 30}
         # Диапазон данных для отображения
         self.x_data_range = {'start': 0, 'end': 0}
-        self.setXRange(self.x_view_range_ms['start'], self.x_view_range_ms['end'])
-        self.getPlotItem().setLabel('bottom', 'мс')
+        self.setXRange(self.x_view_range['start'], self.x_view_range['end'])
+        self.getPlotItem().setLabel('bottom', 'Время, с')
 
         # Base curve pen and default styling
         self.base_pen = pg.mkPen(color="#1C1CF0", width=2)
