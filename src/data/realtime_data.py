@@ -5,7 +5,7 @@
 # Обмен с ПЛК стенда происходит только в данном модуле.
 import logging
 import time
-from ctypes import c_short
+from ctypes import c_short, c_int, c_uint
 
 import numpy as np
 from PyQt6.QtCore import (
@@ -121,7 +121,7 @@ class RealTimeData(QObject):
         )
 
         # Слово состояния дискретных сигналов от ПЛК
-        self.in_status = 0
+        self.in_status = 0x00
 
         # данные от датчика угла поворота, в градусах
         self.angle_data = np.zeros(self.data_window_length, dtype=np.int32)
@@ -156,8 +156,8 @@ class RealTimeData(QObject):
         self.velocity = 0           # Скорость нарастания момента
 
         # Слово управления для отправки в ПЛК
-        self.plc_control_word = 0
-        self.write_regs = [0] * 10  # 10 регистров для записи в ПЛК
+        self.plc_control_word = 0x00
+        self.write_regs = [0x00] * 10  # 10 регистров для записи в ПЛК
 
         # Для обмена по Modbus создаем отдельный поток
         # переносим в отдельный поток
@@ -241,7 +241,8 @@ class RealTimeData(QObject):
 
     def get_real_angle(self, registers):
         """Преобразование регистров в значение угла."""
-        angle = float((registers[3] << 16) | registers[2]) / 768.0
+        _angle = c_uint((registers[3] << 16) | registers[2]).value
+        angle = float(_angle)/768.0
         return angle
 
     def get_real_velocity(self):
@@ -271,9 +272,14 @@ class RealTimeData(QObject):
         if self.curr_index <= max_buffer_index:
             return ds[self.curr_index-points:self.curr_index]
 
-    def get_tension(self):
+    def get_torque(self):
         return self.tension
 
+    def get_velocity(self):
+        return self.velocity
+
+    def get_angle(self):
+        return self.angle
 
     @Slot(dict)
     def modbus_registers_to_PLC_update(self, regs):
