@@ -75,6 +75,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
+    # app.setStyle('Windows11')
     app.setStyleSheet(STYLE_SHEET)
     config = Config('config/config.yaml')
     window = MainWindow(config)

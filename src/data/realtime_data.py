@@ -213,7 +213,7 @@ class RealTimeData(QObject):
         self.angle = self.get_real_angle(registers)
 
         # Фиксируем текущую скорость нарастания момента
-        self.velocity = self.velocity_data[self.ptr-1]
+        self.velocity =  self.get_real_velocity() #self.velocity_data[self.ptr-1]
 
         # Считываем состояние регистров
         self.in_status = c_short(registers[0]).value
@@ -251,7 +251,7 @@ class RealTimeData(QObject):
         if self.ptr > 0:
             velocity = (
                 self.torque_data_c[self.ptr] - self.torque_data_c[self.ptr - 1]
-            ) / self.poll_interval_s
+            ) / self.poll_interval
         return velocity
 
     def _get_dataset_by_name(self, dataset_name):
