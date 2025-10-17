@@ -1,16 +1,32 @@
 """Widget for displaying a numeric value with a title."""
 
-from PyQt6.QtCore import Qt, QSize, pyqtSlot as Slot, QTimer
+from PyQt6.QtCore import Qt, QSize, pyqtSlot as Slot
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy
-from PyQt6.QtGui import QFont
 from pyqtgraph import ValueLabel
+
+# ==========================
+# Оформление (QSS стили)
+# ==========================
+STYLE_SHEET = """
+    QLabel#titleLabel {
+        color: #ffffff;
+        background: #00557f;
+        font-size: 10pt;
+        font-family: Segoe UI;
+    }
+    ValueLabel#valueDisplay {
+        color: #00557f;
+        font-size: 16pt;
+        font-family: Inconsolata LGC Nerd Font
+    }
+"""
 
 class ValueDisplay(QFrame):
     def __init__(self, parent=None):
         super(ValueDisplay, self).__init__(parent)
         self.data_source = None
         self.title = 'Title'
-        self.style = {}
+        self.style_sheet = STYLE_SHEET
         self.average_time = 0.5
 
         self.label = QLabel(self.title)
@@ -35,22 +51,14 @@ class ValueDisplay(QFrame):
         self.vbox.setStretch(0, 10)
         self.vbox.setStretch(1, 16)
 
+        self.label.setObjectName('titleLabel')
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        font = QFont()
-        font.setFamily("Segoe UI")
-        font.setPointSize(10)
-        self.label.setFont(font)
-        self.label.setStyleSheet(
-            "background-color: rgb(0, 85, 127);\n" "color: rgb(255, 255, 255);"
-        )
 
+        self.value.setObjectName('valueDisplay')
         self.value.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        font = QFont()
-        font.setFamily("Inconsolata LGC Nerd Font")
-        font.setPointSize(16)
-        self.value.setFont(font)
-        self.value.setStyleSheet("color: rgb(0, 85, 127);")
         self.value.formatStr = "{avgValue:0.2f}"
+
+        self.setStyleSheet(self.style_sheet)
 
     def set_data_source(self, data_source):
         self.data_source = data_source
@@ -59,8 +67,9 @@ class ValueDisplay(QFrame):
         self.title = title
         self.label.setText(title)
 
-    def apply_style(self, style):
-        self.style = style
+    def apply_style(self, new_style_sheet):
+        self.style_sheet = new_style_sheet
+        self.setStyleSheet(self.style_sheet)
 
     def _set_average_time(self, average_time):
         self.average_time = average_time

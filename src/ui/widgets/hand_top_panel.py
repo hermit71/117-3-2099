@@ -1,6 +1,6 @@
 """Top dashboard panel displaying realtime values."""
 from PyQt6.QtCore import QObject, QTimer
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QPushButton
 from src.ui.widgets.dashboard_value_widget import ValueDisplay
 
 class DashboardPanel(QFrame):
@@ -21,6 +21,8 @@ class DashboardPanel(QFrame):
 
     def _setup_ui(self):
         self.hbox = QHBoxLayout()
+        self.hbox.setSpacing(18)
+        self.hbox.setContentsMargins(0, 0, 0, 0)
         self.hbox.addWidget(self.value_torque)
         self.hbox.addWidget(self.value_velocity)
         self.hbox.addWidget(self.value_angle)
@@ -35,11 +37,13 @@ class DashboardPanel(QFrame):
         self.value_angle.set_title("Угол поворота, \u00B0")
         self.value_time_elapsed.set_title("Время, с")
 
+
     def on_timer(self):
         self.value_torque.update()
         self.value_velocity.update()
         self.value_angle.update()
         self.value_time_elapsed.update()
+
 
     def config(self, model):
         """Attach the application model and connect updates."""
