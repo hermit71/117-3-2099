@@ -52,6 +52,7 @@ class ValueDisplay(QFrame):
         self.vbox.setStretch(1, 16)
 
         self.label.setObjectName('titleLabel')
+        self.label.setAutoFillBackground(True)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.value.setObjectName('valueDisplay')
