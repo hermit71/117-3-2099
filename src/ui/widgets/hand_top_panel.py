@@ -37,13 +37,11 @@ class DashboardPanel(QFrame):
         self.value_angle.set_title("Угол поворота, \u00B0")
         self.value_time_elapsed.set_title("Время, с")
 
-
     def on_timer(self):
         self.value_torque.update()
         self.value_velocity.update()
         self.value_angle.update()
         self.value_time_elapsed.update()
-
 
     def config(self, model):
         """Attach the application model and connect updates."""

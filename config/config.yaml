@@ -12,9 +12,9 @@ logging:
   file: stand_control.log
 graphs:
   tension plot:
-    line_color: '#55aaff'
-    background: '#ffffff'
-    grid_color: '#bec8c7'
+    line_color: '#7eafff'
+    background: '#FEFEFA'
+    grid_color: '#C8C8C8'
     line_width: 2
   velocity plot:
     line_color: '#7eafff'
