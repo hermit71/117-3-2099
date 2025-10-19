@@ -435,6 +435,16 @@
                           <item>
                            <widget class="GraphWidget" name="graph_tension" native="true"/>
                           </item>
+                          <item>
+                           <widget class="PlotPanel" name="frame_3">
+                            <property name="frameShape">
+                             <enum>QFrame::Shape::StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                             <enum>QFrame::Shadow::Raised</enum>
+                            </property>
+                           </widget>
+                          </item>
                          </layout>
                         </widget>
                        </item>
@@ -784,12 +794,6 @@
              </layout>
             </item>
            </layout>
-           <zorder>pageHand_pnlRight</zorder>
-           <zorder>pageHand_pnlCtrl</zorder>
-           <zorder>pageHand_pnlGraph</zorder>
-           <zorder>pageHand_pnlTopDashboard</zorder>
-           <zorder>pushButton_4</zorder>
-           <zorder>pushButton_5</zorder>
           </widget>
           <widget class="QWidget" name="pageInit">
            <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -1701,7 +1705,7 @@
      <x>0</x>
      <y>0</y>
      <width>1743</width>
-     <height>22</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -1759,6 +1763,12 @@
    <class>AppSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>src.utils.spin_box_int_to_float</header>
+  </customwidget>
+  <customwidget>
+   <class>PlotPanel</class>
+   <extends>QFrame</extends>
+   <header>src.ui.widgets.hand_graph_panel</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

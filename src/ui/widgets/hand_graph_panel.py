@@ -10,7 +10,7 @@ X_AXIS_RANGE = 30.0
 POINTS_PER_WINDOW = 1200
 
 class PlotPanel(QFrame):
-    def __init__(self, parent: QWidget, data_source):
+    def __init__(self, parent: QWidget, data_source=None):
         super().__init__(parent)
         self.parent = parent
         self.vbox = QVBoxLayout()
