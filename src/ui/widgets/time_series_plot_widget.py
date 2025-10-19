@@ -145,7 +145,7 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
         self._data: Optional[np.ndarray] = None
 
         # Стандартная серия по умолчанию
-        self.add_series("Сигнал", color="#00E5FF", width=2.0)
+        self.add_series("Сигнал", color="#0055ee", width=1.0)
 
         # Подписка на жест панорамирования
         self._vb.panRequested.connect(self._on_pan_seconds)
