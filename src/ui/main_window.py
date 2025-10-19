@@ -43,8 +43,6 @@ from src.utils.config import Config
 logger = logging.getLogger(__name__)
 
 from typing import TYPE_CHECKING, cast, Iterable, List
-if TYPE_CHECKING:
-    from src.ui.main_window_view_ui import Ui_MainWindow
 
 @dataclass
 class ControlButtons:

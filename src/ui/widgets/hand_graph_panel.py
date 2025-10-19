@@ -1,14 +1,26 @@
 """Panel containing multiple real-time graphs."""
 
-from PyQt6.QtWidgets import QFrame
+from PyQt6.QtWidgets import QFrame, QWidget
 from PyQt6.QtCore import pyqtSlot as Slot
 
 from src.ui.widgets.graph_widget import GraphWidget
+from src.ui.widgets.time_series_plot_widget import TimeSeriesPlotWidget
+
+class PlotPanel(QFrame):
+    def __init__(self, parent: QWidget, data_source):
+        super().__init__(parent)
+        self.parent = parent
+        self.data_source = data_source
+        self.plots = [TimeSeriesPlotWidget() for _ in range(2)]
+
+    def setup_ui(self):
+        for plot in self.plots:
+            plot.set_axis_labels(y_label='FFF')
 
 
 class HandGraphPanel(QFrame):
     """Widget arranging and updating graph widgets."""
-
+T
     def __init__(self, parent=None):
         super().__init__(parent)
         self.model = None

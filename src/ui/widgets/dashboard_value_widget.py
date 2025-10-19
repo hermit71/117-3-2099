@@ -9,15 +9,16 @@ from pyqtgraph import ValueLabel
 # ==========================
 STYLE_SHEET = """
     QLabel#titleLabel {
-        color: #ffffff;
-        background: #00557f;
+        color: #101010;         
+        background: #f1f8ff;
         font-size: 10pt;
         font-family: Segoe UI;
+        border-bottom: 1px solid #a0a0a0;
     }
     ValueLabel#valueDisplay {
-        color: #00557f;
+        color: #101010;
         font-size: 16pt;
-        font-family: Inconsolata LGC Nerd Font
+        font-family: Inconsolata LGC Nerd Font;
     }
 """
 

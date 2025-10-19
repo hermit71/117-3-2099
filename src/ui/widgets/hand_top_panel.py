@@ -1,21 +1,23 @@
 """Top dashboard panel displaying realtime values."""
 from PyQt6.QtCore import QObject, QTimer
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QSpacerItem, QSizePolicy, QPushButton
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QSpacerItem, QSizePolicy
 from src.ui.widgets.dashboard_value_widget import ValueDisplay
+
+UPDATE_TIME = 100 # Время обновления значений виджетов в мс
 
 class DashboardPanel(QFrame):
     """Panel with value widgets for tension, velocity and angle."""
 
     def __init__(self, parent=None, model=None):
         super().__init__(parent)
-        self.model = None
-        self.update_time = 100 # ms
+        self.model              = None
+        self.update_time        = UPDATE_TIME # ms
         self.value_torque       = ValueDisplay(self)
         self.value_velocity     = ValueDisplay(self)
         self.value_angle        = ValueDisplay(self)
         self.value_time_elapsed = ValueDisplay(self)
         self._setup_ui()
-        self.timer = QTimer()
+        self.timer              = QTimer()
         self.timer.timeout.connect(self.on_timer)
         self.timer.start(self.update_time)
 
@@ -45,7 +47,6 @@ class DashboardPanel(QFrame):
 
     def config(self, model):
         """Attach the application model and connect updates."""
-        pass
         if model:
             self.model = model
             self.value_torque.set_data_source(self.model.realtime_data.get_torque)
