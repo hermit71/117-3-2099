@@ -14,6 +14,7 @@ from src.ui.widgets.hand_graph_panel import HandGraphPanel  # noqa: F401
 from src.ui.widgets.hand_right_panel import LedDashboardPanel  # noqa: F401
 from src.ui.widgets.hand_top_panel import DashboardPanel  # noqa: F401
 from src.utils.spin_box_int_to_float import AppSpinBox  # noqa: F401
+from src.ui.widgets.calibration_widget import ServoCalibrationWidget
 
 
 UI_DIR = Path(__file__).resolve().parent

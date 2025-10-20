@@ -360,7 +360,7 @@
            <number>1</number>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="pageHand">
            <layout class="QVBoxLayout" name="verticalLayout_19">
@@ -1288,314 +1288,21 @@
            </layout>
           </widget>
           <widget class="QWidget" name="pageCalibration">
-           <widget class="QPushButton" name="pushButton">
+           <widget class="ServoCalibrationWidget" name="frame">
             <property name="geometry">
              <rect>
-              <x>60</x>
-              <y>260</y>
-              <width>151</width>
-              <height>31</height>
+              <x>20</x>
+              <y>20</y>
+              <width>1101</width>
+              <height>891</height>
              </rect>
             </property>
-            <property name="text">
-             <string>Начать калибровку</string>
+            <property name="frameShape">
+             <enum>QFrame::Shape::NoFrame</enum>
             </property>
-           </widget>
-           <widget class="QComboBox" name="comboBox">
-            <property name="geometry">
-             <rect>
-              <x>60</x>
-              <y>60</y>
-              <width>371</width>
-              <height>31</height>
-             </rect>
+            <property name="frameShadow">
+             <enum>QFrame::Shadow::Plain</enum>
             </property>
-           </widget>
-           <widget class="QLabel" name="label_21">
-            <property name="geometry">
-             <rect>
-              <x>60</x>
-              <y>30</y>
-              <width>301</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Датчик крутящего момента №</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_3">
-            <property name="geometry">
-             <rect>
-              <x>460</x>
-              <y>60</y>
-              <width>131</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Добавить новый</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_22">
-            <property name="geometry">
-             <rect>
-              <x>60</x>
-              <y>120</y>
-              <width>231</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Рабочие (актуальные) коэффициенты:</string>
-            </property>
-           </widget>
-           <widget class="QWidget" name="widget_3" native="true">
-            <property name="geometry">
-             <rect>
-              <x>60</x>
-              <y>150</y>
-              <width>331</width>
-              <height>101</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_17">
-             <property name="spacing">
-              <number>2</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QFrame" name="frame">
-               <property name="frameShape">
-                <enum>QFrame::Shape::Box</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Shadow::Plain</enum>
-               </property>
-               <property name="lineWidth">
-                <number>1</number>
-               </property>
-               <property name="midLineWidth">
-                <number>1</number>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_16">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_18">
-                  <item>
-                   <widget class="QLabel" name="label_23">
-                    <property name="text">
-                     <string>F(нм) </string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_36">
-                    <property name="text">
-                     <string>=</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_24">
-                    <property name="text">
-                     <string>A</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_34">
-                    <property name="text">
-                     <string>x</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_28">
-                    <property name="text">
-                     <string>АЦП</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_35">
-                    <property name="text">
-                     <string>x</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_29">
-                    <property name="text">
-                     <string>B</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QFrame" name="frame_2">
-               <property name="frameShape">
-                <enum>QFrame::Shape::Box</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Shadow::Plain</enum>
-               </property>
-               <property name="midLineWidth">
-                <number>1</number>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_15">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_19">
-                  <item>
-                   <widget class="QLabel" name="label_30">
-                    <property name="text">
-                     <string>0.0</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_37">
-                    <property name="text">
-                     <string>=</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_31">
-                    <property name="text">
-                     <string>1.0 </string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_38">
-                    <property name="text">
-                     <string>x</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_32">
-                    <property name="text">
-                     <string>0.0</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_39">
-                    <property name="text">
-                     <string>x</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_33">
-                    <property name="text">
-                     <string>0.0</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="verticalLayoutWidget">
-            <property name="geometry">
-             <rect>
-              <x>50</x>
-              <y>320</y>
-              <width>621</width>
-              <height>431</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_18">
-             <item>
-              <widget class="QTableWidget" name="table_calibrate_points"/>
-             </item>
-            </layout>
            </widget>
           </widget>
           <widget class="QWidget" name="pageProtocol">
@@ -1705,7 +1412,7 @@
      <x>0</x>
      <y>0</y>
      <width>1743</width>
-     <height>33</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -1768,6 +1475,12 @@
    <class>PlotPanel</class>
    <extends>QFrame</extends>
    <header>src.ui.widgets.hand_graph_panel</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ServoCalibrationWidget</class>
+   <extends>QFrame</extends>
+   <header>src.ui.widgets.calibration_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

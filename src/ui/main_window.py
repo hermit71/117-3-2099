@@ -185,27 +185,28 @@ class MainWindow(QMainWindow):
         self.pageHand_pnlTopDashboard.config(model=self.model)
 
     def _configure_calibration_screen(self) -> None:
+        pass
         # подсказки IDE для self: Ui_MainWindow
-        self: "Ui_MainWindow" = cast("Ui_MainWindow", self)
-
-        headers = ["Задание момента", "Значение", "Эталон"]
-        data = [
-            [0.0, "", ""],
-            [5.0, "", ""],
-            [10.0, "", ""],
-            [15.0, "", ""],
-            [20.0, "", ""],
-            [25.0, "", ""],
-            [30.0, "", ""],
-            [35.0, "", ""],
-            [40.0, "", ""],
-            [45.0, "", ""],
-            [50.0, "", ""],
-        ]
-        new_table = self.make_table(headers, data)
-        new_table.setObjectName(u"table_calibrate_points")
-        lay = self.table_calibrate_points.parentWidget().layout()
-        lay.replaceWidget(self.table_calibrate_points, new_table)
+        # self: "Ui_MainWindow" = cast("Ui_MainWindow", self)
+        #
+        # headers = ["Задание момента", "Значение", "Эталон"]
+        # data = [
+        #     [0.0, "", ""],
+        #     [5.0, "", ""],
+        #     [10.0, "", ""],
+        #     [15.0, "", ""],
+        #     [20.0, "", ""],
+        #     [25.0, "", ""],
+        #     [30.0, "", ""],
+        #     [35.0, "", ""],
+        #     [40.0, "", ""],
+        #     [45.0, "", ""],
+        #     [50.0, "", ""],
+        # ]
+        # new_table = self.make_table(headers, data)
+        # new_table.setObjectName(u"table_calibrate_points")
+        # lay = self.table_calibrate_points.parentWidget().layout()
+        # lay.replaceWidget(self.table_calibrate_points, new_table)
 
     def _configure_status_bar(self) -> None:
         """Добавить виджет состояния соединения в строку состояния."""

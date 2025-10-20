@@ -81,8 +81,8 @@ if __name__ == '__main__':
     window = MainWindow(config)
     window.on_btn_hand_click()
     window.show()
-    window.setGeometry(50, 50, 1920, 1080)
-    #window.showMaximized()
+    #window.setGeometry(50, 50, 1920, 1080)
+    window.showMaximized()
     sys.exit(app.exec())
 
 
