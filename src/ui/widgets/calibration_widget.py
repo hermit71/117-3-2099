@@ -38,6 +38,11 @@ QLabel {
     font-size: 14px;
     font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
 }
+QDoubleSpinBox {
+    background-color: #FFFFFF;
+    font-size: 14px;
+    font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif; 
+}
 """
 
 @dataclass
@@ -153,14 +158,15 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self.speed_spin.setSingleStep(0.01)
         self.speed_spin.setSuffix(" град/с")
         self.speed_spin.setValue(0.1)
+        self.speed_spin.setStyleSheet(STYLE_SHEET)
 
         # Связка значений спинбокса и слайдера
         self.speed_slider.valueChanged.connect(self._sync_speed_from_slider)
         self.speed_spin.valueChanged.connect(self._sync_speed_from_spin)
 
         # Индикаторы (заглушки)
-        self.lbl_angle_val = QLabel()
-        self.lbl_torque_val = QLabel()
+        self.lbl_angle_val = QLabel('0.00 \u00B0')
+        self.lbl_torque_val = QLabel('0.00 Нм')
         self.lbl_angle_val.setObjectName("value_label")
         self.lbl_torque_val.setObjectName("value_label")
         self.lbl_angle_val.setStyleSheet(
@@ -243,6 +249,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             # Метка индекса
             lbl_idx = QLabel(f"{row}")
             lbl_idx.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl_idx.setFixedSize(40, 25)  # фиксируем виджет
+            lbl_idx.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
             row_widgets["lbl_idx"] = lbl_idx
 
             # Ввод момента
@@ -250,13 +258,15 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             spn_torque.setRange(0.0, 50.0)
             spn_torque.setDecimals(2)
             spn_torque.setSingleStep(0.1)
+            spn_torque.setStyleSheet(STYLE_SHEET)
             row_widgets["spn_torque"] = spn_torque
 
             # Ввод эталонного показания
             spn_ref = QDoubleSpinBox()
             spn_ref.setRange(-1e6, 1e6)
-            spn_ref.setDecimals(4)
+            spn_ref.setDecimals(2)
             spn_ref.setSingleStep(0.01)
+            spn_ref.setStyleSheet(STYLE_SHEET)
             row_widgets["spn_ref"] = spn_ref
 
             # Кнопка задания/фиксации
@@ -321,7 +331,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
     def _on_zero_angle(self):
         print("[STUB] Zero current angle")
-        self.lbl_angle_val.setText("0.00 °")
+        self.lbl_angle_val.setText("0.00 \u00B0")
 
     def _on_zero_torque(self):
         print("[STUB] Zero current torque")
