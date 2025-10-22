@@ -97,7 +97,7 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
         x_window_seconds: float = 30.0,
         points_per_window: int = 1200,
         y_range: Tuple[Number, Number] = (-1.0, 1.0),
-        background: str = "k",
+        background: str = "w",
         antialias: bool = True,
         with_legend: bool = True,
         parent: Optional[QtWidgets.QWidget] = None,

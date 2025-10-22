@@ -1288,22 +1288,18 @@
            </layout>
           </widget>
           <widget class="QWidget" name="pageCalibration">
-           <widget class="ServoCalibrationWidget" name="frame">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>20</y>
-              <width>1101</width>
-              <height>891</height>
-             </rect>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Shadow::Plain</enum>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_18">
+            <item>
+             <widget class="ServoCalibrationWidget" name="frame">
+              <property name="frameShape">
+               <enum>QFrame::Shape::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Shadow::Plain</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="pageProtocol">
            <layout class="QHBoxLayout" name="horizontalLayout_protocol">

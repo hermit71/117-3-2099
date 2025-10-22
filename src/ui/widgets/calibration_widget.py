@@ -20,16 +20,15 @@ from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
 )
-
-try:
-    import yaml  # PyYAML
-except Exception:  # pragma: no cover
-    yaml = None
-
+import yaml  # PyYAML
+from src.ui.widgets.time_series_plot_widget import TimeSeriesPlotWidget
 
 CALIB_POINTS = 10
 YAML_PATH = "calibration.yaml"
 DEFAULT_TORQUES = [0.0, 0.5, 1.0, 2.0, 4.5, 10.0, 15.0, 25.0, 35.0, 50.0]
+
+X_AXIS_RANGE = 30.0
+POINTS_PER_WINDOW = 1200
 
 STYLE_SHEET = """
 QLabel {
@@ -81,7 +80,7 @@ class BlinkingMixin:
     def _toggle_blink(self, widget: QWidget, color: str):
         self._blink_on = not self._blink_on
         widget.setStyleSheet(
-            f"background-color: {color}; border-radius: 6px;" if self._blink_on else (self._saved_style or "")
+            f"background-color: {color};" if self._blink_on else (self._saved_style or "")
         )
 
 
@@ -109,7 +108,14 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         ]
         self._rows: list[dict[str, QWidget]] = []
         self._active_row_idx: int | None = None
-
+        self.plt_torque = TimeSeriesPlotWidget(
+            x_window_seconds=X_AXIS_RANGE,
+            points_per_window=POINTS_PER_WINDOW,
+            y_range=(-50.0, 50.0),
+            background="w",
+            antialias=True,
+            with_legend=True,
+        )
         self._build_ui()
         self._apply_defaults_to_ui()  # Заполнить дефолтные моменты в UI
         self._load_yaml_if_exists()   # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
@@ -120,12 +126,16 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         root = QVBoxLayout(self)
         calibre_hbox = QHBoxLayout()
         servo_hbox = QHBoxLayout()
+        self.plt_torque.setFixedSize(1100, 500)  # фиксируем виджет
+        self.plt_torque.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.plt_torque.set_axis_labels(y_label="Крутящий момент, Нм")
         calibre_hbox.addWidget(self._make_calibration_group())
         #calibre_hbox.addStretch(1)
-        calibre_hbox.addSpacing(500)
+        calibre_hbox.addWidget(self.plt_torque)
+        # calibre_hbox.addSpacing(500)
         servo_hbox.addWidget(self._make_servo_group())
         # servo_hbox.addStretch(1)
-        servo_hbox.addSpacing(500)
+        servo_hbox.addStretch(1)
         root.addLayout(calibre_hbox)
         root.addLayout(servo_hbox)
         root.addStretch(1)
@@ -356,7 +366,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             btn.setText("Зафиксировать")
             self._set_other_rows_enabled(False, except_idx=idx)
             # Включаем мигание всей строки
-            self.start_blink(row_widget := row.get("row_widget") or QWidget())
+            self.start_blink(widget=row.get("btn_set"))
         elif self._active_row_idx == idx:
             # Фиксация значений
             torque = spn_torque.value()
