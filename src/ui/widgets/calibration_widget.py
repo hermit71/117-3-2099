@@ -126,7 +126,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         root = QVBoxLayout(self)
         calibre_hbox = QHBoxLayout()
         servo_hbox = QHBoxLayout()
-        self.plt_torque.setFixedSize(1100, 500)  # фиксируем виджет
+        self.plt_torque.setFixedSize(1100, 400)  # фиксируем виджет
         self.plt_torque.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.plt_torque.set_axis_labels(y_label="Крутящий момент, Нм")
         calibre_hbox.addWidget(self._make_calibration_group())
