@@ -109,7 +109,7 @@ class CommandHandler(QObject):
             ``error`` signal is also emitted.
         """
         regs_: dict = self.parent.modbus_write_regs
-        regs_['Modbus_VelocitySV'] = velocity
+        # regs_['Modbus_VelocitySV'] = velocity
         mask = 0b1111111111110001
         regs_['Modbus_CTRL'] &= mask
         match direction:
@@ -130,7 +130,7 @@ class CommandHandler(QObject):
         """Halt motion"""
         regs_ = self.parent.modbus_write_regs
         # regs_['Modbus_TensionSV'] = 0
-        regs_['Modbus_VelocitySV'] = 0
+        # regs_['Modbus_VelocitySV'] = 0
         mask = 0b1111111111110001
         regs_['Modbus_CTRL'] &= mask
         self.write_to_plc.emit(regs_)

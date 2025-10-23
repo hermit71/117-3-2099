@@ -245,6 +245,7 @@ class MainWindow(QMainWindow):
         self.btnHandRegSettings.clicked.connect(
             self.on_hand_reg_settings_clicked
         )
+        self.dsbHandVelocity_1.valueChanged.connect(self.on_hand_speed_value_changed)
 
     # ------------------------------------------------------------------
     # Диалоги
@@ -406,20 +407,26 @@ class MainWindow(QMainWindow):
     def on_servo_power_clicked(self):
         """Силовое питание привода на серводвигатель ВКЛ/ВЫКЛ"""
         ctrl_word = self.model.modbus_write_regs.get('Modbus_CTRL')
-        ctrl_word ^= (1 << 0)
-        self.model.modbus_write_regs['Modbus_CTRL'] = ctrl_word
-        logger.info("power on/off")
+
+        is_power_on =  ctrl_word & (1 << 0)
+        #self.model.modbus_write_regs['Modbus_CTRL'] = ctrl_word
+        if is_power_on:
+            self.model.command_handler.servo_power_off()
+        else:
+            self.model.command_handler.servo_power_on()
+
+        logger.info(f"power on/off")
 
     def on_jog_cw_pressed(self) -> None:
         """Поворот по часовой стрелке, пока кнопка нажата."""
 
-        self.model.command_handler.jog(direction="cw", velocity=0)
+        self.model.command_handler.jog(direction="cw")
         logger.info("cw")
 
     def on_jog_ccw_pressed(self) -> None:
         """Поворот против часовой стрелки, пока кнопка нажата."""
 
-        self.model.command_handler.jog(direction="ccw", velocity=0)
+        self.model.command_handler.jog(direction="ccw")
         logger.info("ccw")
 
     def on_jog_released(self) -> None:
@@ -432,6 +439,11 @@ class MainWindow(QMainWindow):
         """Открыть диалог настроек ручного регулятора."""
 
         HandRegulatorSettingsDialog(self).exec()
+
+    def on_hand_speed_value_changed(self, val):
+        int_velocity =  int(1000 * val)
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=int_velocity)
+        pass
 
     # ------------------------------------------------------------------
     # Заглушки для команд управления
