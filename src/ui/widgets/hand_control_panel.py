@@ -338,9 +338,9 @@ class HandControlPanel(QFrame):
         power_on = self.btn_servo_power.isChecked()
         running = self.btn_run.isChecked()
 
-        # Правило (1): пока не нажата "Сервопривод ..." — disable и направления, и ПУСК
+        # Правило (1): пока не нажата кнопка "Сервопривод ..." — неактивны и направления, и ПУСК
         self.btn_run.setEnabled(power_on)
-        # Правило (2): при ПУСК — направления disabled, иначе зависят от питания
+        # Правило (2): при включенном ПУСК — направления неактивны
         enable_dirs = power_on and (not running)
         self.btn_ccw.setEnabled(enable_dirs)
         self.btn_cw.setEnabled(enable_dirs)
