@@ -191,7 +191,7 @@ class RealTimeData(QObject):
         self._write_torque_buffer(buffer, index)
 
         self.times[self.ptr] = round((time.time() - self.time_origin) * 1000)
-        self.torque_data_c[self.ptr] = self.get_real_tension(registers)
+        self.torque_data_c[self.ptr] = self.tension
         self.angle_data_c[self.ptr] = self.get_real_angle(registers)
         self.velocity_data[self.ptr] = 0 #self.get_real_velocity()
         self.ptr += 1
@@ -205,9 +205,9 @@ class RealTimeData(QObject):
             self.ptr = self.data_window_length - 1
 
         # Фиксируем текущие данные от датчика момента
-        self.tension_adc = registers[1]
-        self.tension_nc = self.get_real_tension_nc(registers)
-        self.tension = self.get_real_tension(registers)
+        self.tension_adc = c_short(registers[1]).value
+        self.tension_nc = self.get_real_tension_nc(self.tension_adc)
+        self.tension = self.get_real_tension(self.tension_nc)
 
         # Фиксируем текущие данные от датчика угла
         self.angle = self.get_real_angle(registers)
@@ -226,18 +226,20 @@ class RealTimeData(QObject):
         self.torque_data_scaled[index:index+BUFFER_LENGTH] = buf[:]
         # print(f'{index} : {self.torque_data_scaled[index-100:index+100]}')
 
-    def get_real_tension_nc(self, registers):
+    def get_real_tension_nc(self, torque_adc):
         """Преобразование регистров в значение крутящего момента (нескорректированного)"""
-        client = self.poller.client
-        tension = client.convert_from_registers(registers[6:8], client.DATATYPE.FLOAT32)
+        tension = 50.0 * float(torque_adc) / 16384.0
+        # client = self.poller.client
+        # tension = client.convert_from_registers(registers[6:8], client.DATATYPE.FLOAT32)
         return tension
 
-    def get_real_tension(self, registers):
+    def get_real_tension(self, torque_nc):
         """Преобразование регистров в значение крутящего момента (корректированного в соответствии с калибровочной моделью)"""
-        client = self.poller.client
+        tension = torque_nc * 1.0 + 0
+        # client = self.poller.client
         # tension = client.convert_from_registers(registers[8:10], client.DATATYPE.FLOAT32)
-        tension = client.convert_from_registers(registers[10:11], client.DATATYPE.INT16)
-        return float(tension)/6400.0
+        # tension = client.convert_from_registers(registers[10:11], client.DATATYPE.INT16)
+        return tension
 
     def get_real_angle(self, registers):
         """Преобразование регистров в значение угла."""

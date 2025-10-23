@@ -237,6 +237,7 @@ class MainWindow(QMainWindow):
         self.btnStop.clicked.connect(self.on_btn_stop_clicked)
         self.btnEmergencyReset.clicked.connect(self.on_btn_emergency_reset_clicked)
 
+        self.btnServoPower.clicked.connect(self.on_servo_power_clicked)
         self.btnJog_CW.pressed.connect(self.on_jog_cw_pressed)
         self.btnJog_CCW.pressed.connect(self.on_jog_ccw_pressed)
         self.btnJog_CW.released.connect(self.on_jog_released)
@@ -348,7 +349,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def on_btn_calibration_click(self) -> None:
         """Открыть экран калибровки датчиков."""
-
+        self.command_handler.set_plc_mode("hand_calibration")
+        self.command_handler.servo_power_on()
         self.pager.setCurrentIndex(4)
 
     @Slot()
@@ -401,6 +403,13 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Ручное управление приводом
     # ------------------------------------------------------------------
+    def on_servo_power_clicked(self):
+        """Силовое питание привода на серводвигатель ВКЛ/ВЫКЛ"""
+        ctrl_word = self.model.modbus_write_regs.get('Modbus_CTRL')
+        ctrl_word ^= (1 << 0)
+        self.model.modbus_write_regs['Modbus_CTRL'] = ctrl_word
+        logger.info("power on/off")
+
     def on_jog_cw_pressed(self) -> None:
         """Поворот по часовой стрелке, пока кнопка нажата."""
 
@@ -416,7 +425,7 @@ class MainWindow(QMainWindow):
     def on_jog_released(self) -> None:
         """Остановить поворот при отпускании кнопки."""
 
-        self.model.command_handler.stop()
+        self.model.command_handler.halt()
         logger.info("stop")
 
     def on_hand_reg_settings_clicked(self) -> None:

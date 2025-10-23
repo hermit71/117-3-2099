@@ -48,7 +48,7 @@ class CommandHandler(QObject):
             is also emitted.
         """
         regs_ = self.parent.modbus_write_regs
-        mask = 0b0011111111111111
+        mask = 0b0001111111111111
         regs_['Modbus_CTRL'] &= mask
         match mode:
             case 'auto':
@@ -57,6 +57,8 @@ class CommandHandler(QObject):
                 mask = 0b0000000000000000
             case 'service':
                 mask = 0b1000000000000000
+            case 'hand_calibration':
+                mask = 0b1010000000000000
             case _:
                 message = f"Unsupported PLC mode: {mode}"
                 logging.warning(message)
@@ -68,7 +70,7 @@ class CommandHandler(QObject):
     def servo_power_on(self):
         """Turn on the servo drive."""
         regs_ = self.parent.modbus_write_regs
-        mask = 0b1111111111100000
+        mask = 0b1111111111111110
         regs_['Modbus_CTRL'] &= mask
         mask = 0b0000000000000001
         regs_['Modbus_CTRL'] |= mask
@@ -77,7 +79,7 @@ class CommandHandler(QObject):
     def servo_power_off(self):
         """Turn off the servo drive."""
         regs_: dict = self.parent.modbus_write_regs
-        mask = 0b1111111111100000
+        mask = 0b1111111111111110
         regs_['Modbus_CTRL'] &= mask
         mask = 0b0000000000000000
         regs_['Modbus_CTRL'] |= mask
@@ -88,10 +90,6 @@ class CommandHandler(QObject):
         regs_ = self.parent.modbus_write_regs
         regs_['Modbus_TensionSV'] = tension
         regs_['Modbus_VelocitySV'] = velocity
-        mask = 0b1111111111100001
-        regs_['Modbus_CTRL'] &= mask
-        mask = 0b0000000000000010
-        regs_['Modbus_CTRL'] |= mask
         self.write_to_plc.emit(regs_)
 
     def jog(self, direction='cw', velocity=0):
@@ -112,14 +110,14 @@ class CommandHandler(QObject):
         """
         regs_: dict = self.parent.modbus_write_regs
         regs_['Modbus_VelocitySV'] = velocity
-        mask = 0b1111111111100001
+        mask = 0b1111111111110001
         regs_['Modbus_CTRL'] &= mask
         match direction:
             case 'cw':
-                mask = 0b0000000000000100
+                mask = 0b0000000000000010
                 regs_['Modbus_CTRL'] |= mask
             case 'ccw':
-                mask = 0b0000000000001000
+                mask = 0b0000000000000100
                 regs_['Modbus_CTRL'] |= mask
             case _:
                 message = f"Unsupported jog direction: {direction}"
@@ -128,12 +126,21 @@ class CommandHandler(QObject):
                 raise ValueError(message)
         self.write_to_plc.emit(regs_)
 
+    def halt(self):
+        """Halt motion"""
+        regs_ = self.parent.modbus_write_regs
+        # regs_['Modbus_TensionSV'] = 0
+        regs_['Modbus_VelocitySV'] = 0
+        mask = 0b1111111111110001
+        regs_['Modbus_CTRL'] &= mask
+        self.write_to_plc.emit(regs_)
+
     def stop(self):
         """Stop motion and reset setpoints to zero."""
         regs_ = self.parent.modbus_write_regs
         regs_['Modbus_TensionSV'] = 0
         regs_['Modbus_VelocitySV'] = 0
-        mask = 0b1111111111100001
+        mask = 0b1111111111110000
         regs_['Modbus_CTRL'] &= mask
         self.write_to_plc.emit(regs_)
 
