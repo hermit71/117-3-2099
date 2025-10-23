@@ -351,7 +351,7 @@ if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
-    w = ControlPanelFrame()
+    w = HandControlPanel()
     w.setWindowTitle("Панель управления сервоприводом — демо")
     w.resize(560, 620)
     w.show()
