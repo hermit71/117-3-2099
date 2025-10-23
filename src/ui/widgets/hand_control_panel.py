@@ -14,6 +14,9 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from src.ui.dialogs import (
+    HandRegulatorSettingsDialog,
+)
 
 
 class HandControlPanel(QFrame):
@@ -329,6 +332,7 @@ class HandControlPanel(QFrame):
 
     def _on_tool_btn1(self):
         print("[STUB] Tool Button 1 clicked")
+        HandRegulatorSettingsDialog(self).exec()
 
     def _on_tool_btn2(self):
         print("[STUB] Tool Button 2 clicked")

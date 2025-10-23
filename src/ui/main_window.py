@@ -238,16 +238,6 @@ class MainWindow(QMainWindow):
         self.btnStop.clicked.connect(self.on_btn_stop_clicked)
         self.btnEmergencyReset.clicked.connect(self.on_btn_emergency_reset_clicked)
 
-        self.btnServoPower.clicked.connect(self.on_servo_power_clicked)
-        self.btnJog_CW.pressed.connect(self.on_jog_cw_pressed)
-        self.btnJog_CCW.pressed.connect(self.on_jog_ccw_pressed)
-        self.btnJog_CW.released.connect(self.on_jog_released)
-        self.btnJog_CCW.released.connect(self.on_jog_released)
-        self.btnHandRegSettings.clicked.connect(
-            self.on_hand_reg_settings_clicked
-        )
-        self.dsbHandVelocity_1.valueChanged.connect(self.on_hand_speed_value_changed)
-
     # ------------------------------------------------------------------
     # Диалоги
     # ------------------------------------------------------------------
@@ -403,50 +393,6 @@ class MainWindow(QMainWindow):
         self.handle_emergency_reset_command()
 
     # ------------------------------------------------------------------
-    # Ручное управление приводом
-    # ------------------------------------------------------------------
-    def on_servo_power_clicked(self):
-        """Силовое питание привода на серводвигатель ВКЛ/ВЫКЛ"""
-        ctrl_word = self.model.modbus_write_regs.get('Modbus_CTRL')
-
-        is_power_on =  ctrl_word & (1 << 0)
-        #self.model.modbus_write_regs['Modbus_CTRL'] = ctrl_word
-        if is_power_on:
-            self.model.command_handler.servo_power_off()
-        else:
-            self.model.command_handler.servo_power_on()
-
-        logger.info(f"power on/off")
-
-    def on_jog_cw_pressed(self) -> None:
-        """Поворот по часовой стрелке, пока кнопка нажата."""
-
-        self.model.command_handler.jog(direction="cw")
-        logger.info("cw")
-
-    def on_jog_ccw_pressed(self) -> None:
-        """Поворот против часовой стрелки, пока кнопка нажата."""
-
-        self.model.command_handler.jog(direction="ccw")
-        logger.info("ccw")
-
-    def on_jog_released(self) -> None:
-        """Остановить поворот при отпускании кнопки."""
-
-        self.model.command_handler.halt()
-        logger.info("stop")
-
-    def on_hand_reg_settings_clicked(self) -> None:
-        """Открыть диалог настроек ручного регулятора."""
-
-        HandRegulatorSettingsDialog(self).exec()
-
-    def on_hand_speed_value_changed(self, val):
-        int_velocity =  int(1000 * val)
-        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=int_velocity)
-        pass
-
-    # ------------------------------------------------------------------
     # Заглушки для команд управления
     # ------------------------------------------------------------------
     def handle_start_command(self) -> None:
@@ -469,59 +415,3 @@ class MainWindow(QMainWindow):
         """Заглушка обработчика команды сброса аварии."""
 
         pass
-
-    # ===========================================
-    # Вспомогательные функции работы с таблицами
-    # ===========================================
-    def make_table(self, headers: List[str], rows: Iterable[Iterable[object]]) -> QTableWidget:
-        table = QTableWidget()
-        table.setColumnCount(len(headers))
-        table.setHorizontalHeaderLabels(headers)
-
-        # Базовые настройки UX
-        #table.setAlternatingRowColors(True)
-        table.setSortingEnabled(False)
-        table.setWordWrap(False)
-
-        header = table.horizontalHeader()
-        header.setStretchLastSection(True)
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-
-        # Выделение строк целиком и редактирование по двойному клику
-        table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        table.setEditTriggers(
-            QAbstractItemView.EditTrigger.DoubleClicked
-            | QAbstractItemView.EditTrigger.EditKeyPressed
-            | QAbstractItemView.EditTrigger.AnyKeyPressed
-        )
-
-        # Заполнение
-        rows = list(rows)
-        table.setRowCount(len(rows))
-        for r, row in enumerate(rows):
-            for c, value in enumerate(row):
-                item = QTableWidgetItem(str(value))
-                # Пример выравнивания: числа — по правому краю
-                if isinstance(value, (int, float)):
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                table.setItem(r, c, item)
-        self.resize_to_contents(table)
-        self.center_column(table, 0)
-        return table
-
-    # Ресайз таблицы по содержимому
-    def resize_to_contents(self, table: QTableWidget) -> None:
-        header = table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        # Немного увеличить последнюю колонку, чтобы не было прижатия
-        header.setStretchLastSection(True)
-
-    # Выравнивание n-ого столбца таблицы по центру
-    def center_column(self, table: QTableWidget, col: int):
-        for r in range(table.rowCount()):
-            it = table.item(r, col)
-            if it is None:
-                it = QTableWidgetItem("")
-                table.setItem(r, col, it)
-            it.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
