@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
             led_dashboards=dashboards.hand_right_panel_led_dashboards,
         )
 
-        default_graphs_cfg = dashboards.hand_graphs_setting_default
+        # default_graphs_cfg = dashboards.hand_graphs_setting_default
         graphs_cfg = self.config.cfg.get("graphs", {})
         for name, desc in dashboards.hand_graphs:
             cfg = graphs_cfg.get(name, {})
@@ -183,6 +183,7 @@ class MainWindow(QMainWindow):
             plots_description=dashboards.hand_graphs,
         )
         self.pageHand_pnlTopDashboard.config(model=self.model)
+        self.pageHand_control.config(model=self.model)
 
     def _configure_calibration_screen(self) -> None:
         pass

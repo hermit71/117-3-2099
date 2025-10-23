@@ -16,9 +16,12 @@ from PyQt6.QtWidgets import (
 )
 
 
-class ControlPanelFrame(QFrame):
+class HandControlPanel(QFrame):
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
+        self.model = None
+        self.data_set = None
+
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setFrameShadow(QFrame.Shadow.Raised)
 
@@ -30,6 +33,17 @@ class ControlPanelFrame(QFrame):
         root.addWidget(self._build_manual_group())
         root.addWidget(self._build_torque_group())
         root.addStretch(1)
+
+        # Initial state: servo power OFF -> disable direction and run per requirement (1)
+        self._apply_enable_rules()
+
+    def config(self, model):
+        if model is not None:
+            self.model = model
+            self.data_set = self.model.realtime_data
+            print(f"in hand_control_panel: {self.data_set}")
+
+
 
     # ---------- Группа 1: Сервопривод ----------
     def _build_servo_group(self) -> QGroupBox:
@@ -97,7 +111,8 @@ class ControlPanelFrame(QFrame):
         self.spin_ang_vel.setRange(0.0, 1.0)
         self.spin_ang_vel.setDecimals(2)
         self.spin_ang_vel.setSingleStep(0.01)
-        self.spin_ang_vel.setSuffix(" град/с")
+        self.spin_ang_vel.setValue(0.1)
+        self.spin_ang_vel.setSuffix(" \u00B0/с")
         self.spin_ang_vel.setFixedHeight(28)
         self.spin_ang_vel.setFixedWidth(100)  # фиксированная ширина 100 px
         self.spin_ang_vel.setFont(QFont("Inconsolata LGC Nerd Font"))
@@ -108,7 +123,7 @@ class ControlPanelFrame(QFrame):
         row += 1
         self.slider_ang_vel = QSlider(Qt.Orientation.Horizontal)
         self.slider_ang_vel.setRange(0, 100)
-        self.slider_ang_vel.setValue(0)
+        self.slider_ang_vel.setValue(10)
         self.slider_ang_vel.valueChanged.connect(self._on_ang_speed_slider_changed)
         grid.addWidget(self.slider_ang_vel, row, 0, 1, 3)
 
@@ -157,6 +172,7 @@ class ControlPanelFrame(QFrame):
         self.spin_rate.setRange(0.0, 4.5)
         self.spin_rate.setDecimals(2)
         self.spin_rate.setSingleStep(0.01)
+        self.spin_rate.setValue(0.5)
         self.spin_rate.setSuffix(" Нм/с")
         style_spin(self.spin_rate)
         self.spin_rate.valueChanged.connect(self._on_rate_changed)
@@ -166,6 +182,7 @@ class ControlPanelFrame(QFrame):
         # Слайдер: 0..450 -> 0.00..4.50
         self.slider_rate = QSlider(Qt.Orientation.Horizontal)
         self.slider_rate.setRange(0, 450)
+        self.slider_rate.setValue(50)
         self.slider_rate.valueChanged.connect(self._on_rate_slider_changed)
         grid.addWidget(self.slider_rate, row, 0, 1, 3)
 
@@ -219,18 +236,38 @@ class ControlPanelFrame(QFrame):
         self.btn_servo_power.setText("Сервопривод ВКЛ" if checked else "Сервопривод ВЫКЛ")
         print(f"[STUB] Servo power toggled -> {'ON' if checked else 'OFF'}")
 
+        if not checked:
+            # При отжатии питания: сброс момента в 0
+            self.spin_torque.setValue(0.0)
+            self.model.command_handler.servo_power_off()
+        else:
+            self.model.command_handler.servo_power_on()
+        # Применить правила доступности (блокировка других кнопок виджета)
+        self._apply_enable_rules()
+
+
     # Раздельные обработчики для кнопок направления
     def _on_ccw_pressed(self):
         print("[STUB] Manual CCW pressed")
+        self.model.command_handler.jog(direction="ccw")
+        iv = int(1000 * self.spin_ang_vel.value())
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
 
     def _on_ccw_released(self):
         print("[STUB] Manual CCW released")
+        self.model.command_handler.halt()
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_cw_pressed(self):
         print("[STUB] Manual CW pressed")
+        self.model.command_handler.jog(direction="cw")
+        iv = int(1000 * self.spin_ang_vel.value())
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
 
     def _on_cw_released(self):
         print("[STUB] Manual CW released")
+        self.model.command_handler.halt()
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_ang_speed_spin_changed(self, value: float):
         # sync slider (0..100)
@@ -287,12 +324,26 @@ class ControlPanelFrame(QFrame):
     def _on_run_toggled(self, checked: bool):
         self.btn_run.setText("СТОП" if checked else "ПУСК")
         print(f"[STUB] RUN toggled -> {'RUN' if checked else 'STOP'}")
+        # Требование (2): при ПУСК нажат — кнопки направления disabled; иначе зависят от питания
+        self._apply_enable_rules()
 
     def _on_tool_btn1(self):
         print("[STUB] Tool Button 1 clicked")
 
     def _on_tool_btn2(self):
         print("[STUB] Tool Button 2 clicked")
+
+    # ---------- Вспомогательное: правила доступности ----------
+    def _apply_enable_rules(self):
+        power_on = self.btn_servo_power.isChecked()
+        running = self.btn_run.isChecked()
+
+        # Правило (1): пока не нажата "Сервопривод ..." — disable и направления, и ПУСК
+        self.btn_run.setEnabled(power_on)
+        # Правило (2): при ПУСК — направления disabled, иначе зависят от питания
+        enable_dirs = power_on and (not running)
+        self.btn_ccw.setEnabled(enable_dirs)
+        self.btn_cw.setEnabled(enable_dirs)
 
 
 # ---------------------- Запуск и проверка ----------------------
