@@ -85,11 +85,28 @@ class CommandHandler(QObject):
         regs_['Modbus_CTRL'] |= mask
         self.write_to_plc.emit(regs_)
 
+    def alarm_reset(self):
+        """Turn off the alarm."""
+        regs_: dict = self.parent.modbus_write_regs
+        mask = 0b1111111111110001
+        regs_['Modbus_CTRL'] &= mask
+        mask = 0b0000000000001110
+        regs_['Modbus_CTRL'] |= mask
+        self.write_to_plc.emit(regs_)
+
     def set_tension(self, tension=0, velocity=0):
         """Set the tension and velocity setpoints."""
         regs_ = self.parent.modbus_write_regs
         regs_['Modbus_TensionSV'] = tension
         regs_['Modbus_VelocitySV'] = velocity
+        self.write_to_plc.emit(regs_)
+
+    def torque_hold(self):
+        regs_: dict = self.parent.modbus_write_regs
+        mask = 0b1111111111110001
+        regs_['Modbus_CTRL'] &= mask
+        mask = 0b0000000000000110
+        regs_['Modbus_CTRL'] |= mask
         self.write_to_plc.emit(regs_)
 
     def jog(self, direction='cw', velocity=0):

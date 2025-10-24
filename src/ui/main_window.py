@@ -236,7 +236,8 @@ class MainWindow(QMainWindow):
         self.btnStart.clicked.connect(self.on_btn_start_clicked)
         self.btnPause.clicked.connect(self.on_btn_pause_clicked)
         self.btnStop.clicked.connect(self.on_btn_stop_clicked)
-        self.btnEmergencyReset.clicked.connect(self.on_btn_emergency_reset_clicked)
+        self.btnEmergencyReset.pressed.connect(self.on_btn_emergency_stop_pressed)
+        self.btnEmergencyReset.released.connect(self.on_btn_emergency_stop_released)
 
     # ------------------------------------------------------------------
     # Диалоги
@@ -387,9 +388,16 @@ class MainWindow(QMainWindow):
         self.handle_stop_command()
 
     @Slot()
+    def on_btn_emergency_stop_pressed(self) -> None:
+        self.model.command_handler.alarm_reset()
+
+    @Slot()
+    def on_btn_emergency_stop_released(self) -> None:
+        self.model.command_handler.halt()
+
+    @Slot()
     def on_btn_emergency_reset_clicked(self) -> None:
         """Обработать нажатие кнопки сброса аварии."""
-
         self.handle_emergency_reset_command()
 
     # ------------------------------------------------------------------
@@ -412,6 +420,4 @@ class MainWindow(QMainWindow):
         pass
 
     def handle_emergency_reset_command(self) -> None:
-        """Заглушка обработчика команды сброса аварии."""
-
-        pass
+        self.model.command_handler.alarm_reset()

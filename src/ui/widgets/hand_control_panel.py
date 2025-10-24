@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
 from src.ui.dialogs import (
     HandRegulatorSettingsDialog,
 )
-
+import struct
 
 class HandControlPanel(QFrame):
     def __init__(self, parent: QWidget | None = None):
@@ -297,6 +297,9 @@ class HandControlPanel(QFrame):
             self.slider_torque.blockSignals(False)
         print(f"[STUB] Torque spin -> {value:.1f} Nm")
 
+        tv = self.int_to_word(int(500 * self.spin_torque.value()))
+        self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
+
     def _on_torque_slider_changed(self, ivalue: int):
         v = ivalue / 10.0
         if abs(self.spin_torque.value() - v) > 1e-9:
@@ -304,6 +307,8 @@ class HandControlPanel(QFrame):
             self.spin_torque.setValue(v)
             self.spin_torque.blockSignals(False)
         print(f"[STUB] Torque slider -> {v:.1f} Nm")
+        tv = self.int_to_word(int(500 * self.spin_torque.value()))
+        self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
 
     def _on_rate_changed(self, value: float):
         iv = int(round(value * 100))  # 0..4.5 -> 0..450
@@ -329,6 +334,12 @@ class HandControlPanel(QFrame):
         print(f"[STUB] RUN toggled -> {'RUN' if checked else 'STOP'}")
         # Требование (2): при ПУСК нажат — кнопки направления disabled; иначе зависят от питания
         self._apply_enable_rules()
+        tv = self.int_to_word(int(500 * self.spin_torque.value()))
+        if checked:
+            self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
+            self.model.command_handler.torque_hold()
+        else:
+            self.model.command_handler.halt()
 
     def _on_tool_btn1(self):
         print("[STUB] Tool Button 1 clicked")
@@ -349,6 +360,10 @@ class HandControlPanel(QFrame):
         self.btn_ccw.setEnabled(enable_dirs)
         self.btn_cw.setEnabled(enable_dirs)
 
+
+    def int_to_word(self, value: int) -> int:
+        # Преобразует signed int16 (-32768..32767) в unsigned WORD (0..65535)
+        return struct.unpack('>H', struct.pack('>h', value))[0]
 
 # ---------------------- Запуск и проверка ----------------------
 if __name__ == "__main__":
