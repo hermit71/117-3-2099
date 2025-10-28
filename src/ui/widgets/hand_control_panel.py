@@ -242,8 +242,8 @@ class HandControlPanel(QFrame):
         if not checked:
             # При отжатии питания: сброс момента в 0
             self.spin_torque.setValue(0.0)
-            self.model.command_handler.servo_power_off()
             self.btn_run.setChecked(False)
+            self.model.command_handler.servo_power_off()
         else:
             self.model.command_handler.servo_power_on()
         # Применить правила доступности (блокировка других кнопок виджета)
@@ -253,7 +253,7 @@ class HandControlPanel(QFrame):
     # Раздельные обработчики для кнопок направления
     def _on_ccw_pressed(self):
         print("[STUB] Manual CCW pressed")
-        self.model.command_handler.jog(direction="ccw")
+        self.model.command_handler.jog_ccw()
         iv = int(1000 * self.spin_ang_vel.value())
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
 
@@ -264,7 +264,7 @@ class HandControlPanel(QFrame):
 
     def _on_cw_pressed(self):
         print("[STUB] Manual CW pressed")
-        self.model.command_handler.jog(direction="cw")
+        self.model.command_handler.jog_cw()
         iv = int(1000 * self.spin_ang_vel.value())
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
 

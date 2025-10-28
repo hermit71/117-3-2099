@@ -394,7 +394,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def on_btn_emergency_stop_released(self) -> None:
-        self.model.command_handler.clear_control_bits()
+        self.model.command_handler.clear_all_control_bits()
         # self.model.command_handler.halt()
 
     @Slot()

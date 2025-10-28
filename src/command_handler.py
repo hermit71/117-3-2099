@@ -10,11 +10,20 @@ import logging
 from PyQt6.QtCore import QObject, pyqtSignal as Signal
 
 CONTROL_BITS = {
+    "power_on": 0,
     "reset_torque": 4,
     "reset_angle": 5,
     "write_retain": 6,
     "reset_error": 7,
     "reset_alarm": 8,
+}
+CONTROL_CMD = {
+    "halt": 0b000,
+    "jog_cw": 0b001,
+    "jog_ccw": 0b010,
+    "torque_hold": 0b011,
+    "move_to_angle": 0b100,
+    "stop": 0b111,
 }
 
 class CommandHandler(QObject):
@@ -76,40 +85,19 @@ class CommandHandler(QObject):
 
     def servo_power_on(self):
         """Turn on the servo drive."""
-        regs_ = self.parent.modbus_write_regs
-        mask = 0b1111111111111110
-        regs_['Modbus_CTRL'] &= mask
-        mask = 0b0000000000000001
-        regs_['Modbus_CTRL'] |= mask
-        self.write_to_plc.emit(regs_)
+        self._set_control_bit(CONTROL_BITS["power_on"])
 
     def servo_power_off(self):
         """Turn off the servo drive."""
-        regs_: dict = self.parent.modbus_write_regs
-        mask = 0b1111111111111110
-        regs_['Modbus_CTRL'] &= mask
-        mask = 0b0000000000000000
-        regs_['Modbus_CTRL'] |= mask
-        self.write_to_plc.emit(regs_)
+        self._clear_control_bit(CONTROL_BITS["power_on"])
 
     def reset_error(self):
         """Reset the servo drive error."""
-        regs_: dict = self.parent.modbus_write_regs
-        regs_['Modbus_CTRL'] |= (1 << CONTROL_BITS["reset_error"])
-        self.write_to_plc.emit(regs_)
+        self._set_control_bit(CONTROL_BITS["reset_error"])
 
     def alarm_reset(self):
         """Turn off the alarm."""
-        regs_: dict = self.parent.modbus_write_regs
-        regs_['Modbus_CTRL'] |= (1 << CONTROL_BITS["reset_alarm"])
-        self.write_to_plc.emit(regs_)
-
-    def clear_control_bits(self):
-        """Clear the control bits."""
-        regs_: dict = self.parent.modbus_write_regs
-        for bit in CONTROL_BITS.values():
-            regs_['Modbus_CTRL'] &= ~(1 << bit)
-        self.write_to_plc.emit(regs_)
+        self._set_control_bit(CONTROL_BITS["reset_alarm"])
 
     def set_tension(self, tension=0, velocity=0):
         """Set the tension and velocity setpoints."""
@@ -119,67 +107,52 @@ class CommandHandler(QObject):
         self.write_to_plc.emit(regs_)
 
     def torque_hold(self):
-        regs_: dict = self.parent.modbus_write_regs
-        mask = 0b1111111111110001
-        regs_['Modbus_CTRL'] &= mask
-        mask = 0b0000000000000110
-        regs_['Modbus_CTRL'] |= mask
-        self.write_to_plc.emit(regs_)
+        self._do_command("torque_hold")
 
-    def jog(self, direction='cw', velocity=0):
-        """Jog the motor in a direction at the given velocity.
+    def jog_cw(self):
+        self._do_command("jog_cw")
 
-        Parameters
-        ----------
-        direction: str
-            'cw' for clockwise or 'ccw' for counter-clockwise.
-        velocity: int
-            Velocity setpoint to send.
-
-        Raises
-        ------
-        ValueError
-            If ``direction`` is not one of the supported values. The
-            ``error`` signal is also emitted.
-        """
-        regs_: dict = self.parent.modbus_write_regs
-        # regs_['Modbus_VelocitySV'] = velocity
-        mask = 0b1111111111110001
-        regs_['Modbus_CTRL'] &= mask
-        match direction:
-            case 'cw':
-                mask = 0b0000000000000010
-                regs_['Modbus_CTRL'] |= mask
-            case 'ccw':
-                mask = 0b0000000000000100
-                regs_['Modbus_CTRL'] |= mask
-            case _:
-                message = f"Unsupported jog direction: {direction}"
-                logging.warning(message)
-                self.error.emit(message)
-                raise ValueError(message)
-        self.write_to_plc.emit(regs_)
+    def jog_ccw(self):
+        self._do_command("jog_ccw")
 
     def halt(self):
         """Halt motion"""
-        regs_ = self.parent.modbus_write_regs
-        # regs_['Modbus_TensionSV'] = 0
-        # regs_['Modbus_VelocitySV'] = 0
-        mask = 0b1111111111110001
-        regs_['Modbus_CTRL'] &= mask
-        self.write_to_plc.emit(regs_)
+        self._do_command("halt")
 
     def stop(self):
         """Stop motion and reset setpoints to zero."""
-        regs_ = self.parent.modbus_write_regs
-        regs_['Modbus_TensionSV'] = 0
-        regs_['Modbus_VelocitySV'] = 0
-        mask = 0b1111111111110000
-        regs_['Modbus_CTRL'] &= mask
-        self.write_to_plc.emit(regs_)
+        self._do_command("stop")
 
     def set_plc_register(self, name='Modbus_CTRL', value=0):
         """Write a raw value to a Modbus register."""
         regs_ = self.parent.modbus_write_regs
         regs_[name] = value
+        self.write_to_plc.emit(regs_)
+
+    def _do_command(self, command):
+        regs_ = self.parent.modbus_write_regs
+        # Создаём битовую маску по месту размещения управляющей команды в слове управления (биты с 1 по 3)
+        mask = 0b111 << 1
+        # Очищаем эти разряды в слове управления
+        regs_['Modbus_CTRL'] &= ~mask
+        # Устанавливаем новые значения
+        regs_['Modbus_CTRL'] |= (CONTROL_CMD[command] << 1)
+        # Отправляем в ПЛК
+        self.write_to_plc.emit(regs_)
+
+    def _set_control_bit(self, bit):
+        regs_: dict = self.parent.modbus_write_regs
+        regs_['Modbus_CTRL'] |= (1 << bit)
+        self.write_to_plc.emit(regs_)
+
+    def _clear_control_bit(self, bit):
+        regs_: dict = self.parent.modbus_write_regs
+        regs_['Modbus_CTRL'] &= ~(1 << bit)
+        self.write_to_plc.emit(regs_)
+
+    def clear_all_control_bits(self):
+        """Clear all control bits."""
+        regs_: dict = self.parent.modbus_write_regs
+        for bit in CONTROL_BITS.values():
+            regs_['Modbus_CTRL'] &= ~(1 << bit)
         self.write_to_plc.emit(regs_)
