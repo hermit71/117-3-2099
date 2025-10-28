@@ -389,11 +389,13 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def on_btn_emergency_stop_pressed(self) -> None:
+        self.model.command_handler.reset_error()
         self.model.command_handler.alarm_reset()
 
     @Slot()
     def on_btn_emergency_stop_released(self) -> None:
-        self.model.command_handler.halt()
+        self.model.command_handler.clear_control_bits()
+        # self.model.command_handler.halt()
 
     @Slot()
     def on_btn_emergency_reset_clicked(self) -> None:

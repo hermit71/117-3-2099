@@ -243,6 +243,7 @@ class HandControlPanel(QFrame):
             # При отжатии питания: сброс момента в 0
             self.spin_torque.setValue(0.0)
             self.model.command_handler.servo_power_off()
+            self.btn_run.setChecked(False)
         else:
             self.model.command_handler.servo_power_on()
         # Применить правила доступности (блокировка других кнопок виджета)
@@ -353,13 +354,12 @@ class HandControlPanel(QFrame):
         power_on = self.btn_servo_power.isChecked()
         running = self.btn_run.isChecked()
 
-        # Правило (1): пока не нажата кнопка "Сервопривод ..." — неактивны и направления, и ПУСК
+        # Пока не нажата кнопка "Сервопривод ..." — неактивны и направления, и ПУСК
         self.btn_run.setEnabled(power_on)
-        # Правило (2): при включенном ПУСК — направления неактивны
+        # При включенном ПУСК — направления неактивны
         enable_dirs = power_on and (not running)
         self.btn_ccw.setEnabled(enable_dirs)
         self.btn_cw.setEnabled(enable_dirs)
-
 
     def int_to_word(self, value: int) -> int:
         # Преобразует signed int16 (-32768..32767) в unsigned WORD (0..65535)

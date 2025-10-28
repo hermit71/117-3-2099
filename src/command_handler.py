@@ -9,6 +9,13 @@ import logging
 
 from PyQt6.QtCore import QObject, pyqtSignal as Signal
 
+CONTROL_BITS = {
+    "reset_torque": 4,
+    "reset_angle": 5,
+    "write_retain": 6,
+    "reset_error": 7,
+    "reset_alarm": 8,
+}
 
 class CommandHandler(QObject):
     """Dispatches control commands to the PLC.
@@ -85,13 +92,23 @@ class CommandHandler(QObject):
         regs_['Modbus_CTRL'] |= mask
         self.write_to_plc.emit(regs_)
 
+    def reset_error(self):
+        """Reset the servo drive error."""
+        regs_: dict = self.parent.modbus_write_regs
+        regs_['Modbus_CTRL'] |= (1 << CONTROL_BITS["reset_error"])
+        self.write_to_plc.emit(regs_)
+
     def alarm_reset(self):
         """Turn off the alarm."""
         regs_: dict = self.parent.modbus_write_regs
-        mask = 0b1111111111110001
-        regs_['Modbus_CTRL'] &= mask
-        mask = 0b0000000000001110
-        regs_['Modbus_CTRL'] |= mask
+        regs_['Modbus_CTRL'] |= (1 << CONTROL_BITS["reset_alarm"])
+        self.write_to_plc.emit(regs_)
+
+    def clear_control_bits(self):
+        """Clear the control bits."""
+        regs_: dict = self.parent.modbus_write_regs
+        for bit in CONTROL_BITS.values():
+            regs_['Modbus_CTRL'] &= ~(1 << bit)
         self.write_to_plc.emit(regs_)
 
     def set_tension(self, tension=0, velocity=0):
