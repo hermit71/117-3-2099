@@ -147,6 +147,7 @@ class RealTimeData(QObject):
         self.curr_index = 0
         self.prev_index = 0
         self.index_offset = 0
+        self.head = 0
 
         # Текущие значения датчиков (данные ПЛК)
         self.tension_adc = 0        # Данные АЦП датчика момента
@@ -179,16 +180,25 @@ class RealTimeData(QObject):
             При переполнении индекса отсчет начинается с 0 и необходимо добавлять накопленное смещение
             чтобы запись в локальный массив происходила последовательно
         """
-        self.curr_index = registers[INDEX_ADDRESS]
-        if self.curr_index < self.prev_index:
-            self.index_offset += 2**16
-        self.prev_index = self.curr_index
+        self.prev_index = self.curr_index                           # Сохраняем предыдущий полученный указатель от ПЛК
+        self.curr_index = registers[INDEX_ADDRESS]                  # Получаем новый указатель от ПЛК
+        if self.prev_index < self.curr_index:
+            self.index_offset = self.curr_index - self.prev_index   # Находим смещение указателя (то есть фактически количество
+        else:                                                       # новых значений которые были записаны в буфер за время
+            self.index_offset = BUFFER_LENGTH + self.curr_index - self.prev_index   # прошедшее между двумя опросами
 
         buffer_ = registers[BUFFER_ADDRESS:BUFFER_ADDRESS + BUFFER_LENGTH]
-        buffer = [c_short(i).value for i in buffer_]
+        buffer = [c_short(i).value for i in buffer_]    # читаем буфер и приводим его к типу INT
 
-        index = self.curr_index + self.index_offset
+        index = self.head   # индекс для записи буфера в локальный массив данных датчика
         self._write_torque_buffer(buffer, index)
+        self.head += self.index_offset  # новый индекс смещаем на фактическое количество новых записей в буфере
+        # Вся вышеуказанная история работает так:
+        # Контроллер читает данные с датчика момента с периодом своего цикла 4 мс в кольцевой буфер размером BUFFER_LENGTH = 50
+        # АРМ читает ВЕСЬ буфер с периодом примерно 100 мс. Этот период в Windows плавает в пределах 50%
+        # поэтому буфер взят с запасом (50 значений, хотя всего за период в среднем мы получаем 25 значений)
+        # текущее смещение которое мы вычисляем каждый раз когда читаем буфер позволяет записывать значения
+        # последовательно без пропусков и дублирования в локальный массив большого размера
 
         self.times[self.ptr] = round((time.time() - self.time_origin) * 1000)
         self.torque_data_c[self.ptr] = self.tension
