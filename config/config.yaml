@@ -4,6 +4,12 @@ modbus:
   timeout: 2.0
   retry_attempts: 3
   poll_interval_ms: 100
+dyno:
+  port_name: 'COM5'
+  rate: 9600
+  bits: 8
+  parity: N
+  stopbit: 1
 ui:
   max_graph_points: 2000
   poll_interval_ms: 100

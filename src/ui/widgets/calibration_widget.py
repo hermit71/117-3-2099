@@ -101,6 +101,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         BlinkingMixin.__init__(self)
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setFrameShadow(QFrame.Shadow.Plain)
+        self.model = None
 
         # Инициализация точек с дефолтными значениями моментов
         self._points: list[CalibPoint] = [
@@ -120,6 +121,23 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self._apply_defaults_to_ui()  # Заполнить дефолтные моменты в UI
         self._load_yaml_if_exists()   # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
         self._update_global_state()
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_dyno_value)
+        self.timer.start(200)
+
+    def _set_model(self, model):
+        self.model = model
+
+    def update_dyno_value(self):
+        value = self.model.dyno_data.get_value()
+        for idx, r in enumerate(self._rows):
+            pt = self._points[idx]
+            if not pt.fixed:
+                r["spn_ref"].setValue(value)
+
+        # btn: QPushButton = t.cast(QPushButton, row["btn_set"])  # type: ignore
+        # spn_torque: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_torque"])  # type: ignore
+        # spn_ref: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_ref"])  # type: ignore
 
     # ----------------------------- UI BUILD ---------------------------------
     def _build_ui(self):

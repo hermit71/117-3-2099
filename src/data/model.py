@@ -15,7 +15,7 @@ application can react.
 from PyQt6.QtCore import QObject, pyqtSignal as Signal, pyqtSlot as Slot
 
 from src.command_handler import CommandHandler
-from src.data.realtime_data import RealTimeData
+from src.data.realtime_data import RealTimeData, Dyno
 
 
 class Model(QObject):
@@ -51,6 +51,7 @@ class Model(QObject):
         self.config = config
         # Данные которые (пишем в/получаем из) регистров Modbus ПЛК с частотой опроса
         self.realtime_data = RealTimeData(self.config, self)
+        self.dyno_data = Dyno(self.config)
         self.command_handler = CommandHandler(self)
 
         self.realtime_data.data_updated.connect(self.rt_data_changed)

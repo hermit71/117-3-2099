@@ -186,6 +186,7 @@ class MainWindow(QMainWindow):
         self.pageHand_control.config(model=self.model)
 
     def _configure_calibration_screen(self) -> None:
+        self.frCalibration._set_model(self.model)
         pass
         # подсказки IDE для self: Ui_MainWindow
         # self: "Ui_MainWindow" = cast("Ui_MainWindow", self)

@@ -20,6 +20,7 @@ import asyncio
 from pymodbus.client import ModbusTcpClient
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
+from src.data.dyno import SerialHandler
 
 REALTIME_DATA_WINDOW = 60    # временное окно для хранения данных (мин)
 PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
@@ -319,3 +320,24 @@ class RealTimeData(QObject):
         if self.poller.timer:
             self.poller.timer.setInterval(self.poll_interval)
         # self.poller.init_modbus()
+
+class Dyno(QObject):
+    def __init__(self, config):
+        QObject.__init__(self)
+        self.config = config
+        self.dyno_value = 0.0
+        self.port_name = self.config.get('dyno', 'port_name')
+        # Для работы с динамометром АЦД/1У обмен с COM портом переносим в отдельный поток
+        self.serial_dyno = SerialHandler(self.port_name)
+        self.dyno_thread = QThread()
+        self.serial_dyno.moveToThread(self.dyno_thread)
+        self.dyno_thread.start()
+        self.serial_dyno.response_ready.connect(self.update)
+
+    @Slot(str, float)
+    def update(self, value_text, value):
+        # print(f'{value_text}: {value}')
+        self.dyno_value = value
+
+    def get_value(self):
+        return self.dyno_value
