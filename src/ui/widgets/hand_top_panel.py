@@ -23,8 +23,8 @@ class DashboardPanel(QFrame):
 
     def _setup_ui(self):
         self.hbox = QHBoxLayout()
-        self.hbox.setSpacing(18)
-        self.hbox.setContentsMargins(0, 0, 0, 0)
+        self.hbox.setSpacing(12)
+        self.hbox.setContentsMargins(1, 1, 1, 1)
         self.hbox.addWidget(self.value_torque)
         self.hbox.addWidget(self.value_velocity)
         self.hbox.addWidget(self.value_angle)
