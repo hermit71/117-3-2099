@@ -1058,24 +1058,24 @@
               <x>30</x>
               <y>90</y>
               <width>201</width>
-              <height>141</height>
+              <height>181</height>
              </rect>
             </property>
             <property name="title">
              <string>Коэффициенты ПИД-регулятора</string>
             </property>
-            <widget class="QWidget" name="">
+            <widget class="QWidget" name="layoutWidget">
              <property name="geometry">
               <rect>
                <x>10</x>
                <y>30</y>
-               <width>181</width>
+               <width>171</width>
                <height>91</height>
               </rect>
              </property>
              <layout class="QFormLayout" name="formLayout_4">
               <item row="0" column="0">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="dsbKP">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -1109,7 +1109,7 @@
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+               <widget class="QDoubleSpinBox" name="dsbKI">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -1143,7 +1143,7 @@
                </widget>
               </item>
               <item row="2" column="0">
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+               <widget class="QDoubleSpinBox" name="dsbKD">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -1178,6 +1178,36 @@
               </item>
              </layout>
             </widget>
+            <widget class="QPushButton" name="btnSavePID">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>130</y>
+               <width>171</width>
+               <height>42</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>42</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Сохранить</string>
+             </property>
+            </widget>
            </widget>
           </widget>
          </widget>
@@ -1194,7 +1224,7 @@
      <x>0</x>
      <y>0</y>
      <width>1743</width>
-     <height>22</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

@@ -6,8 +6,9 @@ commands are reported via the ``error`` signal.
 """
 
 import logging
+import struct
 
-from PyQt6.QtCore import QObject, pyqtSignal as Signal
+from PyQt6.QtCore import QObject, pyqtSignal as Signal, QTimer
 
 CONTROL_BITS = {
     "power_on": 0,
@@ -25,6 +26,52 @@ CONTROL_CMD = {
     "move_to_angle": 0b100,
     "stop": 0b111,
 }
+
+def words_to_float(word1, word2, byte_order="CDAB"):
+    """
+    Преобразует два 16-битных слова (WORD) в 32-битное число float.
+
+    :param word1: Первое 16-битное слово (из первого регистра).
+    :param word2: Второе 16-битное слово (из второго регистра).
+    :param byte_order: Порядок байт/слов. "CDAB" (swapped) или "ABCD" (big-endian).
+    :return: Значение float.
+    """
+    if byte_order == "CDAB":  # Младшее слово первое
+        packed_bytes = struct.pack('>HH', word2, word1)
+    elif byte_order == "ABCD":  # Старшее слово первое
+        packed_bytes = struct.pack('>HH', word1, word2)
+    else:
+        raise ValueError("Неподдерживаемый порядок байт. Используйте 'CDAB' или 'ABCD'.")
+
+    # Распаковываем 4 байта как big-endian float
+    float_val = struct.unpack('>f', packed_bytes)[0]
+    return float_val
+
+def float_to_words(float_val, byte_order="CDAB"):
+    """
+    Преобразует 32-битное число float в два 16-битных слова (WORD).
+
+    :param float_val: Значение float для преобразования.
+    :param byte_order: Порядок слов. "CDAB" (swapped) или "ABCD" (big-endian).
+    :return: Кортеж из двух 16-битных слов (word1, word2).
+    """
+    # Упаковываем float в 4-байтовую последовательность (big-endian)
+    packed_bytes = struct.pack('>f', float_val)
+
+    # Распаковываем 4 байта в два 16-битных беззнаковых целых числа (WORD)
+    # Это дает нам слова в порядке "ABCD" (старшее, затем младшее)
+    word_abcd = struct.unpack('>HH', packed_bytes)
+    word1_abcd, word2_abcd = word_abcd[0], word_abcd[1]
+
+    if byte_order == "ABCD":
+        return (word1_abcd, word2_abcd)
+    elif byte_order == "CDAB":
+        # Для порядка "CDAB" меняем слова местами
+        return (word2_abcd, word1_abcd)
+    else:
+        raise ValueError("Неподдерживаемый порядок байт. Используйте 'CDAB' или 'ABCD'.")
+
+
 
 class CommandHandler(QObject):
     """Dispatches control commands to the PLC.
@@ -48,6 +95,13 @@ class CommandHandler(QObject):
         self.write_to_plc.connect(
             self.parent.realtime_data.modbus_registers_to_PLC_update
         )
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.setInterval(250)  # интервал 1000 мс (1 секунда)
+        self.timer.timeout.connect(self.on_singleshot_timer)
+
+    def on_singleshot_timer(self):
+        self._clear_control_bit(CONTROL_BITS["write_retain"])
 
     def set_plc_mode(self, mode):
         """Set the PLC operating mode.
@@ -91,6 +145,9 @@ class CommandHandler(QObject):
         """Turn off the servo drive."""
         self._clear_control_bit(CONTROL_BITS["power_on"])
 
+    def write_retain(self):
+        self._set_control_bit(CONTROL_BITS["write_retain"])
+
     def reset_error(self):
         """Reset the servo drive error."""
         self._set_control_bit(CONTROL_BITS["reset_error"])
@@ -122,6 +179,14 @@ class CommandHandler(QObject):
     def stop(self):
         """Stop motion and reset setpoints to zero."""
         self._do_command("stop")
+
+    def set_PID_parameters(self, kp, ki, kd):
+        """Set PID parameters."""
+        regs_ = self.parent.modbus_write_regs
+        regs_["Modbus_KP"] = kp
+        regs_["Modbus_KI"] = ki
+        regs_["Modbus_KD"] = kd
+        self.write_to_plc.emit(regs_)
 
     def set_plc_register(self, name='Modbus_CTRL', value=0):
         """Write a raw value to a Modbus register."""

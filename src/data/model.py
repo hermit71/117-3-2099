@@ -63,6 +63,9 @@ class Model(QObject):
             'Modbus_VelocitySV': 0,  # Задание скорости сервопривода
             'Modbus_DQ_CTRL': 0,  # Прямое управление дискретными выходами
             'Modbus_UZ_CTRL': 0,  # Прямое управление сервоприводом
+            'Modbus_KP': 1.0,
+            'Modbus_KI': 0.01,
+            'Modbus_KD': 0.0,
             'Modbus_AUX': 0,  # Резерв
         }
 
