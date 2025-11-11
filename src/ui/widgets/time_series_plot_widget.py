@@ -224,6 +224,12 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
         self._cursor_index = 0
         self.update(data, 0)
 
+    def update_2(self, data: np.ndarray) -> None:
+        if data is not None:
+            self._data = data
+
+        pass
+
     def update(self, data: Optional[np.ndarray] = None, cursor_index: Optional[int] = None) -> None:  # noqa: D401
         """Обновить отображаемый срез.
 
@@ -360,8 +366,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
 
     w = TimeSeriesPlotWidget(
-        x_window_seconds=30.0,
-        points_per_window=1200,
+        x_window_seconds=5.0,
         y_range=(-2.0, 2.0),
         background="k",
         antialias=True,
@@ -403,7 +408,7 @@ if __name__ == "__main__":
 
     timer = QtCore.QTimer()
     timer.timeout.connect(on_timer)
-    timer.start(50)
+    timer.start(25)
 
     w.show()
     sys.exit(app.exec())

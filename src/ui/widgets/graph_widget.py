@@ -100,10 +100,6 @@ class GraphWidget(pg.PlotWidget):
         start_indx = max(
             0, model.realtime_data.ptr - (self.parent.time_window * 40 + 100)
         )
-        #time_data = model.realtime_data.times[
-        #    start_indx:model.realtime_data.ptr
-        #]
-        # value_data = ds[start_indx:model.realtime_data.ptr]
         value_data = model.realtime_data.get_visible_chunk(dataset_name)
         time_data = [i for i in range(model.config.get('ui', 'max_graph_points', 1000))]
         self.curve.setData(time_data, value_data)

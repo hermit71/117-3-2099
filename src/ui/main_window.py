@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from PyQt6.QtCore import Qt, pyqtSlot as Slot
+from PyQt6.QtCore import Qt, pyqtSlot as Slot, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -139,6 +139,10 @@ class MainWindow(QMainWindow):
         self._configure_service_screen()
         self._configure_status_bar()
         self._connect_signals()
+
+        self.base_timer = QTimer()
+        self.base_timer.timeout.connect(self.on_timer)
+        self.base_timer.start(100)
 
     # ------------------------------------------------------------------
     # Настройка меню и основных разделов
@@ -433,3 +437,6 @@ class MainWindow(QMainWindow):
 
     def handle_emergency_reset_command(self) -> None:
         self.model.command_handler.alarm_reset()
+
+    def on_timer(self):
+        pass

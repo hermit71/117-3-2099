@@ -277,8 +277,8 @@ class RealTimeData(QObject):
                 return self.velocity_data
         return None
 
-    def get_visible_chunk(self, dataset_name):
-        ds = self.torque_data_scaled # self._get_dataset_by_name(dataset_name)
+    def get_visible_chunk(self):
+        ds = self.torque_data_scaled
         points = self.config.get('ui', 'max_graph_points', 1000)
         max_buffer_index = self.data_window_length - points
         if self.curr_index <= max_buffer_index:
