@@ -17,11 +17,26 @@ logging:
   level: INFO
   file: stand_control.log
 graphs:
+  x_view_range:
+    start: 0
+    end: 30
+  base_axis_style:
+    background: '#000000'
+    axis_pen: '#000000'
+    tick_pen: '#C0C0C0'
+    text_pen: '#000000'
+    grid_alpha: 80
   tension plot:
     line_color: '#7eafff'
     background: '#FEFEFA'
     grid_color: '#C8C8C8'
     line_width: 2
+    axis_style:
+      background: '#FEFEFA'
+      axis_pen: '#000000'
+      tick_pen: '#C0C0C0'
+      text_pen: '#000000'
+      grid_alpha: 80
   velocity plot:
     line_color: '#7eafff'
     background: '#FEFEFA'

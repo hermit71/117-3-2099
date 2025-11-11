@@ -360,7 +360,7 @@
            <number>1</number>
           </property>
           <property name="currentIndex">
-           <number>7</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="pageHand">
            <layout class="QVBoxLayout" name="verticalLayout_19">
@@ -392,7 +392,7 @@
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="12,3">
                   <item>
-                   <widget class="HandGraphPanel" name="pageHand_pnlGraph">
+                   <widget class="PlotPanel" name="pageHand_pnlGraph">
                     <property name="frameShape">
                      <enum>QFrame::Shape::NoFrame</enum>
                     </property>
@@ -412,29 +412,6 @@
                      <property name="bottomMargin">
                       <number>0</number>
                      </property>
-                     <item>
-                      <layout class="QVBoxLayout" name="verticalLayout_4">
-                       <item>
-                        <widget class="QFrame" name="frame_4">
-                         <property name="frameShape">
-                          <enum>QFrame::Shape::StyledPanel</enum>
-                         </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_6">
-                          <item>
-                           <widget class="PlotPanel" name="frame_3">
-                            <property name="frameShape">
-                             <enum>QFrame::Shape::StyledPanel</enum>
-                            </property>
-                            <property name="frameShadow">
-                             <enum>QFrame::Shadow::Raised</enum>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </widget>
-                       </item>
-                      </layout>
-                     </item>
                     </layout>
                    </widget>
                   </item>
@@ -1064,7 +1041,7 @@
             <property name="title">
              <string>Коэффициенты ПИД-регулятора</string>
             </property>
-            <widget class="QWidget" name="">
+            <widget class="QWidget" name="layoutWidget">
              <property name="geometry">
               <rect>
                <x>10</x>
@@ -1225,12 +1202,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>HandGraphPanel</class>
-   <extends>QFrame</extends>
-   <header>src.ui.widgets.hand_graph_panel</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>LedDashboardPanel</class>
    <extends>QFrame</extends>

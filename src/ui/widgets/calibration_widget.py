@@ -111,7 +111,6 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self._active_row_idx: int | None = None
         self.plt_torque = TimeSeriesPlotWidget(
             x_window_seconds=X_AXIS_RANGE,
-            points_per_window=POINTS_PER_WINDOW,
             y_range=(-50.0, 50.0),
             background="w",
             antialias=True,

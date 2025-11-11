@@ -10,7 +10,6 @@ from PyQt6.QtWidgets import QWidget
 # именам, объявленным в ``.ui`` файлах.  Сами классы не используются напрямую в
 # коде модуля, поэтому подавляем предупреждения линтера.
 from src.ui.widgets.graph_widget import GraphWidget  # noqa: F401
-from src.ui.widgets.hand_graph_panel import HandGraphPanel  # noqa: F401
 from src.ui.widgets.hand_right_panel import LedDashboardPanel  # noqa: F401
 from src.ui.widgets.hand_top_panel import DashboardPanel  # noqa: F401
 from src.utils.spin_box_int_to_float import AppSpinBox  # noqa: F401

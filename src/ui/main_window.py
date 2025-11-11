@@ -168,20 +168,6 @@ class MainWindow(QMainWindow):
             model=self.model,
             led_dashboards=dashboards.hand_right_panel_led_dashboards,
         )
-
-        # default_graphs_cfg = dashboards.hand_graphs_setting_default
-        graphs_cfg = self.config.cfg.get("graphs", {})
-        for name, desc in dashboards.hand_graphs:
-            cfg = graphs_cfg.get(name, {})
-            desc["line_color"] = cfg.get("line_color", desc["line_color"])
-            desc["background"] = cfg.get("background", desc["background"])
-            desc["grid_color"] = cfg.get("grid_color", desc["grid_color"])
-            desc["line_width"] = cfg.get("line_width", desc["line_width"])
-
-        self.pageHand_pnlGraph.graph_config(
-            model=self.model,
-            plots_description=dashboards.hand_graphs,
-        )
         self.pageHand_pnlTopDashboard.config(model=self.model)
         self.pageHand_control.config(model=self.model)
 

@@ -25,6 +25,7 @@ import pyqtgraph as pg
 Number = Union[int, float]
 ColorLike = Union[str, Tuple[int, int, int], Tuple[int, int, int, int], pg.QtGui.QColor]
 
+NUMBERS_PER_SECONDS = 250
 
 class _PanViewBox(pg.ViewBox):
     """Пользовательский ViewBox: вместо сдвига диапазонов осей меняем «курсор-срез».
@@ -95,7 +96,6 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
     def __init__(
         self,
         x_window_seconds: float = 30.0,
-        points_per_window: int = 1200,
         y_range: Tuple[Number, Number] = (-1.0, 1.0),
         background: str = "w",
         antialias: bool = True,
@@ -108,7 +108,7 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
 
         # Хранение параметров окна
         self._x_window_seconds: float = float(x_window_seconds)
-        self._points_per_window: int = int(points_per_window)
+        self._points_per_window: int = int(x_window_seconds * NUMBERS_PER_SECONDS)
         self._dt: float = self._x_window_seconds / max(1, (self._points_per_window - 1))
         self._y_range: Tuple[Number, Number] = y_range
 

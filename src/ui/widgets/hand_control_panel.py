@@ -44,8 +44,6 @@ class HandControlPanel(QFrame):
         if model is not None:
             self.model = model
             self.data_set = self.model.realtime_data
-            print(f"in hand_control_panel: {self.data_set}")
-
 
 
     # ---------- Группа 1: Сервопривод ----------

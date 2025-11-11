@@ -9,24 +9,34 @@ class GraphWidget(pg.PlotWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        # Диапазон оси X графика (в единицах времени)
-        # self.x_view_range = {'start': 0, 'end': self.parent.time_window}
-        self.x_view_range = {'start': 0, 'end': 30}
-        self.x_view_range_ms = {'start': 0, 'end': 1000 * 30}
+        if self.parent is not None:
+            self.config = parent.config
+            self.model = parent.model
+        else:
+            print('GraphWidget has no parent, unable to initialize GraphWidget')
+            return
+        if self.config is not None:
+            # Диапазон оси X графика (в единицах времени)
+            self.x_view_range = self.config.get("x_view_range", {'start': 0, 'end': 30})
+            self.x_view_range_ms = {
+                'start': self.x_view_range['start'],
+                'end': self.x_view_range['end'] * 1000
+            }
+        else:
+            print('GraphWidget get no config, unable to initialize GraphWidget')
+            return
+
         # Диапазон данных для отображения
         self.x_data_range = {'start': 0, 'end': 0}
+
         self.setXRange(self.x_view_range['start'], self.x_view_range['end'])
         self.getPlotItem().setLabel('bottom', 'Время, с')
 
         # Base curve pen and default styling
         self.base_pen = pg.mkPen(color="#1C1CF0", width=2)
-        self.apply_axes_style(
-            background="#FEFEFA",
-            axis_pen="#000000",
-            tick_pen="#C0C0C0",
-            text_pen="#000000",
-            grid_alpha=80,
-        )
+
+        self.apply_axes_style(self.config.get("base_axes_style", {}))
+
         self.curve = self.plot(pen=self.base_pen)
         self.apply_style(
             line_color="#1C1CF0",
@@ -53,11 +63,7 @@ class GraphWidget(pg.PlotWidget):
 
     def apply_axes_style(
         self,
-        background: str,
-        axis_pen: str,
-        tick_pen: str,
-        text_pen: str,
-        grid_alpha: int = 80,
+        style: dict
     ) -> None:
         """Apply styling for background, axes and grid.
 
@@ -75,14 +81,15 @@ class GraphWidget(pg.PlotWidget):
             Opacity (0-255) for grid lines.
         """
 
-        self.setBackground(background)
+        self.setBackground(style['background'])
         plot_item = self.getPlotItem()
-        plot_item.showGrid(x=True, y=True, alpha=grid_alpha / 255.0)
+        plot_item.showGrid(x=True, y=True, alpha=style['grid_alpha'] / 255.0)
         for axis in ("left", "bottom"):
             axis_item = plot_item.getAxis(axis)
-            axis_item.setPen(pg.mkPen(axis_pen))
-            axis_item.setTickPen(pg.mkPen(tick_pen))
-            axis_item.setTextPen(pg.mkPen(text_pen))
+            axis_item.setPen(pg.mkPen(style['axis_pen']))
+            axis_item.setTickPen(pg.mkPen(style['tick_pen']))
+            axis_item.setTextPen(pg.mkPen(style['text_pen']))
+
 
     def update_plot(self, dataset_name):
         """Redraw the graph using the specified dataset."""
