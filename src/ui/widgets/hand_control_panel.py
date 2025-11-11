@@ -247,7 +247,6 @@ class HandControlPanel(QFrame):
         # Применить правила доступности (блокировка других кнопок виджета)
         self._apply_enable_rules()
 
-
     # Раздельные обработчики для кнопок направления
     def _on_ccw_pressed(self):
         print("[STUB] Manual CCW pressed")

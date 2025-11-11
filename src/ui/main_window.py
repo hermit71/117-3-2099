@@ -136,6 +136,7 @@ class MainWindow(QMainWindow):
 
         self._configure_hand_screen()
         self._configure_calibration_screen()
+        self._configure_service_screen()
         self._configure_status_bar()
         self._connect_signals()
 
@@ -195,6 +196,15 @@ class MainWindow(QMainWindow):
         # new_table.setObjectName(u"table_calibrate_points")
         # lay = self.table_calibrate_points.parentWidget().layout()
         # lay.replaceWidget(self.table_calibrate_points, new_table)
+
+    def _configure_service_screen(self) -> None:
+        kp = self.config.get("pid", "kp", 1.0)
+        ki = self.config.get("pid", "ki", 0.01)
+        kd = self.config.get("pid", "kd", 0.0)
+        self.dsbKP.setValue(kp)
+        self.dsbKI.setValue(ki)
+        self.dsbKD.setValue(kd)
+        self.btnSavePID.clicked.connect(self.on_btn_save_pid)
 
     def _configure_status_bar(self) -> None:
         """Добавить виджет состояния соединения в строку состояния."""
@@ -388,6 +398,19 @@ class MainWindow(QMainWindow):
     def on_btn_emergency_reset_clicked(self) -> None:
         """Обработать нажатие кнопки сброса аварии."""
         self.handle_emergency_reset_command()
+
+    # ------------------------------------------------------------------
+    # Кнопки страницы СЕРВИС
+    # ------------------------------------------------------------------
+    @Slot()
+    def on_btn_save_pid(self):
+        self.config.cfg["pid"]["kp"] = self.dsbKP.value()
+        self.config.cfg["pid"]["ki"] = self.dsbKI.value()
+        self.config.cfg["pid"]["kd"] = self.dsbKD.value()
+        self.config.save()
+        self.command_handler.set_PID_parameters(self.dsbKP.value(), self.dsbKI.value(), self.dsbKD.value())
+        self.command_handler.write_retain()
+        self.command_handler.timer.start()
 
     # ------------------------------------------------------------------
     # Заглушки для команд управления

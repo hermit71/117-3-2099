@@ -21,6 +21,7 @@ from pymodbus.client import ModbusTcpClient
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
 from src.data.dyno import SerialHandler
+from src.command_handler import float_to_words, words_to_float
 
 REALTIME_DATA_WINDOW = 60    # временное окно для хранения данных (мин)
 PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
@@ -157,9 +158,7 @@ class RealTimeData(QObject):
         self.angle = 0              # Угол поворота в градусах нескорректированный
         self.velocity = 0           # Скорость нарастания момента
 
-        # Слово управления для отправки в ПЛК
-        self.plc_control_word = 0x00
-        self.write_regs = [0x00] * 10  # 10 регистров для записи в ПЛК
+        self.write_regs = [0x00] * 22  # 10 регистров для записи в ПЛК
 
         # Для обмена по Modbus создаем отдельный поток
         # переносим в отдельный поток
@@ -235,7 +234,7 @@ class RealTimeData(QObject):
             self.torque_data_scaled[:-BUFFER_LENGTH] = self.torque_data_scaled[BUFFER_LENGTH:]
             index = self.data_window_length - BUFFER_LENGTH
         self.torque_data_scaled[index:index+BUFFER_LENGTH] = buf[:]
-        # print(f'{index} : {self.torque_data_scaled[index-100:index+100]}')
+
 
     def get_real_tension_nc(self, torque_adc):
         """Преобразование регистров в значение крутящего момента (нескорректированного)"""
@@ -309,8 +308,20 @@ class RealTimeData(QObject):
                     self.write_regs[3] = reg
                 case 'Modbus_UZ_CTRL':
                     self.write_regs[4] = reg
+                case 'Modbus_KP':
+                    _kp = float_to_words(reg)
+                    self.write_regs[5] = _kp[0]
+                    self.write_regs[6] = _kp[1]
+                case 'Modbus_KI':
+                    _ki = float_to_words(reg)
+                    self.write_regs[7] = _ki[0]
+                    self.write_regs[8] = _ki[1]
+                case 'Modbus_KD':
+                    _kd = float_to_words(reg)
+                    self.write_regs[9] = _kd[0]
+                    self.write_regs[10] = _kd[1]
                 case 'Modbus_AUX':
-                    self.write_regs[5] = reg
+                    self.write_regs[11] = reg
 
     @Slot()
     def update_connection_settings(self):

@@ -47,7 +47,7 @@ class ValueDisplay(QFrame):
         self.setFixedSize(QSize(175,72))
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setFrameShadow(QFrame.Shadow.Plain)
-        self.vbox.setContentsMargins(0, 0, 0, 0)
+        self.vbox.setContentsMargins(1, 1, 1, 1)
         self.vbox.setSpacing(0)
         self.vbox.setStretch(0, 10)
         self.vbox.setStretch(1, 16)
