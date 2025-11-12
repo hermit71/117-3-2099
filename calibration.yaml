@@ -21,15 +21,15 @@ points:
   fixed: true
 - index: 6
   commanded_torque: 10.0
-  reference_reading: 0.15
+  reference_reading: 0.0
   fixed: true
 - index: 7
   commanded_torque: 15.0
-  reference_reading: 0.25
+  reference_reading: 0.0
   fixed: true
 - index: 8
   commanded_torque: 25.0
-  reference_reading: 0.3
+  reference_reading: 0.0
   fixed: true
 - index: 9
   commanded_torque: 35.0

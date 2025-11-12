@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import typing as t
 from dataclasses import dataclass
+import numpy as np
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
@@ -22,6 +23,12 @@ from PyQt6.QtWidgets import (
 )
 import yaml  # PyYAML
 from src.ui.widgets.time_series_plot_widget import TimeSeriesPlotWidget
+from src.utils.utils import (
+    int_to_word,
+)
+from src.utils.config import (
+    Config,
+)
 
 CALIB_POINTS = 10
 YAML_PATH = "calibration.yaml"
@@ -102,11 +109,14 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setFrameShadow(QFrame.Shadow.Plain)
         self.model = None
+        self.data_source = None
+        self.config = None
 
         # Инициализация точек с дефолтными значениями моментов
         self._points: list[CalibPoint] = [
             CalibPoint(i, commanded_torque=DEFAULT_TORQUES[i - 1]) for i in range(1, CALIB_POINTS + 1)
         ]
+        self.calib_coeff = {'A1': 0.0, 'B1': 1.0, 'C1': 0.0} # Коэффициенты калибровки датчика момента
         self._rows: list[dict[str, QWidget]] = []
         self._active_row_idx: int | None = None
         self.plt_torque = TimeSeriesPlotWidget(
@@ -121,11 +131,21 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self._load_yaml_if_exists()   # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
         self._update_global_state()
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_dyno_value)
-        self.timer.start(200)
+        self.timer.timeout.connect(self._on_timer)
+        self.timer.start(100)
 
     def _set_model(self, model):
         self.model = model
+        self.data_source = self.model.realtime_data
+
+    def _set_config(self, config: Config):
+        self.config = config
+        if self.config is not None:
+            self.calib_coeff = (
+                self.config.get("calibration", 'A1'),
+                self.config.get("calibration", 'B1'),
+                self.config.get("calibration", 'C1'),
+            )
 
     def update_dyno_value(self):
         value = self.model.dyno_data.get_value()
@@ -134,9 +154,10 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             if not pt.fixed:
                 r["spn_ref"].setValue(value)
 
-        # btn: QPushButton = t.cast(QPushButton, row["btn_set"])  # type: ignore
-        # spn_torque: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_torque"])  # type: ignore
-        # spn_ref: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_ref"])  # type: ignore
+    def update_plots(self):
+        torque_data = self.data_source.torque_data_scaled
+        torque_data_indx = self.data_source.head
+        self.plt_torque.update(torque_data, torque_data_indx)
 
     # ----------------------------- UI BUILD ---------------------------------
     def _build_ui(self):
@@ -384,14 +405,14 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             self._set_other_rows_enabled(False, except_idx=idx)
             # Включаем мигание всей строки
             self.start_blink(widget=row.get("btn_set"))
+            # Стартуем работу сервопривоода в режиме ПИД регулирования по моменту
+            tv = int_to_word(int(500 * spn_torque.value()))
+            self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
+            self.model.command_handler.torque_hold()
         elif self._active_row_idx == idx:
+            self.model.command_handler.halt()
             # Фиксация значений
-            torque = spn_torque.value()
-            if not (0.0 <= torque <= 50.0):
-                QMessageBox.warning(self, "Ошибка", "Момент должен быть в диапазоне 0..50 Нм")
-                return
-
-            pt.commanded_torque = torque
+            pt.commanded_torque = spn_torque.value()
             pt.reference_reading = spn_ref.value()
             pt.fixed = True
 
@@ -438,7 +459,17 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self.btn_compute.setEnabled(all_fixed)
 
     def _on_compute_clicked(self):
-        # Заглушка: здесь бы происходил расчёт коэффициентов и сохранение YAML
+        # Расчёт коэффициентов и сохранение в YAML
+        x, y = self.get_xy_arrays()
+        # Аппроксимация полиномом 2-го порядка
+        coeffs = np.polyfit(x, y, 2)
+        A, B, C = coeffs  # коэффициенты полинома y = Ax^2 + Bx + C
+        self.config.cfg["calibration"]["A1"] = A
+        self.config.cfg["calibration"]["B1"] = B
+        self.config.cfg["calibration"]["C1"] = C
+        self.config.save()
+        print(f"A={A}, B={B}, C={C}")
+
         self._save_yaml()
         QMessageBox.information(
             self,
@@ -499,6 +530,19 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         except Exception as exc:
             QMessageBox.warning(self, "Ошибка сохранения", f"Не удалось сохранить {YAML_PATH}: {exc}")
 
+    def get_xy_arrays(self):
+        # Извлечение commanded_torque и reference_reading в отдельные списки
+        x_list = [pt.commanded_torque for pt in self._points]
+        y_list = [pt.reference_reading for pt in self._points]
+
+        # Преобразование списков в numpy массивы
+        x = np.array(x_list)
+        y = np.array(y_list)
+        return x, y
+
+    def _on_timer(self):
+        self.update_dyno_value()
+        self.update_plots()
 
 # ------------------------------- DEMO APP -----------------------------------
 if __name__ == "__main__":

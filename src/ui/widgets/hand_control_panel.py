@@ -17,7 +17,9 @@ from PyQt6.QtWidgets import (
 from src.ui.dialogs import (
     HandRegulatorSettingsDialog,
 )
-import struct
+from src.utils.utils import (
+    int_to_word,
+)
 
 class HandControlPanel(QFrame):
     def __init__(self, parent: QWidget | None = None):
@@ -232,7 +234,7 @@ class HandControlPanel(QFrame):
 
         return gb
 
-    # ---------- Обработчики (заглушки) ----------
+    # ---------- Обработчики  ----------
     def _on_servo_power_toggled(self, checked: bool):
         self.btn_servo_power.setText("Сервопривод ВКЛ" if checked else "Сервопривод ВЫКЛ")
         print(f"[STUB] Servo power toggled -> {'ON' if checked else 'OFF'}")
@@ -295,7 +297,7 @@ class HandControlPanel(QFrame):
             self.slider_torque.blockSignals(False)
         print(f"[STUB] Torque spin -> {value:.1f} Nm")
 
-        tv = self.int_to_word(int(500 * self.spin_torque.value()))
+        tv = int_to_word(int(500 * self.spin_torque.value()))
         self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
 
     def _on_torque_slider_changed(self, ivalue: int):
@@ -305,7 +307,7 @@ class HandControlPanel(QFrame):
             self.spin_torque.setValue(v)
             self.spin_torque.blockSignals(False)
         print(f"[STUB] Torque slider -> {v:.1f} Nm")
-        tv = self.int_to_word(int(500 * self.spin_torque.value()))
+        tv = int_to_word(int(500 * self.spin_torque.value()))
         self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
 
     def _on_rate_changed(self, value: float):
@@ -332,7 +334,7 @@ class HandControlPanel(QFrame):
         print(f"[STUB] RUN toggled -> {'RUN' if checked else 'STOP'}")
         # Требование (2): при ПУСК нажат — кнопки направления disabled; иначе зависят от питания
         self._apply_enable_rules()
-        tv = self.int_to_word(int(500 * self.spin_torque.value()))
+        tv = int_to_word(int(500 * self.spin_torque.value()))
         if checked:
             self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
             self.model.command_handler.torque_hold()
@@ -357,10 +359,6 @@ class HandControlPanel(QFrame):
         enable_dirs = power_on and (not running)
         self.btn_ccw.setEnabled(enable_dirs)
         self.btn_cw.setEnabled(enable_dirs)
-
-    def int_to_word(self, value: int) -> int:
-        # Преобразует signed int16 (-32768..32767) в unsigned WORD (0..65535)
-        return struct.unpack('>H', struct.pack('>h', value))[0]
 
 # ---------------------- Запуск и проверка ----------------------
 if __name__ == "__main__":

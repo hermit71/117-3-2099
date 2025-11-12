@@ -23,9 +23,6 @@ from pymodbus.exceptions import ModbusException
 from src.data.dyno import SerialHandler
 from src.command_handler import float_to_words, words_to_float
 
-REALTIME_DATA_WINDOW = 60    # временное окно для хранения данных (мин)
-PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
-
 READ_BUFFER_SIZE = 110
 BUFFER_LENGTH = 50          # размер буфера данных от ПЛК
 DI_ADDRESS = 0
@@ -37,6 +34,13 @@ BUFFER_ADDRESS = 10
 INDEX_ADDRESS = 60
 WRITE_BUFFER_ADDRESS = 111
 
+BUF_START = BUFFER_ADDRESS
+BUF_END = BUFFER_ADDRESS + BUFFER_LENGTH
+
+REALTIME_DATA_WINDOW = 1    # временное окно для хранения данных (мин)
+PLC_POLLING_INTERVAL = 4    # интервал опроса датчиков контроллером (мс)
+DATA_STORAGE_LEN = REALTIME_DATA_WINDOW * 60 * 1000 / PLC_POLLING_INTERVAL
+DATA_STORAGE_END_INDX = DATA_STORAGE_LEN - BUFFER_LENGTH - 1 # Последний индекс, куда можно писать (с учетом размера буфера)
 
 class ModbusPoller(QObject):
     """Background worker handling Modbus communication.
@@ -47,7 +51,7 @@ class ModbusPoller(QObject):
 
     def __init__(self, data_set):
         """Initialize poller with a reference to the data set.
-        Инициализировать опрос ПЛК со ссылкой на набор данных.
+        Инициализировать опрос ПЛК со ссылкой на набо+р данных.
         """
         QObject.__init__(self)
         logging.debug('worker init')
@@ -118,9 +122,7 @@ class RealTimeData(QObject):
         # период опроса в секундах
         self.poll_interval_s = float(self.poll_interval) / 1000.0
         # Длина массива данных с учётом интервала опроса датчиков
-        self.data_window_length = int(
-            REALTIME_DATA_WINDOW * 60 * 1000 / PLC_POLLING_INTERVAL
-        )
+        self.data_window_length = int(DATA_STORAGE_LEN)
 
         # Слово состояния дискретных сигналов от ПЛК
         self.in_status = 0x00
@@ -175,30 +177,7 @@ class RealTimeData(QObject):
     @Slot(list)
     def update(self, registers):
         """ Обновление данных по полученным регистрам."""
-        """ От ПЛК приходит индекс начала буфера в виде целого числа (2 байта)
-            Полученный буфер записывается в локальный массив по этому индексу
-            При переполнении индекса отсчет начинается с 0 и необходимо добавлять накопленное смещение
-            чтобы запись в локальный массив происходила последовательно
-        """
-        self.prev_index = self.curr_index                           # Сохраняем предыдущий полученный указатель от ПЛК
-        self.curr_index = registers[INDEX_ADDRESS]                  # Получаем новый указатель от ПЛК
-        if self.prev_index < self.curr_index:
-            self.index_offset = self.curr_index - self.prev_index   # Находим смещение указателя (то есть фактически количество
-        else:                                                       # новых значений которые были записаны в буфер за время
-            self.index_offset = BUFFER_LENGTH + self.curr_index - self.prev_index   # прошедшее между двумя опросами
-
-        buffer_ = registers[BUFFER_ADDRESS:BUFFER_ADDRESS + BUFFER_LENGTH]
-        buffer = [c_short(i).value for i in buffer_]    # читаем буфер и приводим его к типу INT
-
-        index = self.head   # индекс для записи буфера в локальный массив данных датчика
-        self._write_torque_buffer(buffer, index)
-        self.head += self.index_offset  # новый индекс смещаем на фактическое количество новых записей в буфере
-        # Вся вышеуказанная история работает так:
-        # Контроллер читает данные с датчика момента с периодом своего цикла 4 мс в кольцевой буфер размером BUFFER_LENGTH = 50
-        # АРМ читает ВЕСЬ буфер с периодом примерно 100 мс. Этот период в Windows плавает в пределах 50%
-        # поэтому буфер взят с запасом (50 значений, хотя всего за период в среднем мы получаем 25 значений)
-        # текущее смещение которое мы вычисляем каждый раз когда читаем буфер позволяет записывать значения
-        # последовательно без пропусков и дублирования в локальный массив большого размера
+        self._write_torque_buffer(registers)
 
         self.times[self.ptr] = round((time.time() - self.time_origin) * 1000)
         self.torque_data_c[self.ptr] = self.tension
@@ -229,11 +208,38 @@ class RealTimeData(QObject):
         self.in_status = c_short(registers[0]).value
         self.data_updated.emit(registers)
 
-    def _write_torque_buffer(self, buf: list, index):
-        if index > (self.data_window_length - BUFFER_LENGTH - 1):
+    def _write_torque_buffer(self, registers):
+        """ Контроллер читает данные с датчика момента с периодом своего цикла 4 мс в кольцевой буфер размером BUFFER_LENGTH = 50
+            АРМ читает ВЕСЬ буфер с периодом примерно 100 мс. Этот период в Windows плавает в пределах 50%
+            поэтому буфер взят с запасом (50 значений, хотя всего за период 4 мс в среднем мы получаем 25 значений)
+            текущее смещение которое мы вычисляем каждый раз когда читаем буфер позволяет записывать значения
+            последовательно без пропусков и дублирования в локальный массив большого размера
+        """
+
+        self.prev_index = self.curr_index  # Сохраняем предыдущий полученный указатель от ПЛК
+        self.curr_index = registers[INDEX_ADDRESS]  # Получаем новый указатель от ПЛК
+        if self.prev_index < self.curr_index:
+            # Находим смещение указателя (то есть фактически количество
+            # новых значений которые были записаны в буфер за время прошедшее между двумя опросами
+            self.index_offset = self.curr_index - self.prev_index
+        else:
+            self.index_offset = BUFFER_LENGTH + self.curr_index - self.prev_index
+        buffer = [c_short(i).value for i in registers[BUF_START:BUF_END]]  # читаем буфер и приводим его к типу INT
+
+        if self.head > DATA_STORAGE_END_INDX:
+            # Если указатель достиг конца хранилища данных сдвигаем данные в хранилище на размер буфера:
             self.torque_data_scaled[:-BUFFER_LENGTH] = self.torque_data_scaled[BUFFER_LENGTH:]
-            index = self.data_window_length - BUFFER_LENGTH
-        self.torque_data_scaled[index:index+BUFFER_LENGTH] = buf[:]
+            self.head -= BUFFER_LENGTH
+        self.torque_data_scaled[self.head:self.head+BUFFER_LENGTH] = buffer
+
+        # новый индекс смещаем на фактическое количество новых записей в буфере
+        self.head += self.index_offset
+
+    # def _write_torque_buffer(self, buf: list, index):
+    #     if index > (self.data_window_length - BUFFER_LENGTH - 1):
+    #         self.torque_data_scaled[:-BUFFER_LENGTH] = self.torque_data_scaled[BUFFER_LENGTH:]
+    #         index = self.data_window_length - BUFFER_LENGTH
+    #     self.torque_data_scaled[index:index+BUFFER_LENGTH] = buf[:]
 
 
     def get_real_tension_nc(self, torque_adc):

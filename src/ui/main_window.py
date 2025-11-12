@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.data.model import Model
+from src.data.realtime_data import RealTimeData
 from  src.models.modeldata import ModbusDataSource
 from src.ui.designer_loader import load_ui
 from src.ui.dialogs import (
@@ -122,7 +123,9 @@ class MainWindow(QMainWindow):
         self._setup_menu()
 
         self.model = Model(self.config)
-        self.data_source = ModbusDataSource(self.config.cfg)
+        self.realtime_data = self.model.realtime_data
+
+        # self.data_source = ModbusDataSource(self.config.cfg)
 
         self.command_handler = self.model.command_handler
         self.connection_ctrl = cw.ConnectionControl()
@@ -173,33 +176,13 @@ class MainWindow(QMainWindow):
             model=self.model,
             led_dashboards=dashboards.hand_right_panel_led_dashboards,
         )
+        self.pageHand_pnlGraph.config(self.realtime_data)
         self.pageHand_pnlTopDashboard.config(model=self.model)
         self.pageHand_control.config(model=self.model)
 
     def _configure_calibration_screen(self) -> None:
         self.frCalibration._set_model(self.model)
-        pass
-        # подсказки IDE для self: Ui_MainWindow
-        # self: "Ui_MainWindow" = cast("Ui_MainWindow", self)
-        #
-        # headers = ["Задание момента", "Значение", "Эталон"]
-        # data = [
-        #     [0.0, "", ""],
-        #     [5.0, "", ""],
-        #     [10.0, "", ""],
-        #     [15.0, "", ""],
-        #     [20.0, "", ""],
-        #     [25.0, "", ""],
-        #     [30.0, "", ""],
-        #     [35.0, "", ""],
-        #     [40.0, "", ""],
-        #     [45.0, "", ""],
-        #     [50.0, "", ""],
-        # ]
-        # new_table = self.make_table(headers, data)
-        # new_table.setObjectName(u"table_calibrate_points")
-        # lay = self.table_calibrate_points.parentWidget().layout()
-        # lay.replaceWidget(self.table_calibrate_points, new_table)
+        self.frCalibration._set_config(self.config)
 
     def _configure_service_screen(self) -> None:
         kp = self.config.get("pid", "kp", 1.0)
@@ -439,4 +422,4 @@ class MainWindow(QMainWindow):
         self.model.command_handler.alarm_reset()
 
     def on_timer(self):
-        pass
+        self.pageHand_pnlGraph.update_plots()

@@ -224,63 +224,71 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
         self._cursor_index = 0
         self.update(data, 0)
 
-    def update_2(self, data: np.ndarray) -> None:
-        if data is not None:
-            self._data = data
-
-        pass
-
-    def update(self, data: Optional[np.ndarray] = None, cursor_index: Optional[int] = None) -> None:  # noqa: D401
-        """Обновить отображаемый срез.
-
-        Если `data` не передан, используется ранее установленный через set_data().
-        Если `cursor_index` не передан, используется текущий self._cursor_index.
-        """
-        if data is not None:
-            self._data = data
-        if self._data is None:
-            return
-        data = self._data
-
-        if cursor_index is not None:
-            self._cursor_index = int(cursor_index)
-
-        if data.ndim == 1:
-            n_series, total_len = 1, data.shape[0]
-        else:
-            n_series, total_len = data.shape[0], data.shape[1]
-
-        start = int(max(0, min(self._cursor_index, max(0, total_len - 1))))
-        end = int(min(total_len, start + self._points_per_window))
-        if end - start < self._points_per_window:
-            start = max(0, end - self._points_per_window)
-        self._last_slice = (start, end)
-
+    def update(self,data: Optional[np.ndarray] = None, cursor_index: Optional[int] = None) -> None: # noqa: D401
         x = self._x_window
-
-        # Автодобавление недостающих серий
-        series_names = list(self._series.keys())
-        if n_series > len(series_names):
-            for i in range(len(series_names), n_series):
-                self.add_series(f"Сигнал {i+1}")
-            series_names = list(self._series.keys())
-
-        if n_series == 1:
-            y_slice = data[start:end]
-            if y_slice.shape[0] != self._points_per_window:
-                y_slice = self._fit_to_window(y_slice)
-            self._series[series_names[0]].setData(x, y_slice, connect='finite')
+        if cursor_index < 7500:
+            y_slice = data[0:7500]
         else:
-            for i in range(n_series):
-                y_slice = data[i, start:end]
-                if y_slice.shape[0] != self._points_per_window:
-                    y_slice = self._fit_to_window(y_slice)
-                self._series[series_names[i]].setData(x, y_slice, connect='finite')
+            y_slice = data[cursor_index - 7500:cursor_index]
+
+        self._series['Сигнал'].setData(x, y_slice, connect='finite')
 
         self.plotItem.setXRange(0.0, self._x_window_seconds, padding=0.0)
         self.plotItem.setYRange(self._y_range[0], self._y_range[1], padding=0.0)
 
-        self.dataUpdated.emit(start, end)
+        # self.dataUpdated.emit(start, end)
+
+    # def update(self, data: Optional[np.ndarray] = None, cursor_index: Optional[int] = None) -> None:  # noqa: D401
+    #     """Обновить отображаемый срез.
+    #
+    #     Если `data` не передан, используется ранее установленный через set_data().
+    #     Если `cursor_index` не передан, используется текущий self._cursor_index.
+    #     """
+    #     if data is not None:
+    #         self._data = data
+    #     if self._data is None:
+    #         return
+    #     data = self._data
+    #
+    #     if cursor_index is not None:
+    #         self._cursor_index = int(cursor_index)
+    #
+    #     if data.ndim == 1:
+    #         n_series, total_len = 1, data.shape[0]
+    #     else:
+    #         n_series, total_len = data.shape[0], data.shape[1]
+    #
+    #     start = int(max(0, min(self._cursor_index, max(0, total_len - 1))))
+    #     end = int(min(total_len, start + self._points_per_window))
+    #     if end - start < self._points_per_window:
+    #         start = max(0, end - self._points_per_window)
+    #     self._last_slice = (start, end)
+    #
+    #     x = self._x_window
+    #
+    #     # Автодобавление недостающих серий
+    #     series_names = list(self._series.keys())
+    #     if n_series > len(series_names):
+    #         for i in range(len(series_names), n_series):
+    #             self.add_series(f"Сигнал {i+1}")
+    #         series_names = list(self._series.keys())
+    #
+    #     if n_series == 1:
+    #         y_slice = data[start:end]
+    #         if y_slice.shape[0] != self._points_per_window:
+    #             y_slice = self._fit_to_window(y_slice)
+    #         self._series[series_names[0]].setData(x, y_slice, connect='finite')
+    #     else:
+    #         for i in range(n_series):
+    #             y_slice = data[i, start:end]
+    #             if y_slice.shape[0] != self._points_per_window:
+    #                 y_slice = self._fit_to_window(y_slice)
+    #             self._series[series_names[i]].setData(x, y_slice, connect='finite')
+    #
+    #     self.plotItem.setXRange(0.0, self._x_window_seconds, padding=0.0)
+    #     self.plotItem.setYRange(self._y_range[0], self._y_range[1], padding=0.0)
+    #
+    #     self.dataUpdated.emit(start, end)
 
     # ------------- Вспомогательные -------------
     def _fit_to_window(self, y: np.ndarray) -> np.ndarray:
