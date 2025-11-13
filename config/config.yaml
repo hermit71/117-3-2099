@@ -1,5 +1,5 @@
 modbus:
-  host: 127.0.0.1
+  host: 192.168.6.31
   port: 502
   timeout: 2.0
   retry_attempts: 3
@@ -9,15 +9,15 @@ calibration:
   B1: 1.0
   C1: 0.0
 dyno:
-  port_name: COM5
+  port_name: COM3
   rate: 9600
   bits: 8
   parity: N
   stopbit: 1
 pid:
-  kp: 80.0
-  ki: 3.0
-  kd: 0.1
+  kp: 99.0
+  ki: 1.0
+  kd: 0.05
 ui:
   max_graph_points: 2000
   poll_interval_ms: 100

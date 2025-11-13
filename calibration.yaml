@@ -1,41 +1,41 @@
 points:
 - index: 1
   commanded_torque: 0.0
-  reference_reading: 0.0
+  reference_reading: 0.5
   fixed: true
 - index: 2
   commanded_torque: 0.5
-  reference_reading: 0.0
+  reference_reading: 0.8
   fixed: true
 - index: 3
   commanded_torque: 1.0
-  reference_reading: 0.0
+  reference_reading: 1.2
   fixed: true
 - index: 4
   commanded_torque: 2.0
-  reference_reading: 0.0
+  reference_reading: 1.95
   fixed: true
 - index: 5
   commanded_torque: 4.5
-  reference_reading: 0.0
+  reference_reading: 4.45
   fixed: true
 - index: 6
   commanded_torque: 10.0
-  reference_reading: 0.0
+  reference_reading: 9.95
   fixed: true
 - index: 7
   commanded_torque: 15.0
-  reference_reading: 0.0
+  reference_reading: 14.9
   fixed: true
 - index: 8
   commanded_torque: 25.0
-  reference_reading: 0.0
+  reference_reading: 25.05
   fixed: true
 - index: 9
   commanded_torque: 35.0
-  reference_reading: 0.0
+  reference_reading: 35.4
   fixed: true
 - index: 10
   commanded_torque: 50.0
-  reference_reading: 0.0
+  reference_reading: 50.75
   fixed: true

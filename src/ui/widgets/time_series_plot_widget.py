@@ -230,8 +230,9 @@ class TimeSeriesPlotWidget(pg.PlotWidget):
             y_slice = data[0:7500]
         else:
             y_slice = data[cursor_index - 7500:cursor_index]
-
-        self._series['Сигнал'].setData(x, y_slice, connect='finite')
+        arr_float = y_slice.astype(np.float32)
+        arr_float /= 500
+        self._series['Сигнал'].setData(x, arr_float, connect='finite')
 
         self.plotItem.setXRange(0.0, self._x_window_seconds, padding=0.0)
         self.plotItem.setYRange(self._y_range[0], self._y_range[1], padding=0.0)

@@ -9,7 +9,7 @@ PACKET_SIZE = 17   # длина посылки в байтах
 class SerialHandler(QObject):
     response_ready = pyqtSignal(str, float)
 
-    def __init__(self, port_name='COM5', baudrate=9600, bits=8, parity='N', stopbits=1):
+    def __init__(self, port_name='COM3', baudrate=9600, bits=8, parity='N', stopbits=1):
         super().__init__()
         self.buffer = b''
         self.serial = QSerialPort()
@@ -28,7 +28,7 @@ class SerialHandler(QObject):
         # \s+ - один или несколько пробелов
         # (\d+\.\d+) - число с точкой (одна или более цифр, точка, одна или более цифр)
         # kN - заданный суффикс
-        self.pattern = re.compile(r"\s+(\d+\.\d+)KN")
+        self.pattern = re.compile(r"\s+(\d+\.\d+)N")
 
     def format_float_with_sign(self, value, total_digits, decimals) -> str:
         """
@@ -105,11 +105,11 @@ class MainWindow(QWidget):
 
     def show_response(self, text):
         new_text = text.replace(" ", "0")
-        self.label.setText(f"{new_text}<span style='font-family: Consolas; font-size: 46pt; color: lightgreen;'> kN")
+        self.label.setText(f"{new_text}<span style='font-family: Consolas; font-size: 46pt; color: lightgreen;'> N")
 
 if __name__ == "__main__":
     # Замените 'COM3' на нужный порт, например '/dev/ttyUSB0' для Linux
-    port_name = 'COM5'
+    port_name = 'COM3'
     app = QApplication(sys.argv)
     window = MainWindow(port_name)
     window.setGeometry(300, 300, 300, 200)
