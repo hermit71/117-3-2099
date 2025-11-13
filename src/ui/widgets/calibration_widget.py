@@ -148,11 +148,15 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             )
 
     def update_dyno_value(self):
-        value = self.model.dyno_data.get_value()
+        value = self.model.dyno_data.get_value() / 2.0
         for idx, r in enumerate(self._rows):
             pt = self._points[idx]
             if not pt.fixed:
                 r["spn_ref"].setValue(value)
+
+    def update_torque_value(self):
+        value = self.data_source.get_torque()
+        self.lbl_torque_val.setText(f'{value:.2f}')
 
     def update_plots(self):
         torque_data = self.data_source.torque_data_scaled
@@ -190,7 +194,11 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self.btn_zero_torque = QPushButton("Обнулить момент")
 
         self.btn_cw.clicked.connect(self._on_servo_cw)
+        self.btn_cw.pressed.connect(self._on_servo_cw_pressed)
+        self.btn_cw.released.connect(self._on_servo_cw_released)
         self.btn_ccw.clicked.connect(self._on_servo_ccw)
+        self.btn_ccw.pressed.connect(self._on_servo_ccw_pressed)
+        self.btn_ccw.released.connect(self._on_servo_ccw_released)
         self.btn_zero_angle.clicked.connect(self._on_zero_angle)
         self.btn_zero_torque.clicked.connect(self._on_zero_torque)
 
@@ -353,10 +361,32 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     # ---------------------------- EVENT HANDLERS (STUBS) --------------------
     # --- Servo controls ---
     def _on_servo_cw(self):
+        print("[STUB] Servo CW clicked")
+
+    def _on_servo_cw_pressed(self):
         print("[STUB] Servo CW pressed")
+        self.model.command_handler.jog_cw()
+        iv = 200
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
+
+    def _on_servo_cw_released(self):
+        print("[STUB] Servo CW released")
+        self.model.command_handler.halt()
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_servo_ccw(self):
+        print("[STUB] Servo CCW clicked")
+
+    def _on_servo_ccw_pressed(self):
         print("[STUB] Servo CCW pressed")
+        self.model.command_handler.jog_ccw()
+        iv = 200
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
+
+    def _on_servo_ccw_released(self):
+        print("[STUB] Servo CCW released")
+        self.model.command_handler.halt()
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_speed_changed(self, val: int):
         print(f"[STUB] Speed set to {val}")
@@ -542,6 +572,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
     def _on_timer(self):
         self.update_dyno_value()
+        self.update_torque_value()
         self.update_plots()
 
 # ------------------------------- DEMO APP -----------------------------------
