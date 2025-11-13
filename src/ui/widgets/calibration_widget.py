@@ -467,7 +467,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self.config.cfg["calibration"]["A1"] = A
         self.config.cfg["calibration"]["B1"] = B
         self.config.cfg["calibration"]["C1"] = C
-        self.config.save()
+        # self.config.save()
         print(f"A={A}, B={B}, C={C}")
 
         self._save_yaml()
