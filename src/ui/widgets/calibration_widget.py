@@ -146,6 +146,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
                 self.config.get("calibration", 'A1'),
                 self.config.get("calibration", 'B1'),
                 self.config.get("calibration", 'C1'),
+                self.config.get("calibration", 'A2'),
+                self.config.get("calibration", 'B2'),
             )
 
     def update_dyno_value(self):
@@ -158,6 +160,10 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     def update_torque_value(self):
         value = self.data_source.get_torque()
         self.lbl_torque_val.setText(f'{value:.2f}')
+        for idx, r in enumerate(self._rows):
+            pt = self._points[idx]
+            if not pt.fixed:
+                r["torque_val"].setText(f'{value:.2f}')
 
     def update_plots(self):
         torque_data = self.data_source.torque_data_scaled
@@ -169,13 +175,18 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         root = QVBoxLayout(self)
         calibre_hbox = QHBoxLayout()
         servo_hbox = QHBoxLayout()
-        self.plt_torque.setFixedSize(800, 400)  # фиксируем виджет
-        self.plt_torque.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        points_layout = QVBoxLayout()
+        plot_layout = QVBoxLayout()
+        #self.plt_torque.setFixedSize(800, 380)  # фиксируем виджет
+        #self.plt_torque.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.plt_torque.set_axis_labels(y_label="Крутящий момент, Нм")
-        # calibre_hbox.addWidget(self._make_calibration_group())
-        calibre_hbox.addWidget(self._make_calibration_group_v2())
-        #calibre_hbox.addStretch(1)
-        calibre_hbox.addWidget(self.plt_torque)
+        points_layout.addWidget(self._make_calibration_group_v2())
+        points_layout.addSpacing(40)
+        plot_layout.addSpacing(20)
+        plot_layout.addWidget(self.plt_torque)
+
+        calibre_hbox.addLayout(points_layout)
+        calibre_hbox.addLayout(plot_layout)
         # calibre_hbox.addSpacing(500)
         servo_hbox.addWidget(self._make_servo_group())
         # servo_hbox.addStretch(1)
@@ -431,8 +442,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         row = self._rows[idx]
         pt = self._points[idx]
         btn: QPushButton = t.cast(QPushButton, row["btn_set"])  # type: ignore
-        spn_torque: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_torque"])  # type: ignore
-        spn_ref: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_ref"])  # type: ignore
+        torque_sv: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["torque_sv"])  # type: ignore
+        # spn_ref: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_ref"])  # type: ignore
 
         if pt.fixed:
             # Уже зафиксировано — предлагаем перезаписать при повторном нажатии
@@ -447,14 +458,13 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             # Включаем мигание всей строки
             self.start_blink(widget=row.get("btn_set"))
             # Стартуем работу сервопривоода в режиме ПИД регулирования по моменту
-            tv = int_to_word(int(500 * spn_torque.value()))
+            tv = int_to_word(int(500 * torque_sv.value()))
             self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
             self.model.command_handler.torque_hold()
         elif self._active_row_idx == idx:
             self.model.command_handler.halt()
             # Фиксация значений
-            pt.commanded_torque = spn_torque.value()
-            pt.reference_reading = spn_ref.value()
+            pt.torque_sv = torque_sv.value()
             pt.fixed = True
 
             btn.setText("Задать")
@@ -501,20 +511,34 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
     def _on_compute_clicked(self):
         # Расчёт коэффициентов и сохранение в YAML
+
         x, y = self.get_xy_arrays()
         # Массив точек нижнего поддиапазона
         x_l, y_l = (x[:6], y[:6])
+        if np.unique(x_l).size < 3:
+            QMessageBox.information(
+                self,
+                "Предупреждение:",
+                "Недостаточно уникальных значений для расчета коэффициентов!\nНачните процедуру калибровки заново",
+            )
+            return
         # Массив точек верхнего поддиапазона
-        x_h, y_h = (x[6:], y[6:])
+        x_h, y_h = (x[5:], y[5:])
         # Аппроксимация полиномом 2-го порядка
-        coeffs = np.polyfit(x_l, y_l, 2)
-        A, B, C = tuple(float(c) for c in coeffs)  # коэффициенты полинома y = Ax^2 + Bx + C
-        self.config.cfg["calibration"]["A1"] = A
-        self.config.cfg["calibration"]["B1"] = B
-        self.config.cfg["calibration"]["C1"] = C
+        coeffs_l = np.polyfit(x,y,2) # np.polyfit(x_l, y_l, 2)
+        A1, B1, C1 = tuple(float(c) for c in coeffs_l)  # коэффициенты полинома y = Ax^2 + Bx + C
+        self.config.cfg["calibration"]["A1"] = A1
+        self.config.cfg["calibration"]["B1"] = B1
+        self.config.cfg["calibration"]["C1"] = C1
+        # Аппроксимация полиномом 1-го порядка
+        coeffs_h = np.polyfit(x_l, y_l, 1)
+        A2, B2 = tuple(float(c) for c in coeffs_h)  # коэффициенты полинома y = Ax + B
+        self.config.cfg["calibration"]["A2"] = A2
+        self.config.cfg["calibration"]["B2"] = B2
 
+        print(f"A={A1}, B={B1}, C={C1}")
+        print(f"A={A2}, B={B2}")
         self.config.save()
-        print(f"A={A}, B={B}, C={C}")
 
         self._save_yaml()
         QMessageBox.information(
@@ -568,12 +592,15 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         if not yaml:
             QMessageBox.warning(self, "PyYAML недоступен", "Модуль PyYAML не найден — сохранение пропущено.")
             return
+        # todo: _save_yaml data
         data = {
             "points": [
                 {
                     "index": p.index,
-                    "commanded_torque": p.commanded_torque,
+                    "torque_sv": p.torque_sv,
+                    "torque_actual": p.torque_actual,
                     "reference_reading": p.reference_reading,
+                    "reference_torque": p.reference_torque,
                     "fixed": p.fixed,
                 }
                 for p in self._points
@@ -586,9 +613,10 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             QMessageBox.warning(self, "Ошибка сохранения", f"Не удалось сохранить {YAML_PATH}: {exc}")
 
     def get_xy_arrays(self):
-        # Извлечение commanded_torque и reference_reading в отдельные списки
-        x_list = [pt.commanded_torque for pt in self._points]
-        y_list = [pt.reference_reading for pt in self._points]
+        # Извлечение фактического и эталонного момента в отдельные списки
+        # x_list = [pt.torque_actual for pt in self._points]
+        x_list = [pt.torque_sv for pt in self._points]
+        y_list = [pt.reference_torque for pt in self._points]
 
         # Преобразование списков в numpy массивы
         x = np.array(x_list)

@@ -4,58 +4,58 @@ points:
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 1
   torque_sv: 0.5
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 2
-  torque_sv: 1.0
+  torque_sv: 1.1
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 3
   torque_sv: 2.0
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 4
   torque_sv: 5.0
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 5
   torque_sv: 9.0
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 6
   torque_sv: 15.0
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 7
-  torque_sv: 23.0
+  torque_sv: 23.1
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 8
   torque_sv: 37.0
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
 - index: 9
   torque_sv: 50.0
   torque_actual: 0.0
   reference_reading: 0.0
   reference_torque: 0.0
-  fixed: false
+  fixed: true
