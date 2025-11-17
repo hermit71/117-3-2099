@@ -36,3 +36,4 @@ class Config:
             with open(self.path, "w", encoding="utf-8") as f:
                 yaml.safe_dump(self.cfg, f, allow_unicode=True, sort_keys=False)
             self._initial_cfg = copy.deepcopy(self.cfg)
+        pass

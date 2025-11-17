@@ -493,11 +493,11 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         x, y = self.get_xy_arrays()
         # Аппроксимация полиномом 2-го порядка
         coeffs = np.polyfit(x, y, 2)
-        A, B, C = coeffs  # коэффициенты полинома y = Ax^2 + Bx + C
+        A, B, C = tuple(float(c) for c in coeffs)  # коэффициенты полинома y = Ax^2 + Bx + C
         self.config.cfg["calibration"]["A1"] = A
         self.config.cfg["calibration"]["B1"] = B
         self.config.cfg["calibration"]["C1"] = C
-        # self.config.save()
+        self.config.save()
         print(f"A={A}, B={B}, C={C}")
 
         self._save_yaml()
