@@ -1,41 +1,61 @@
 points:
+- index: 0
+  torque_sv: 0.0
+  torque_actual: 0.0
+  reference_reading: 0.0
+  reference_torque: 0.0
+  fixed: false
 - index: 1
-  commanded_torque: 0.0
+  torque_sv: 0.5
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 2
-  commanded_torque: 0.5
+  torque_sv: 1.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 3
-  commanded_torque: 1.0
+  torque_sv: 2.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 4
-  commanded_torque: 2.0
+  torque_sv: 5.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 5
-  commanded_torque: 4.5
+  torque_sv: 9.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 6
-  commanded_torque: 10.0
+  torque_sv: 15.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 7
-  commanded_torque: 15.0
+  torque_sv: 23.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 8
-  commanded_torque: 25.0
+  torque_sv: 37.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false
 - index: 9
-  commanded_torque: 35.0
+  torque_sv: 50.0
+  torque_actual: 0.0
   reference_reading: 0.0
-  fixed: true
-- index: 10
-  commanded_torque: 50.0
-  reference_reading: 0.0
-  fixed: true
+  reference_torque: 0.0
+  fixed: false

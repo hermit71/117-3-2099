@@ -39,7 +39,7 @@ POINTS_PER_WINDOW = 1200
 
 STYLE_SHEET = """
 QLabel {
-    gridline-color: #E0E0E0;
+    border: 1px solid #A0A0A0;
     background-color: #FFFFFF;
     font-size: 14px;
     font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
@@ -47,17 +47,18 @@ QLabel {
 QDoubleSpinBox {
     background-color: #FFFFFF;
     font-size: 14px;
-    font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif; 
+    font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
 }
 """
 
 @dataclass
 class CalibPoint:
     index: int
-    commanded_torque: float = 0.0  # Нм (0..50)
-    reference_reading: float = 0.0  # произв. ед. эталонного датчика
+    torque_sv: float = 0.0  # Задание момента в Нм (0..50)
+    torque_actual: float = 0.0 # Фактичекское значение датчика момента, Нм
+    reference_reading: float = 0.0  # Данные эталоннго динамометра, Н
+    reference_torque: float = 0.0 # Пересчитанные данные динамометра, Нм
     fixed: bool = False
-
 
 class BlinkingMixin:
     """Подсветка/мигание виджета с помощью QTimer и стилей."""
@@ -114,9 +115,9 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
         # Инициализация точек с дефолтными значениями моментов
         self._points: list[CalibPoint] = [
-            CalibPoint(i, commanded_torque=DEFAULT_TORQUES[i - 1]) for i in range(1, CALIB_POINTS + 1)
+            CalibPoint(i, torque_sv=DEFAULT_TORQUES[i]) for i in range(CALIB_POINTS)
         ]
-        self.calib_coeff = {'A1': 0.0, 'B1': 1.0, 'C1': 0.0} # Коэффициенты калибровки датчика момента
+        self.calib_coeff = {'A1': 0.0, 'B1': 1.0, 'C1': 0.0, 'A2': 1.0, 'B2': 0.0} # Коэффициенты калибровки датчика момента
         self._rows: list[dict[str, QWidget]] = []
         self._active_row_idx: int | None = None
         self.plt_torque = TimeSeriesPlotWidget(
@@ -152,7 +153,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         for idx, r in enumerate(self._rows):
             pt = self._points[idx]
             if not pt.fixed:
-                r["spn_ref"].setValue(value)
+                r["spn_ref"].setText(f'{value:.2f}')
 
     def update_torque_value(self):
         value = self.data_source.get_torque()
@@ -168,10 +169,11 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         root = QVBoxLayout(self)
         calibre_hbox = QHBoxLayout()
         servo_hbox = QHBoxLayout()
-        self.plt_torque.setFixedSize(1100, 400)  # фиксируем виджет
+        self.plt_torque.setFixedSize(800, 400)  # фиксируем виджет
         self.plt_torque.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.plt_torque.set_axis_labels(y_label="Крутящий момент, Нм")
-        calibre_hbox.addWidget(self._make_calibration_group())
+        # calibre_hbox.addWidget(self._make_calibration_group())
+        calibre_hbox.addWidget(self._make_calibration_group_v2())
         #calibre_hbox.addStretch(1)
         calibre_hbox.addWidget(self.plt_torque)
         # calibre_hbox.addSpacing(500)
@@ -278,25 +280,21 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         return gb
 
     # ---- CALIBRATION GROUP --------------------------------------------------
-    def _make_calibration_group(self) -> QGroupBox:
+    def _make_calibration_group_v2(self) -> QGroupBox:
         gb = QGroupBox("Калибровка датчика момента (10 точек)")
         layout = QGridLayout(gb)
 
         caption = [
-            QLabel("Точка"),
+            QLabel(" "),
             QLabel("Заданный момент, Нм"),
-            QLabel("Эталонный динамометр"),
-            QLabel("Действие")
+            QLabel("Фактический момент, Нм"),
+            QLabel("Эталонный динамометр, Н"),
+            QLabel("Эталонный момент, Нм"),
+            QLabel(" ")
         ]
         for i, text in enumerate(caption):
             caption[i].setAlignment(Qt.AlignmentFlag.AlignCenter)
             layout.addWidget(text, 0, i)
-
-        # Заголовки
-        # layout.addWidget(caption_0, 0, 0)
-        # layout.addWidget(caption_1, 0, 1)
-        # layout.addWidget(caption_2, 0, 2)
-        # layout.addWidget(caption_3, 0, 3)
 
         for i in range(CALIB_POINTS):
             row_widgets: dict[str, QWidget] = {}
@@ -309,21 +307,32 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             lbl_idx.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
             row_widgets["lbl_idx"] = lbl_idx
 
-            # Ввод момента
+            # Уставка момента, Нм
             spn_torque = QDoubleSpinBox()
-            spn_torque.setRange(0.0, 50.0)
+            spn_torque.setAlignment(Qt.AlignmentFlag.AlignRight)
+            spn_torque.setRange(0, 55.0)
             spn_torque.setDecimals(2)
             spn_torque.setSingleStep(0.1)
             spn_torque.setStyleSheet(STYLE_SHEET)
-            row_widgets["spn_torque"] = spn_torque
+            row_widgets["torque_sv"] = spn_torque
 
-            # Ввод эталонного показания
-            spn_ref = QDoubleSpinBox()
-            spn_ref.setRange(-1e6, 1e6)
-            spn_ref.setDecimals(2)
-            spn_ref.setSingleStep(0.01)
+            # Фактическое значение датчика момента, Нм
+            lbl_torque = QLabel('0.00')
+            lbl_torque.setAlignment(Qt.AlignmentFlag.AlignRight)
+            lbl_torque.setStyleSheet(STYLE_SHEET)
+            row_widgets["torque_val"] = lbl_torque
+
+            # Данные эталонного динамометра, Н
+            spn_ref = QLabel('0.0')
+            spn_ref.setAlignment(Qt.AlignmentFlag.AlignRight)
             spn_ref.setStyleSheet(STYLE_SHEET)
             row_widgets["spn_ref"] = spn_ref
+
+            # Эталонный момент, Нм
+            lbl_ref_torque = QLabel('0.00')
+            lbl_ref_torque.setAlignment(Qt.AlignmentFlag.AlignRight)
+            lbl_ref_torque.setStyleSheet(STYLE_SHEET)
+            row_widgets["ref_torque_val"] = lbl_ref_torque
 
             # Кнопка задания/фиксации
             btn_set = QPushButton("Задать")
@@ -332,8 +341,10 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
             layout.addWidget(lbl_idx, row, 0)
             layout.addWidget(spn_torque, row, 1)
-            layout.addWidget(spn_ref, row, 2)
-            layout.addWidget(btn_set, row, 3)
+            layout.addWidget(lbl_torque, row, 2)
+            layout.addWidget(spn_ref, row, 3)
+            layout.addWidget(lbl_ref_torque, row, 4)
+            layout.addWidget(btn_set, row, 5)
 
             self._rows.append(row_widgets)
 
@@ -355,8 +366,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     def _apply_defaults_to_ui(self):
         for i, pt in enumerate(self._points):
             row = self._rows[i]
-            spn_torque: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_torque"])  # type: ignore
-            spn_torque.setValue(pt.commanded_torque)
+            torque_sv: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["torque_sv"])  # type: ignore
+            torque_sv.setValue(pt.torque_sv)
 
     # ---------------------------- EVENT HANDLERS (STUBS) --------------------
     # --- Servo controls ---
@@ -491,12 +502,17 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     def _on_compute_clicked(self):
         # Расчёт коэффициентов и сохранение в YAML
         x, y = self.get_xy_arrays()
+        # Массив точек нижнего поддиапазона
+        x_l, y_l = (x[:6], y[:6])
+        # Массив точек верхнего поддиапазона
+        x_h, y_h = (x[6:], y[6:])
         # Аппроксимация полиномом 2-го порядка
-        coeffs = np.polyfit(x, y, 2)
+        coeffs = np.polyfit(x_l, y_l, 2)
         A, B, C = tuple(float(c) for c in coeffs)  # коэффициенты полинома y = Ax^2 + Bx + C
         self.config.cfg["calibration"]["A1"] = A
         self.config.cfg["calibration"]["B1"] = B
         self.config.cfg["calibration"]["C1"] = C
+
         self.config.save()
         print(f"A={A}, B={B}, C={C}")
 
@@ -504,7 +520,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         QMessageBox.information(
             self,
             "Расчёт завершён",
-            "[STUB] Расчёт калибровочных коэффициентов выполнен. Данные сохранены в calibration.yaml",
+            "Расчёт калибровочных коэффициентов выполнен. Данные сохранены в файле конфигурации и в ПЛК",
         )
 
     # ----------------------------- YAML I/O ----------------------------------
@@ -522,20 +538,29 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             for i, pd in enumerate(points[:CALIB_POINTS]):
                 pt = self._points[i]
                 # Перезаписываем значениями из файла (если пользователь вводил другие)
-                if "commanded_torque" in pd:
-                    pt.commanded_torque = float(pd.get("commanded_torque", pt.commanded_torque))
+                if "torque_sv" in pd:
+                    pt.torque_sv = float(pd.get("torque_sv", pt.torque_sv))
+                if "torque_actual" in pd:
+                    pt.torque_actual = float(pd.get("torque_actual", pt.torque_actual))
                 if "reference_reading" in pd:
-                    pt.reference_reading = float(pd.get("reference_reading", pt.reference_reading))
+                    pt.reference_torque = float(pd.get("reference_reading", pt.reference_reading))
+                if "reference_torque" in pd:
+                    pt.reference_torque = float(pd.get("reference_torque", pt.reference_torque))
                 # Фиксацию не переносим — новая калибровка может начаться сразу
                 pt.fixed = False
 
             # Применяем к UI (поля активны)
             for i, pt in enumerate(self._points):
                 row = self._rows[i]
-                spn_torque: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_torque"])  # type: ignore
-                spn_ref: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_ref"])  # type: ignore
-                spn_torque.setValue(pt.commanded_torque)
-                spn_ref.setValue(pt.reference_reading)
+                torque_sv: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["torque_sv"])  # type: ignore
+                torque_actual: QLabel = t.cast(QLabel, row["torque_val"]) # type: ignore
+                spn_ref: QLabel = t.cast(QLabel, row["spn_ref"])  # type: ignore
+                ref_torque_val: QLabel = t.cast(QLabel, row["ref_torque_val"])
+                torque_sv.setValue(pt.torque_sv)
+                torque_actual.setText(f'{pt.torque_actual:.2f}')
+                spn_ref.setText(f'{pt.reference_reading:.2f}')
+                ref_torque_val.setText(f'{pt.reference_torque:.2f}')
+
         except Exception as exc:
             QMessageBox.warning(self, "Ошибка загрузки", f"Не удалось загрузить {YAML_PATH}: {exc}")
 
