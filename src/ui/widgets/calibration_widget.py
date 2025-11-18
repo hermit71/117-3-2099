@@ -45,6 +45,12 @@ QLabel {
     font-size: 14px;
     font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
 }
+QLabel["highlited"="True"] {
+    border: 5px solid #A0A0A0;
+    background-color: #FFFFFF;
+    font-size: 14px;
+    font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
+}
 QDoubleSpinBox {
     background-color: #FFFFFF;
     font-size: 14px;
@@ -60,6 +66,26 @@ class CalibPoint:
     reference_reading: float = 0.0  # Данные эталоннго динамометра, Н
     reference_torque: float = 0.0 # Пересчитанные данные динамометра, Нм
     fixed: bool = False
+
+class CoeffPanel(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ui = Ui_coeffs_header()
+        self.ui.setupUi(self)
+        self.lbl_coeffs = {
+            'A1': self.ui.A1,
+            'B1': self.ui.B1,
+            'C1': self.ui.C1,
+            'A2': self.ui.A2,
+            'B2': self.ui.B2,
+        }
+
+    def _update_labels(self, coeffs: dict):
+        self.ui.A1.setText(f'{coeffs['A1']:.5f}')
+        self.ui.B1.setText(f'{coeffs['B1']:.5f}')
+        self.ui.C1.setText(f'{coeffs['C1']:.5f}')
+        self.ui.A2.setText(f'{coeffs['A2']:.5f}')
+        self.ui.B2.setText(f'{coeffs['B2']:.5f}')
 
 class BlinkingMixin:
     """Подсветка/мигание виджета с помощью QTimer и стилей."""
@@ -118,7 +144,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self._points: list[CalibPoint] = [
             CalibPoint(i, torque_sv=DEFAULT_TORQUES[i]) for i in range(CALIB_POINTS)
         ]
-        self.calib_coeff = {'A1': 0.0, 'B1': 1.0, 'C1': 0.0, 'A2': 1.0, 'B2': 0.0} # Коэффициенты калибровки датчика момента
+        self.calib_coeff = {}
         self._rows: list[dict[str, QWidget]] = []
         self._active_row_idx: int | None = None
         self.plt_torque = TimeSeriesPlotWidget(
@@ -128,7 +154,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             antialias=True,
             with_legend=True,
         )
-        self.coeffs_header = QFrame()
+        self.coeffs_header = CoeffPanel(self)
         self._build_ui()
         # self._apply_defaults_to_ui() # Заполнить дефолтные моменты в UI
         self._load_yaml_if_exists()    # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
@@ -144,13 +170,19 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     def _set_config(self, config: Config):
         self.config = config
         if self.config is not None:
-            self.calib_coeff = (
-                self.config.get("calibration", 'A1'),
-                self.config.get("calibration", 'B1'),
-                self.config.get("calibration", 'C1'),
-                self.config.get("calibration", 'A2'),
-                self.config.get("calibration", 'B2'),
-            )
+            self.calib_coeff = {
+                'A1': self.config.get("calibration", 'A1'),
+                'B1': self.config.get("calibration", 'B1'),
+                'C1': self.config.get("calibration", 'C1'),
+                'A2': self.config.get("calibration", 'A2'),
+                'B2': self.config.get("calibration", 'B2')
+            }
+        else:
+            self.calib_coeff = {'A1': 0.0, 'B1': 1.0, 'C1': 0.0, 'A2': 1.0, 'B2': 0.0}  # Коэффициенты калибровки датчика момента
+
+        # Панель расчетных коэффициентов
+        self.coeffs_header._update_labels(self.calib_coeff)
+
 
     def update_dyno_value(self):
         value = self.model.dyno_data.get_value() / 2.0
@@ -175,15 +207,11 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     # ----------------------------- UI BUILD ---------------------------------
     def _build_ui(self):
         root = QVBoxLayout(self)
-        ch_ui = Ui_coeffs_header()
-        ch_ui.setupUi(self.coeffs_header)
         calibre_vbox = QVBoxLayout()
         calibre_hbox = QHBoxLayout()
         servo_hbox = QHBoxLayout()
         points_layout = QVBoxLayout()
         plot_layout = QVBoxLayout()
-        #self.plt_torque.setFixedSize(800, 380)  # фиксируем виджет
-        #self.plt_torque.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.plt_torque.set_axis_labels(y_label="Крутящий момент, Нм")
         points_layout.addWidget(self._make_calibration_group_v2())
         points_layout.addSpacing(40)
@@ -195,11 +223,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
         calibre_hbox.addLayout(calibre_vbox)
         calibre_hbox.addLayout(plot_layout)
-        # calibre_hbox.addSpacing(500)
         servo_hbox.addWidget(self._make_servo_group())
-        # servo_hbox.addStretch(1)
         servo_hbox.addStretch(1)
-        # root.addWidget(self.coeffs_header)
         root.addLayout(calibre_hbox)
         root.addLayout(servo_hbox)
         root.addStretch(1)
@@ -466,7 +491,11 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             btn.setText("Зафиксировать")
             self._set_other_rows_enabled(False, except_idx=idx)
             # Включаем мигание всей строки
-            self.start_blink(widget=row.get("btn_set"))
+            # self.start_blink(widget=row.get("btn_set"))
+            a = row["torque_val"].styleSheet()
+
+            row["torque_val"].setProperty("highlited", True)
+            b = row["torque_val"].styleSheet()
             # Стартуем работу сервопривоода в режиме ПИД регулирования по моменту
             tv = int_to_word(int(500 * torque_sv.value()))
             self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
@@ -478,7 +507,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             pt.fixed = True
 
             btn.setText("Задать")
-            self.stop_blink(row.get("row_widget") or QWidget())
+            # self.stop_blink(row.get("row_widget") or QWidget())
             self._active_row_idx = None
             self._set_other_rows_enabled(True)
             self._update_global_state()
@@ -527,18 +556,14 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     def _on_compute_clicked(self):
         # Расчёт коэффициентов и сохранение в YAML
 
-        x, y = self.get_xy_arrays()
-        # Массив точек нижнего поддиапазона
-        x_l, y_l = (x[:6], y[:6])
-        if np.unique(x_l).size < 3:
+        x, y, x_l, y_l, x_h, y_h = self.get_xy_arrays()
+        if (np.unique(x_l).size < 3) or np.unique(x_h.size < 3):
             QMessageBox.information(
                 self,
                 "Предупреждение:",
                 "Недостаточно уникальных значений для расчета коэффициентов!\nНачните процедуру калибровки заново",
             )
             return
-        # Массив точек верхнего поддиапазона
-        x_h, y_h = (x[5:], y[5:])
         # Аппроксимация полиномом 2-го порядка
         coeffs_l = np.polyfit(x,y,2) # np.polyfit(x_l, y_l, 2)
         A1, B1, C1 = tuple(float(c) for c in coeffs_l)  # коэффициенты полинома y = Ax^2 + Bx + C
@@ -550,6 +575,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         A2, B2 = tuple(float(c) for c in coeffs_h)  # коэффициенты полинома y = Ax + B
         self.config.cfg["calibration"]["A2"] = A2
         self.config.cfg["calibration"]["B2"] = B2
+        self.coeffs_header._update_labels(self.calib_coeff)
 
         print(f"A={A1}, B={B1}, C={C1}")
         print(f"A={A2}, B={B2}")
@@ -636,7 +662,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         # Преобразование списков в numpy массивы
         x = np.array(x_list)
         y = np.array(y_list)
-        return x, y
+        return x, y, x[:6], y[:6], x[5:], y[5:]
 
     def _on_timer(self):
         self.update_dyno_value()
