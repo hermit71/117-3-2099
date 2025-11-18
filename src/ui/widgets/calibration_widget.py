@@ -366,6 +366,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             lbl_torque = QLabel('0.00')
             lbl_torque.setAlignment(Qt.AlignmentFlag.AlignRight)
             lbl_torque.setStyleSheet(STYLE_SHEET)
+            lbl_torque.setProperty("highlited", False)
             row_widgets["torque_val"] = lbl_torque
 
             # Данные эталонного динамометра, Н
@@ -495,6 +496,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             a = row["torque_val"].styleSheet()
 
             row["torque_val"].setProperty("highlited", True)
+            c = row["torque_val"].property("highlited")
+            print(c)
             b = row["torque_val"].styleSheet()
             # Стартуем работу сервопривоода в режиме ПИД регулирования по моменту
             tv = int_to_word(int(500 * torque_sv.value()))
