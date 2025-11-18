@@ -213,9 +213,9 @@ class MainWindow(QMainWindow):
         self.btnArchive.clicked.connect(self.on_btn_archive_click)
         self.btnService.clicked.connect(self.on_btn_service_click)
 
-        self.btnInitNewTest.clicked.connect(self.on_btn_init_new_test_clicked)
-        self.btnInitEdit.clicked.connect(self.on_btn_init_edit_clicked)
-        self.btnInitSave.clicked.connect(self.on_btn_init_save_clicked)
+        #self.btnInitNewTest.clicked.connect(self.on_btn_init_new_test_clicked)
+        #self.btnInitEdit.clicked.connect(self.on_btn_init_edit_clicked)
+        #self.btnInitSave.clicked.connect(self.on_btn_init_save_clicked)
 
         self.btnStart.clicked.connect(self.on_btn_start_clicked)
         self.btnPause.clicked.connect(self.on_btn_pause_clicked)

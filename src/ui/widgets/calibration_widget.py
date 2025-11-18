@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
 )
 import yaml  # PyYAML
 from src.ui.widgets.time_series_plot_widget import TimeSeriesPlotWidget
+from src.ui.calibration_model_coeffs_ui import Ui_coeffs_header
 from src.utils.utils import (
     int_to_word,
 )
@@ -68,7 +69,7 @@ class BlinkingMixin:
         self._blink_on: bool = False
         self._saved_style: str | None = None
 
-    def start_blink(self, widget: QWidget, color: str = "#FFF3CD"):
+    def start_blink(self, widget: QWidget, color: str = "#32b848"):
         if self._blink_timer is None:
             self._blink_timer = QTimer(widget)
             self._blink_timer.timeout.connect(lambda: self._toggle_blink(widget, color))
@@ -127,9 +128,10 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             antialias=True,
             with_legend=True,
         )
+        self.coeffs_header = QFrame()
         self._build_ui()
-        self._apply_defaults_to_ui()  # Заполнить дефолтные моменты в UI
-        self._load_yaml_if_exists()   # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
+        # self._apply_defaults_to_ui() # Заполнить дефолтные моменты в UI
+        self._load_yaml_if_exists()    # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
         self._update_global_state()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._on_timer)
@@ -173,6 +175,9 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
     # ----------------------------- UI BUILD ---------------------------------
     def _build_ui(self):
         root = QVBoxLayout(self)
+        ch_ui = Ui_coeffs_header()
+        ch_ui.setupUi(self.coeffs_header)
+        calibre_vbox = QVBoxLayout()
         calibre_hbox = QHBoxLayout()
         servo_hbox = QHBoxLayout()
         points_layout = QVBoxLayout()
@@ -185,12 +190,16 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         plot_layout.addSpacing(20)
         plot_layout.addWidget(self.plt_torque)
 
-        calibre_hbox.addLayout(points_layout)
+        calibre_vbox.addWidget(self.coeffs_header)
+        calibre_vbox.addLayout(points_layout)
+
+        calibre_hbox.addLayout(calibre_vbox)
         calibre_hbox.addLayout(plot_layout)
         # calibre_hbox.addSpacing(500)
         servo_hbox.addWidget(self._make_servo_group())
         # servo_hbox.addStretch(1)
         servo_hbox.addStretch(1)
+        # root.addWidget(self.coeffs_header)
         root.addLayout(calibre_hbox)
         root.addLayout(servo_hbox)
         root.addStretch(1)
@@ -292,7 +301,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
     # ---- CALIBRATION GROUP --------------------------------------------------
     def _make_calibration_group_v2(self) -> QGroupBox:
-        gb = QGroupBox("Калибровка датчика момента (10 точек)")
+        gb = QGroupBox("Калибровка датчика момента")
         layout = QGridLayout(gb)
 
         caption = [
@@ -325,6 +334,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             spn_torque.setDecimals(2)
             spn_torque.setSingleStep(0.1)
             spn_torque.setStyleSheet(STYLE_SHEET)
+            spn_torque.valueChanged.connect(lambda val, idx=i: self._on_value_changed(val, idx))
             row_widgets["torque_sv"] = spn_torque
 
             # Фактическое значение датчика момента, Нм
@@ -380,7 +390,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             torque_sv: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["torque_sv"])  # type: ignore
             torque_sv.setValue(pt.torque_sv)
 
-    # ---------------------------- EVENT HANDLERS (STUBS) --------------------
+    # ----------------------- EVENT HANDLERS ----------------------------------
     # --- Servo controls ---
     def _on_servo_cw(self):
         print("[STUB] Servo CW clicked")
@@ -479,6 +489,11 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
                 "Другой пункт активен",
                 f"Сначала зафиксируйте точку {self._points[self._active_row_idx].index}.",
             )
+
+    def _on_value_changed(self, value: float, idx: int):
+        row = self._rows[idx]
+        self._points[idx].torque_sv = value
+        self._save_yaml()
 
     def _set_other_rows_enabled(self, enabled: bool, except_idx: int | None = None):
         for i, row in enumerate(self._rows):
