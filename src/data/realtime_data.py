@@ -160,7 +160,7 @@ class RealTimeData(QObject):
         self.angle = 0              # Угол поворота в градусах нескорректированный
         self.velocity = 0           # Скорость нарастания момента
 
-        self.write_regs = [0x00] * 22  # 10 регистров для записи в ПЛК
+        self.write_regs = [0x00] * 30 # 30 регистров для записи в ПЛК
 
         # Для обмена по Modbus создаем отдельный поток
         # переносим в отдельный поток
@@ -326,6 +326,16 @@ class RealTimeData(QObject):
                     _kd = float_to_words(reg)
                     self.write_regs[9] = _kd[0]
                     self.write_regs[10] = _kd[1]
+                case 'Modbus_CC_LO':
+                    cc_lo = list(map(float_to_words, reg))
+                    for i in range(len(cc_lo)):
+                        self.write_regs[17 + i * 2] = cc_lo[i][0]
+                        self.write_regs[18 + i * 2] = cc_lo[i][1]
+                case 'Modbus_CC_HI':
+                    cc_hi = list(map(float_to_words, reg))
+                    for i in range(len(cc_hi)):
+                        self.write_regs[23 + i * 2] = cc_hi[i][0]
+                        self.write_regs[24 + i * 2] = cc_hi[i][1]
                 case 'Modbus_AUX':
                     self.write_regs[11] = reg
 

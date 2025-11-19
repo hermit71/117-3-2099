@@ -5,7 +5,7 @@ import typing as t
 from dataclasses import dataclass
 import numpy as np
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, pyqtSignal as Signal, pyqtSlot as Slot, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QDoubleSpinBox,
@@ -73,6 +73,8 @@ class CalibPoint:
     fixed: bool = False
 
 class CoeffPanel(QFrame):
+    write_to_plc = Signal(dict)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_coeffs_header()
@@ -84,13 +86,20 @@ class CoeffPanel(QFrame):
             'A2': self.ui.A2,
             'B2': self.ui.B2,
         }
+        self.coeffs_values = {}
+        self.ui.btn_write_to_PLC.clicked.connect(self._on_btn_write_to_plc_clicked)
 
     def _update_labels(self, coeffs: dict):
+        self.coeffs_values = coeffs
         self.ui.A1.setText(f'{coeffs['A1']:.5f}')
         self.ui.B1.setText(f'{coeffs['B1']:.5f}')
         self.ui.C1.setText(f'{coeffs['C1']:.5f}')
         self.ui.A2.setText(f'{coeffs['A2']:.5f}')
         self.ui.B2.setText(f'{coeffs['B2']:.5f}')
+
+    def _on_btn_write_to_plc_clicked(self):
+        print(self.coeffs_values)
+        self.write_to_plc.emit(self.coeffs_values)
 
 class ServoCalibrationWidget(QFrame):
     """
@@ -103,7 +112,6 @@ class ServoCalibrationWidget(QFrame):
     «Расчёт коэффициентов» активируется, когда все точки зафиксированы.
     Обработчики — заглушки без реальной логики.
     """
-
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         #BlinkingMixin.__init__(self)
@@ -136,6 +144,7 @@ class ServoCalibrationWidget(QFrame):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._on_timer)
         self.timer.start(100)
+        self.coeffs_header.write_to_plc.connect(self._on_btn_write_to_plc_clicked)
 
     def _set_model(self, model):
         self.model = model
@@ -144,13 +153,7 @@ class ServoCalibrationWidget(QFrame):
     def _set_config(self, config: Config):
         self.config = config
         if self.config is not None:
-            self.calib_coeff = {
-                'A1': self.config.get("calibration", 'A1'),
-                'B1': self.config.get("calibration", 'B1'),
-                'C1': self.config.get("calibration", 'C1'),
-                'A2': self.config.get("calibration", 'A2'),
-                'B2': self.config.get("calibration", 'B2')
-            }
+            self.calib_coeff = self.config.cfg.get("calibration")
         else:
             self.calib_coeff = {'A1': 0.0, 'B1': 1.0, 'C1': 0.0, 'A2': 1.0, 'B2': 0.0}  # Коэффициенты калибровки датчика момента
 
@@ -645,6 +648,12 @@ class ServoCalibrationWidget(QFrame):
         self.update_dyno_value()
         self.update_torque_value()
         self.update_plots()
+
+    @Slot(dict)
+    def _on_btn_write_to_plc_clicked(self, coeffs: dict):
+        print(f"write coeffs to PLC: {coeffs}")
+        self.model.command_handler.set_caliration_coefficients([], [])
+
 
 # ------------------------------- DEMO APP -----------------------------------
 if __name__ == "__main__":

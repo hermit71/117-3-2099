@@ -35,14 +35,10 @@ class Model(QObject):
     graphs_updated = Signal()
 
     def __init__(self, config, parent=None):
-        """Initialize the model.
-
-        Инициализировать модель.
-
+        """
         Args:
             config: Application configuration options.
             parent: Optional QObject parent for Qt ownership.
-
         Аргументы:
             config: Параметры конфигурации приложения.
             parent: Необязательный родитель QObject для управления владением Qt.
@@ -53,20 +49,29 @@ class Model(QObject):
         self.realtime_data = RealTimeData(self.config, self)
         self.dyno_data = Dyno(self.config)
         self.command_handler = CommandHandler(self)
-
         self.realtime_data.data_updated.connect(self.rt_data_changed)
+
+        self.calib_coeff = self.config.cfg.get("calibration") or None
+        if self.calib_coeff is not None:
+            self.cc_lo = [self.calib_coeff["A1"], self.calib_coeff["B1"], self.calib_coeff["C1"]]
+            self.cc_hi = [self.calib_coeff["A2"], self.calib_coeff["B2"]]
+        else:
+            self.cc_lo = [0.0, 1.0, 0.0]
+            self.cc_hi = [1.0, 0.0]
 
         # Регистры для записи в ПЛК
         self.modbus_write_regs = {
-            'Modbus_CTRL': 0,  # Управление режимом стенда
-            'Modbus_TensionSV': 0,  # Задание момента на валу
-            'Modbus_VelocitySV': 0,  # Задание скорости сервопривода
-            'Modbus_DQ_CTRL': 0,  # Прямое управление дискретными выходами
-            'Modbus_UZ_CTRL': 0,  # Прямое управление сервоприводом
-            'Modbus_KP': 1.0,
-            'Modbus_KI': 0.01,
-            'Modbus_KD': 0.0,
-            'Modbus_AUX': 0,  # Резерв
+            'Modbus_CTRL':      0,          # Управление режимом стенда
+            'Modbus_TensionSV': 0,          # Задание момента на валу
+            'Modbus_VelocitySV':0,          # Задание скорости сервопривода
+            'Modbus_DQ_CTRL':   0,          # Прямое управление дискретными выходами
+            'Modbus_UZ_CTRL':   0,          # Прямое управление сервоприводом
+            'Modbus_KP':        1.0,        # PID Kp
+            'Modbus_KI':        0.01,       # PID Ki
+            'Modbus_KD':        0.0,        # PID Kd
+            'Modbus_CC_LO':     self.cc_lo, # Коэффициенты модели аппроксимации датчика момента (нижний поддиапазон)
+            'Modbus_CC_HI':     self.cc_hi, # Коэффициенты модели аппроксимации датчика момента (верхний поддиапазон)
+            'Modbus_AUX':       0,          # Резерв
         }
 
     @Slot(list)

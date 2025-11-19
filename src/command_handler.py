@@ -11,20 +11,20 @@ import struct
 from PyQt6.QtCore import QObject, pyqtSignal as Signal, QTimer
 
 CONTROL_BITS = {
-    "power_on": 0,
+    "power_on":     0,
     "reset_torque": 4,
-    "reset_angle": 5,
+    "reset_angle":  5,
     "write_retain": 6,
-    "reset_error": 7,
-    "reset_alarm": 8,
+    "reset_error":  7,
+    "reset_alarm":  8,
 }
 CONTROL_CMD = {
-    "halt": 0b000,
-    "jog_cw": 0b001,
-    "jog_ccw": 0b010,
-    "torque_hold": 0b011,
-    "move_to_angle": 0b100,
-    "stop": 0b111,
+    "halt":         0b000,
+    "jog_cw":       0b001,
+    "jog_ccw":      0b010,
+    "torque_hold":  0b011,
+    "move_to_angle":0b100,
+    "stop":         0b111,
 }
 
 def words_to_float(word1, word2, byte_order="CDAB"):
@@ -97,7 +97,7 @@ class CommandHandler(QObject):
         )
         self.timer = QTimer()
         self.timer.setSingleShot(True)
-        self.timer.setInterval(250)  # интервал 1000 мс (1 секунда)
+        self.timer.setInterval(250)  # интервал 250 мс
         self.timer.timeout.connect(self.on_singleshot_timer)
 
     def on_singleshot_timer(self):
@@ -186,6 +186,14 @@ class CommandHandler(QObject):
         regs_["Modbus_KP"] = kp
         regs_["Modbus_KI"] = ki
         regs_["Modbus_KD"] = kd
+        self.write_to_plc.emit(regs_)
+
+    def set_caliration_coefficients(self, cc_lo: list[float], cc_hi: list[float]):
+        """Set caliration coefficients on PLC."""
+        print('set caliration coefficients on PLC')
+        regs_ = self.parent.modbus_write_regs
+        regs_["Modbus_CC_LO"] = cc_lo
+        regs_["Modbus_CC_HI"] = cc_hi
         self.write_to_plc.emit(regs_)
 
     def set_plc_register(self, name='Modbus_CTRL', value=0):
