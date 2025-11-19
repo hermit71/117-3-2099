@@ -45,8 +45,13 @@ QLabel {
     font-size: 14px;
     font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
 }
-QLabel["highlited"="True"] {
-    border: 5px solid #A0A0A0;
+QLabel[caption=true] {
+    border: none;
+    font-size: 11px;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+QLabel[highlited=true] {
+    border: 2px solid #32b848;
     background-color: #FFFFFF;
     font-size: 14px;
     font-family: "Inconsolata LGC Nerd Font", "Segoe UI", Arial, sans-serif;
@@ -87,39 +92,7 @@ class CoeffPanel(QFrame):
         self.ui.A2.setText(f'{coeffs['A2']:.5f}')
         self.ui.B2.setText(f'{coeffs['B2']:.5f}')
 
-class BlinkingMixin:
-    """Подсветка/мигание виджета с помощью QTimer и стилей."""
-
-    def __init__(self):
-        self._blink_timer: QTimer | None = None
-        self._blink_on: bool = False
-        self._saved_style: str | None = None
-
-    def start_blink(self, widget: QWidget, color: str = "#32b848"):
-        if self._blink_timer is None:
-            self._blink_timer = QTimer(widget)
-            self._blink_timer.timeout.connect(lambda: self._toggle_blink(widget, color))
-            self._blink_timer.start(450)
-            self._saved_style = widget.styleSheet()
-
-    def stop_blink(self, widget: QWidget):
-        if self._blink_timer is not None:
-            self._blink_timer.stop()
-            self._blink_timer.deleteLater()
-            self._blink_timer = None
-        self._blink_on = False
-        if self._saved_style is not None:
-            widget.setStyleSheet(self._saved_style)
-            self._saved_style = None
-
-    def _toggle_blink(self, widget: QWidget, color: str):
-        self._blink_on = not self._blink_on
-        widget.setStyleSheet(
-            f"background-color: {color};" if self._blink_on else (self._saved_style or "")
-        )
-
-
-class ServoCalibrationWidget(QFrame, BlinkingMixin):
+class ServoCalibrationWidget(QFrame):
     """
     Виджет (QFrame), содержащий:
       1) Группу управления сервоприводом (кнопки/индикаторы, обработчики-заглушки).
@@ -133,7 +106,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        BlinkingMixin.__init__(self)
+        #BlinkingMixin.__init__(self)
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setFrameShadow(QFrame.Shadow.Plain)
         self.model = None
@@ -155,8 +128,9 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             with_legend=True,
         )
         self.coeffs_header = CoeffPanel(self)
+        self.cg = QWidget()
         self._build_ui()
-        # self._apply_defaults_to_ui() # Заполнить дефолтные моменты в UI
+        self.cg.setStyleSheet(STYLE_SHEET)
         self._load_yaml_if_exists()    # Перезаписать значениями из файла (если есть), НЕ блокируя элементы
         self._update_global_state()
         self.timer = QTimer(self)
@@ -213,7 +187,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         points_layout = QVBoxLayout()
         plot_layout = QVBoxLayout()
         self.plt_torque.set_axis_labels(y_label="Крутящий момент, Нм")
-        points_layout.addWidget(self._make_calibration_group_v2())
+        self.cg = self._make_calibration_group_v2()
+        points_layout.addWidget(self.cg)
         points_layout.addSpacing(40)
         plot_layout.addSpacing(20)
         plot_layout.addWidget(self.plt_torque)
@@ -339,6 +314,9 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         ]
         for i, text in enumerate(caption):
             caption[i].setAlignment(Qt.AlignmentFlag.AlignCenter)
+            caption[i].setProperty("caption", True)
+            caption[i].style().unpolish(caption[i])
+            caption[i].style().polish(caption[i])
             layout.addWidget(text, 0, i)
 
         for i in range(CALIB_POINTS):
@@ -358,27 +336,27 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             spn_torque.setRange(0, 55.0)
             spn_torque.setDecimals(2)
             spn_torque.setSingleStep(0.1)
-            spn_torque.setStyleSheet(STYLE_SHEET)
+            #spn_torque.setStyleSheet(STYLE_SHEET)
             spn_torque.valueChanged.connect(lambda val, idx=i: self._on_value_changed(val, idx))
             row_widgets["torque_sv"] = spn_torque
 
             # Фактическое значение датчика момента, Нм
             lbl_torque = QLabel('0.00')
             lbl_torque.setAlignment(Qt.AlignmentFlag.AlignRight)
-            lbl_torque.setStyleSheet(STYLE_SHEET)
-            lbl_torque.setProperty("highlited", False)
+            #lbl_torque.setStyleSheet(STYLE_SHEET)
+            #lbl_torque.setProperty("highlited", False)
             row_widgets["torque_val"] = lbl_torque
 
             # Данные эталонного динамометра, Н
             spn_ref = QLabel('0.0')
             spn_ref.setAlignment(Qt.AlignmentFlag.AlignRight)
-            spn_ref.setStyleSheet(STYLE_SHEET)
+            #spn_ref.setStyleSheet(STYLE_SHEET)
             row_widgets["spn_ref"] = spn_ref
 
             # Эталонный момент, Нм
             lbl_ref_torque = QLabel('0.00')
             lbl_ref_torque.setAlignment(Qt.AlignmentFlag.AlignRight)
-            lbl_ref_torque.setStyleSheet(STYLE_SHEET)
+            #lbl_ref_torque.setStyleSheet(STYLE_SHEET)
             row_widgets["ref_torque_val"] = lbl_ref_torque
 
             # Кнопка задания/фиксации
@@ -479,7 +457,8 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         pt = self._points[idx]
         btn: QPushButton = t.cast(QPushButton, row["btn_set"])  # type: ignore
         torque_sv: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["torque_sv"])  # type: ignore
-        # spn_ref: QDoubleSpinBox = t.cast(QDoubleSpinBox, row["spn_ref"])  # type: ignore
+        torque_val: QLabel = t.cast(QLabel, row["torque_val"])
+        ref_torque_val: QLabel = t.cast(QLabel, row["ref_torque_val"])
 
         if pt.fixed:
             # Уже зафиксировано — предлагаем перезаписать при повторном нажатии
@@ -491,14 +470,10 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             self._active_row_idx = idx
             btn.setText("Зафиксировать")
             self._set_other_rows_enabled(False, except_idx=idx)
-            # Включаем мигание всей строки
-            # self.start_blink(widget=row.get("btn_set"))
-            a = row["torque_val"].styleSheet()
 
-            row["torque_val"].setProperty("highlited", True)
-            c = row["torque_val"].property("highlited")
-            print(c)
-            b = row["torque_val"].styleSheet()
+            # Выделяем поля изменяющихся виджетов для удобства контроля оператором
+            self._set_lbl_state([torque_val, ref_torque_val], True)
+
             # Стартуем работу сервопривоода в режиме ПИД регулирования по моменту
             tv = int_to_word(int(500 * torque_sv.value()))
             self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
@@ -508,9 +483,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
             # Фиксация значений
             pt.torque_sv = torque_sv.value()
             pt.fixed = True
-
             btn.setText("Задать")
-            # self.stop_blink(row.get("row_widget") or QWidget())
             self._active_row_idx = None
             self._set_other_rows_enabled(True)
             self._update_global_state()
@@ -521,6 +494,12 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
                 "Другой пункт активен",
                 f"Сначала зафиксируйте точку {self._points[self._active_row_idx].index}.",
             )
+
+    def _set_lbl_state(self, items: list[QLabel], active: bool):
+        for item in items:
+            item.setProperty("highlited", active)
+            self.style().unpolish(item)
+            self.style().polish(item)
 
     def _on_value_changed(self, value: float, idx: int):
         row = self._rows[idx]
@@ -538,18 +517,17 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
 
     def _on_new_calibration(self):
         """Сброс фиксации всех точек: элементы становятся активными и доступны для новой калибровки."""
-        if self._active_row_idx is not None:
-            # Остановить мигание активной строки
-            row = self._rows[self._active_row_idx]
-            self.stop_blink(row.get("row_widget") or QWidget())
         self._active_row_idx = None
-
         for i, pt in enumerate(self._points):
             pt.fixed = False
             row = self._rows[i]
             btn: QPushButton = t.cast(QPushButton, row["btn_set"])  # type: ignore
             btn.setEnabled(True)
             btn.setText("Задать")
+            torque_val: QLabel = t.cast(QLabel, row["torque_val"])
+            ref_torque_val: QLabel = t.cast(QLabel, row["ref_torque_val"])
+            # Сброс выделения виджетов
+            self._set_lbl_state([torque_val, ref_torque_val], False)
         self._update_global_state()
 
     def _update_global_state(self):
@@ -579,11 +557,7 @@ class ServoCalibrationWidget(QFrame, BlinkingMixin):
         self.config.cfg["calibration"]["A2"] = A2
         self.config.cfg["calibration"]["B2"] = B2
         self.coeffs_header._update_labels(self.calib_coeff)
-
-        print(f"A={A1}, B={B1}, C={C1}")
-        print(f"A={A2}, B={B2}")
         self.config.save()
-
         self._save_yaml()
         QMessageBox.information(
             self,
