@@ -162,17 +162,21 @@ class ServoCalibrationWidget(QFrame):
 
 
     def update_dyno_value(self):
-        value = self.model.dyno_data.get_value() / 2.0
+        value = self.model.dyno_data.get_value() # Момент в Н
+        value_m = value * 0.5 # Момент в Нм с учетом плеча 0.5 м
         for idx, r in enumerate(self._rows):
             pt = self._points[idx]
+            print(f'torque = {pt.torque_actual}')
             if not pt.fixed:
                 r["spn_ref"].setText(f'{value:.2f}')
+                r["ref_torque_val"].setText(f'{value_m:.2f}')
 
     def update_torque_value(self):
         value = self.data_source.get_torque()
         self.lbl_torque_val.setText(f'{value:.2f}')
         for idx, r in enumerate(self._rows):
             pt = self._points[idx]
+            print(f'ref = {pt.reference_torque}')
             if not pt.fixed:
                 r["torque_val"].setText(f'{value:.2f}')
 

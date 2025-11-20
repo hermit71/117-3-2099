@@ -363,7 +363,6 @@ class Dyno(QObject):
 
     @Slot(str, float)
     def update(self, value_text, value):
-        # print(f'{value_text}: {value}')
         self.dyno_value = value
 
     def get_value(self):
