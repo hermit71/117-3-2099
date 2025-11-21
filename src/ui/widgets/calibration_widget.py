@@ -166,7 +166,6 @@ class ServoCalibrationWidget(QFrame):
         value_m = value * 0.5 # Момент в Нм с учетом плеча 0.5 м
         for idx, r in enumerate(self._rows):
             pt = self._points[idx]
-            print(f'torque = {pt.torque_actual}')
             if not pt.fixed:
                 r["spn_ref"].setText(f'{value:.2f}')
                 r["ref_torque_val"].setText(f'{value_m:.2f}')
@@ -176,7 +175,6 @@ class ServoCalibrationWidget(QFrame):
         self.lbl_torque_val.setText(f'{value:.2f}')
         for idx, r in enumerate(self._rows):
             pt = self._points[idx]
-            print(f'ref = {pt.reference_torque}')
             if not pt.fixed:
                 r["torque_val"].setText(f'{value:.2f}')
 
@@ -481,7 +479,7 @@ class ServoCalibrationWidget(QFrame):
             # Выделяем поля изменяющихся виджетов для удобства контроля оператором
             self._set_lbl_state([torque_val, ref_torque_val], True)
 
-            # Стартуем работу сервопривоода в режиме ПИД регулирования по моменту
+            # Стартуем работу сервопривода в режиме ПИД регулирования по моменту
             tv = int_to_word(int(500 * torque_sv.value()))
             self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
             self.model.command_handler.torque_hold()
@@ -489,6 +487,8 @@ class ServoCalibrationWidget(QFrame):
             self.model.command_handler.halt()
             # Фиксация значений
             pt.torque_sv = torque_sv.value()
+            pt.torque_actual = float(torque_val.text())
+            pt.reference_reading = float(ref_torque_val.text())
             pt.fixed = True
             btn.setText("Задать")
             self._active_row_idx = None
@@ -501,6 +501,8 @@ class ServoCalibrationWidget(QFrame):
                 "Другой пункт активен",
                 f"Сначала зафиксируйте точку {self._points[self._active_row_idx].index}.",
             )
+
+        print(self._points[idx])
 
     def _set_lbl_state(self, items: list[QLabel], active: bool):
         for item in items:
