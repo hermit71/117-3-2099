@@ -188,9 +188,10 @@ class CommandHandler(QObject):
         regs_["Modbus_KD"] = kd
         self.write_to_plc.emit(regs_)
 
-    def set_caliration_coefficients(self, cc_lo: list[float], cc_hi: list[float]):
+    def set_calibration_coefficients(self, coeffs: dict):
         """Set caliration coefficients on PLC."""
-        print('set caliration coefficients on PLC')
+        cc_lo = [coeffs['A1'], coeffs['B1'], coeffs['C1']]
+        cc_hi = [coeffs['A2'], coeffs['B2']]
         regs_ = self.parent.modbus_write_regs
         regs_["Modbus_CC_LO"] = cc_lo
         regs_["Modbus_CC_HI"] = cc_hi

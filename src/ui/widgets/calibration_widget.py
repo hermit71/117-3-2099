@@ -681,8 +681,7 @@ class ServoCalibrationWidget(QFrame):
 
     @Slot(dict)
     def _on_btn_write_to_plc_clicked(self, coeffs: dict):
-        print(f"write coeffs to PLC: {coeffs}")
-        self.model.command_handler.set_caliration_coefficients([], [])
+        self.model.command_handler.set_calibration_coefficients(coeffs)
 
 
 # ------------------------------- DEMO APP -----------------------------------
