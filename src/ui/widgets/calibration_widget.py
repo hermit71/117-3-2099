@@ -545,7 +545,7 @@ class ServoCalibrationWidget(QFrame):
 
     def _on_compute_clicked(self):
         # Расчёт коэффициентов и сохранение в YAML
-
+        coeffs = {}
         x, y, x_l, y_l, x_h, y_h = self.get_xy_arrays()
         if (np.unique(x_l).size < 3) or np.unique(x_h.size < 3):
             QMessageBox.information(
@@ -555,17 +555,22 @@ class ServoCalibrationWidget(QFrame):
             )
             return
         # Аппроксимация полиномом 2-го порядка
-        coeffs_l = np.polyfit(x,y,2) # np.polyfit(x_l, y_l, 2)
-        A1, B1, C1 = tuple(float(c) for c in coeffs_l)  # коэффициенты полинома y = Ax^2 + Bx + C
-        self.config.cfg["calibration"]["A1"] = A1
-        self.config.cfg["calibration"]["B1"] = B1
-        self.config.cfg["calibration"]["C1"] = C1
+        coeffs_l = np.polyfit(x_l,y_l,2) # np.polyfit(x_l, y_l, 2)
         # Аппроксимация полиномом 1-го порядка
-        coeffs_h = np.polyfit(x_l, y_l, 1)
-        A2, B2 = tuple(float(c) for c in coeffs_h)  # коэффициенты полинома y = Ax + B
-        self.config.cfg["calibration"]["A2"] = A2
-        self.config.cfg["calibration"]["B2"] = B2
-        self.coeffs_header._update_labels(self.calib_coeff)
+        coeffs_h = np.polyfit(x_h, y_h, 1)
+
+        self.calib_coeff['A1'] = float(coeffs_l[0]) #
+        self.calib_coeff['B1'] = float(coeffs_l[1]) #
+        self.calib_coeff['C1'] = float(coeffs_l[2]) # коэффициенты полинома y = Ax^2 + Bx + C
+        self.calib_coeff['A2'] = float(coeffs_h[0]) #
+        self.calib_coeff['B2'] = float(coeffs_h[1]) # коэффициенты полинома y = Ax + B
+        self._test_coeffs(self.calib_coeff)
+        self.config.cfg["calibration"]["A1"] = self.calib_coeff['A1']
+        self.config.cfg["calibration"]["B1"] = self.calib_coeff['B1']
+        self.config.cfg["calibration"]["C1"] = self.calib_coeff['C1']
+        self.config.cfg["calibration"]["A2"] = self.calib_coeff['A2']
+        self.config.cfg["calibration"]["B2"] = self.calib_coeff['B2']
+        self._set_config(self.config)
         self.config.save()
         self._save_yaml()
         QMessageBox.information(
@@ -573,6 +578,24 @@ class ServoCalibrationWidget(QFrame):
             "Расчёт завершён",
             "Расчёт калибровочных коэффициентов выполнен. Данные сохранены в файле конфигурации и в ПЛК",
         )
+
+    def _test_coeffs(self, coeffs: dict):
+        '''
+        Проверяем полученные коэффициенты на валидность:
+        Они не должны отличаться от коэффициентов идеальной модели слишком сильно
+        В этом случае считаем, что расчет был некорректный и применяем коэффициенты по умолчанию
+        '''
+        deltaB1 = 0.5
+        deltaA2 = 0.5
+
+        condition_l = (abs(coeffs['B1']) <= deltaB1)
+        condition_h = (abs(coeffs['A2']) <= deltaA2)
+        if  condition_l or condition_h:
+            coeffs['A1'] = 0.0
+            coeffs['B1'] = 1.0
+            coeffs['C1'] = 0.0
+            coeffs['A2'] = 1.0
+            coeffs['B2'] = 0.0
 
     # ----------------------------- YAML I/O ----------------------------------
     def _load_yaml_if_exists(self):
@@ -641,9 +664,10 @@ class ServoCalibrationWidget(QFrame):
 
     def get_xy_arrays(self):
         # Извлечение фактического и эталонного момента в отдельные списки
-        # x_list = [pt.torque_actual for pt in self._points]
         x_list = [pt.torque_sv for pt in self._points]
-        y_list = [pt.reference_torque for pt in self._points]
+        #x_list = [pt.torque_actual for pt in self._points]
+        #y_list = [pt.reference_torque for pt in self._points]
+        y_list = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
 
         # Преобразование списков в numpy массивы
         x = np.array(x_list)

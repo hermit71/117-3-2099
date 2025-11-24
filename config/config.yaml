@@ -6,9 +6,9 @@ modbus:
   poll_interval_ms: 100
 calibration:
   A1: 0.0
-  B1: 0.0
+  B1: 1.0
   C1: 0.0
-  A2: 0.0
+  A2: 1.0
   B2: 0.0
 dyno:
   port_name: COM3
