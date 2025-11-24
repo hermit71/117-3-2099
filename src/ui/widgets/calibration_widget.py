@@ -450,11 +450,13 @@ class ServoCalibrationWidget(QFrame):
 
     def _on_zero_angle(self):
         print("[STUB] Zero current angle")
-        self.lbl_angle_val.setText("0.00 \u00B0")
+        self.model.command_handler.angle_reset()
+        self.model.command_handler.timer.start()
 
     def _on_zero_torque(self):
         print("[STUB] Zero current torque")
-        self.lbl_torque_val.setText("0.00 Нм")
+        self.model.command_handler.torque_reset()
+        self.model.command_handler.timer.start()
 
     # --- Calibration logic ---
     def _on_point_set_clicked(self, idx: int):

@@ -102,6 +102,10 @@ class CommandHandler(QObject):
 
     def on_singleshot_timer(self):
         self._clear_control_bit(CONTROL_BITS["write_retain"])
+        self._clear_control_bit(CONTROL_BITS["reset_error"])
+        self._clear_control_bit(CONTROL_BITS["reset_alarm"])
+        self._clear_control_bit(CONTROL_BITS["reset_torque"])
+        self._clear_control_bit(CONTROL_BITS["reset_angle"])
 
     def set_plc_mode(self, mode):
         """Set the PLC operating mode.
@@ -155,6 +159,12 @@ class CommandHandler(QObject):
     def alarm_reset(self):
         """Turn off the alarm."""
         self._set_control_bit(CONTROL_BITS["reset_alarm"])
+
+    def torque_reset(self):
+        self._set_control_bit(CONTROL_BITS["reset_torque"])
+
+    def angle_reset(self):
+        self._set_control_bit(CONTROL_BITS["reset_angle"])
 
     def set_tension(self, tension=0, velocity=0):
         """Set the tension and velocity setpoints."""
