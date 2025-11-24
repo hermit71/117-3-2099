@@ -145,6 +145,7 @@ class ServoCalibrationWidget(QFrame):
         self.timer.timeout.connect(self._on_timer)
         self.timer.start(100)
         self.coeffs_header.write_to_plc.connect(self._on_btn_write_to_plc_clicked)
+        self.jog_speed_value = 100
 
     def _set_model(self, model):
         self.model = model
@@ -402,35 +403,29 @@ class ServoCalibrationWidget(QFrame):
     # ----------------------- EVENT HANDLERS ----------------------------------
     # --- Servo controls ---
     def _on_servo_cw(self):
-        print("[STUB] Servo CW clicked")
+        pass
 
     def _on_servo_cw_pressed(self):
-        print("[STUB] Servo CW pressed")
         self.model.command_handler.jog_cw()
-        iv = 200
-        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=self.jog_speed_value)
 
     def _on_servo_cw_released(self):
-        print("[STUB] Servo CW released")
         self.model.command_handler.halt()
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_servo_ccw(self):
-        print("[STUB] Servo CCW clicked")
+        pass
 
     def _on_servo_ccw_pressed(self):
-        print("[STUB] Servo CCW pressed")
         self.model.command_handler.jog_ccw()
-        iv = 200
-        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
+        self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=self.jog_speed_value)
 
     def _on_servo_ccw_released(self):
-        print("[STUB] Servo CCW released")
         self.model.command_handler.halt()
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_speed_changed(self, val: int):
-        print(f"[STUB] Speed set to {val}")
+        self.jog_speed_value = 10 * val
 
     def _sync_speed_from_slider(self, v: int):
         # синхронизируем спинбокс, затем вызываем ваш существующий обработчик скорости
@@ -449,12 +444,10 @@ class ServoCalibrationWidget(QFrame):
         self._on_speed_changed(iv)
 
     def _on_zero_angle(self):
-        print("[STUB] Zero current angle")
         self.model.command_handler.angle_reset()
         self.model.command_handler.timer.start()
 
     def _on_zero_torque(self):
-        print("[STUB] Zero current torque")
         self.model.command_handler.torque_reset()
         self.model.command_handler.timer.start()
 

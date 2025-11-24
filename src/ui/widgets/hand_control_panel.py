@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
@@ -26,6 +26,9 @@ class HandControlPanel(QFrame):
         super().__init__(parent)
         self.model = None
         self.data_set = None
+        self.torque_sv = 0.0
+        self.current_torque_sv = 0.0
+        self.speed_rate_delta = 0.05
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setFrameShadow(QFrame.Shadow.Raised)
@@ -41,12 +44,30 @@ class HandControlPanel(QFrame):
 
         # Initial state: servo power OFF -> disable direction and run per requirement (1)
         self._apply_enable_rules()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self._on_timer)
 
     def config(self, model):
         if model is not None:
             self.model = model
             self.data_set = self.model.realtime_data
 
+    def _on_timer(self):
+        # Уставка по моменту
+        self.torque_sv = self.spin_torque.value()
+        # Скорость нарастания момента
+        self.speed_rate_delta = self.spin_rate.value() / 10.0
+        delta = self.torque_sv - self.current_torque_sv
+        sign = 1 if delta >= 0 else -1
+
+        if self.spin_rate.value() < 0.05 or (abs(delta) < self.speed_rate_delta):
+            self.current_torque_sv = self.torque_sv
+        else:
+            self.current_torque_sv += sign * self.speed_rate_delta
+
+        print(f'Speed set: {self.current_torque_sv}')
+        sv = int_to_word(int(500 * self.current_torque_sv))
+        self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=sv)
 
     # ---------- Группа 1: Сервопривод ----------
     def _build_servo_group(self) -> QGroupBox:
@@ -216,21 +237,21 @@ class HandControlPanel(QFrame):
         self.btn_run.toggled.connect(self._on_run_toggled)
         grid.addWidget(self.btn_run, row, 0, 1, 1)
 
-        # 5) Две QToolButton ниже
-        row += 1
-        hb = QHBoxLayout()
-        self.tbtn1 = QToolButton()
-        self.tbtn1.setText("Опция 1")
-        self.tbtn1.clicked.connect(self._on_tool_btn1)
-
-        self.tbtn2 = QToolButton()
-        self.tbtn2.setText("Опция 2")
-        self.tbtn2.clicked.connect(self._on_tool_btn2)
-
-        hb.addWidget(self.tbtn1)
-        hb.addWidget(self.tbtn2)
-        hb.addStretch(1)
-        grid.addLayout(hb, row, 0, 1, 3)
+        # # 5) Две QToolButton ниже
+        # row += 1
+        # hb = QHBoxLayout()
+        # self.tbtn1 = QToolButton()
+        # self.tbtn1.setText("Опция 1")
+        # self.tbtn1.clicked.connect(self._on_tool_btn1)
+        #
+        # self.tbtn2 = QToolButton()
+        # self.tbtn2.setText("Опция 2")
+        # self.tbtn2.clicked.connect(self._on_tool_btn2)
+        #
+        # hb.addWidget(self.tbtn1)
+        # hb.addWidget(self.tbtn2)
+        # hb.addStretch(1)
+        # grid.addLayout(hb, row, 0, 1, 3)
 
         return gb
 
@@ -331,22 +352,27 @@ class HandControlPanel(QFrame):
 
     def _on_run_toggled(self, checked: bool):
         self.btn_run.setText("СТОП" if checked else "ПУСК")
-        print(f"[STUB] RUN toggled -> {'RUN' if checked else 'STOP'}")
-        # Требование (2): при ПУСК нажат — кнопки направления disabled; иначе зависят от питания
+        print(f"RUN toggled -> {'RUN' if checked else 'STOP'}")
         self._apply_enable_rules()
-        tv = int_to_word(int(500 * self.spin_torque.value()))
+
         if checked:
-            self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
+            self.timer.start(100)
             self.model.command_handler.torque_hold()
         else:
+            self.timer.stop()
             self.model.command_handler.halt()
+            # При стопе: сброс момента в 0
+            self.spin_torque.setValue(0.0)
+            self.current_torque_sv = 0.0
+            self.model.command_handler.set_plc_register(name='Modbus_TorqueSV')
 
-    def _on_tool_btn1(self):
-        print("[STUB] Tool Button 1 clicked")
-        HandRegulatorSettingsDialog(self).exec()
 
-    def _on_tool_btn2(self):
-        print("[STUB] Tool Button 2 clicked")
+    # def _on_tool_btn1(self):
+    #     print("[STUB] Tool Button 1 clicked")
+    #     HandRegulatorSettingsDialog(self).exec()
+    #
+    # def _on_tool_btn2(self):
+    #     print("[STUB] Tool Button 2 clicked")
 
     # ---------- Вспомогательное: правила доступности ----------
     def _apply_enable_rules(self):
