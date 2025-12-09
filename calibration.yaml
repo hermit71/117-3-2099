@@ -1,6 +1,6 @@
 points:
 - index: 0
-  torque_sv: 0.20000000000000004
+  torque_sv: 0.2
   torque_actual: 3.39
   reference_reading: 0.0
   reference_torque: 0.0
