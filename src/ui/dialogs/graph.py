@@ -90,7 +90,7 @@ class GraphSettingsDialog(QDialog):
         )
 
     def _choose_color(self, button: QPushButton) -> None:
-        """Открыть диалог выбора цвета и применить выбранный цвет."""
+        """Открыть диалог выбора цвета и применить выбранный  цвет."""
 
         color = QColorDialog.getColor(parent=self)
         if color.isValid():
