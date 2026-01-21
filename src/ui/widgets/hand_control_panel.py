@@ -42,17 +42,17 @@ class HandControlPanel(QFrame):
         root.addWidget(self._build_torque_group())
         root.addStretch(1)
 
-        # Initial state: servo power OFF -> disable direction and run per requirement (1)
+        # Initial state: servo power OFF -> disable direction and run
         self._apply_enable_rules()
         self.timer = QTimer()
-        self.timer.timeout.connect(self._on_timer)
+        self.timer.timeout.connect(self.on_timer)
 
     def config(self, model):
         if model is not None:
             self.model = model
             self.data_set = self.model.realtime_data
 
-    def _on_timer(self):
+    def on_timer(self):
         # Уставка по моменту
         self.torque_sv = self.spin_torque.value()
         # Скорость нарастания момента
@@ -76,14 +76,14 @@ class HandControlPanel(QFrame):
         lay.setContentsMargins(8, 8, 8, 8)
 
         self.btn_servo_power = QPushButton("Сервопривод ВЫКЛ")
-        self.btn_servo_power.setCheckable(True)
-        self.btn_servo_power.setFixedSize(140, 32)
-        self.btn_servo_power.setStyleSheet(
-            """
+
+        _power_btn_css = """
             QPushButton { background-color: #F1F3F4; border: 1px solid #D0D0D0; border-radius: 6px; }
             QPushButton:checked { background-color: #2ECC71; color: white; }
             """
-        )
+        self.btn_servo_power.setStyleSheet(_power_btn_css)
+        self.btn_servo_power.setCheckable(True)
+        self.btn_servo_power.setFixedSize(140, 32)
         self.btn_servo_power.toggled.connect(self._on_servo_power_toggled)
 
         lay.addWidget(self.btn_servo_power)
@@ -100,7 +100,7 @@ class HandControlPanel(QFrame):
 
         # Кнопки направления: без фиксации, отдельные обработчики нажатия/отжатия, желтые при нажатии
         self.btn_ccw = QPushButton("Против часовой")
-        self.btn_cw = QPushButton("По часовой")
+        self.btn_cw  = QPushButton("По часовой")
 
         _dir_btn_css = """
         QPushButton { background-color: #F1F3F4; border: 1px solid #D0D0D0; border-radius: 6px; }
@@ -141,7 +141,7 @@ class HandControlPanel(QFrame):
         self.spin_ang_vel.setFixedWidth(100)  # фиксированная ширина 100 px
         self.spin_ang_vel.setFont(QFont("Inconsolata LGC Nerd Font"))
         self.spin_ang_vel.valueChanged.connect(self._on_ang_speed_spin_changed)
-        grid.addWidget(self.spin_ang_vel, row, 0, 1, 3)
+        grid.addWidget(self.spin_ang_vel, row, 0, 1, 1)
 
         # Связанный слайдер (0..100 -> 0.00..1.00)
         row += 1
@@ -236,29 +236,12 @@ class HandControlPanel(QFrame):
         )
         self.btn_run.toggled.connect(self._on_run_toggled)
         grid.addWidget(self.btn_run, row, 0, 1, 1)
-
-        # # 5) Две QToolButton ниже
-        # row += 1
-        # hb = QHBoxLayout()
-        # self.tbtn1 = QToolButton()
-        # self.tbtn1.setText("Опция 1")
-        # self.tbtn1.clicked.connect(self._on_tool_btn1)
-        #
-        # self.tbtn2 = QToolButton()
-        # self.tbtn2.setText("Опция 2")
-        # self.tbtn2.clicked.connect(self._on_tool_btn2)
-        #
-        # hb.addWidget(self.tbtn1)
-        # hb.addWidget(self.tbtn2)
-        # hb.addStretch(1)
-        # grid.addLayout(hb, row, 0, 1, 3)
-
         return gb
 
     # ---------- Обработчики  ----------
     def _on_servo_power_toggled(self, checked: bool):
         self.btn_servo_power.setText("Сервопривод ВКЛ" if checked else "Сервопривод ВЫКЛ")
-        print(f"[STUB] Servo power toggled -> {'ON' if checked else 'OFF'}")
+        print(f"Питание сервопривода -> {'ВКЛ' if checked else 'ВЫКЛ'}")
 
         if not checked:
             # При отжатии питания: сброс момента в 0
