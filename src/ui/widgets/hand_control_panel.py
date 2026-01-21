@@ -29,6 +29,7 @@ class HandControlPanel(QFrame):
         self.torque_sv = 0.0
         self.current_torque_sv = 0.0
         self.speed_rate_delta = 0.05
+        self.dwell_time = 0
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setFrameShadow(QFrame.Shadow.Raised)
@@ -46,6 +47,10 @@ class HandControlPanel(QFrame):
         self._apply_enable_rules()
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer)
+        # Таймер выдержки при достижении заданного момента
+        self.dwell_timer = QTimer()
+        self.dwell_timer.timeout.connect(self.on_dwell_timer)
+        # QTimer.singleShot(1000)
 
     def config(self, model):
         if model is not None:
@@ -68,6 +73,9 @@ class HandControlPanel(QFrame):
         print(f'Speed set: {self.current_torque_sv}')
         sv = int_to_word(int(500 * self.current_torque_sv))
         self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=sv)
+
+    def on_dwell_timer(self):
+        pass
 
     # ---------- Группа 1: Сервопривод ----------
     def _build_servo_group(self) -> QGroupBox:
@@ -331,7 +339,9 @@ class HandControlPanel(QFrame):
         print(f"Rate slider -> {v:.2f} Nm/s")
 
     def _on_dwell_changed(self, value: float):
+        self.dwell_time = int(value)
         print(f"Dwell time -> {value:.0f} s")
+        print(f"Dwell time -> {self.dwell_time:} s")
 
     def _on_run_toggled(self, checked: bool):
         self.btn_run.setText("СТОП" if checked else "ПУСК")
