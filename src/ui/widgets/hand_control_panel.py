@@ -49,8 +49,8 @@ class HandControlPanel(QFrame):
         self.timer.timeout.connect(self.on_timer)
         # Таймер выдержки при достижении заданного момента
         self.dwell_timer = QTimer()
+        self.dwell_timer.setSingleShot(True)
         self.dwell_timer.timeout.connect(self.on_dwell_timer)
-        # QTimer.singleShot(1000)
 
     def config(self, model):
         if model is not None:
@@ -74,7 +74,10 @@ class HandControlPanel(QFrame):
         sv = int_to_word(int(500 * self.current_torque_sv))
         self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=sv)
 
+        print(f'Dwell timer estimated time: {self.dwell_timer.remainingTime()} ms')
+
     def on_dwell_timer(self):
+        print(f'Dwell timer timeout: {self.dwell_time} ms')
         pass
 
     # ---------- Группа 1: Сервопривод ----------
@@ -349,9 +352,17 @@ class HandControlPanel(QFrame):
         self._apply_enable_rules()
 
         if checked:
+            # тест таймера выдержки:
+            self.dwell_timer.setInterval(self.dwell_time * 1000)
+            self.dwell_timer.start()
+            #
             self.timer.start(100)
             self.model.command_handler.torque_hold()
         else:
+            # тест таймера выдержки:
+            self.on_dwell_timer()
+            self.dwell_timer.stop()
+            #
             self.timer.stop()
             self.model.command_handler.halt()
             # При стопе: сброс момента в 0
