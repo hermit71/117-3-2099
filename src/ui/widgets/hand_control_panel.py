@@ -255,24 +255,24 @@ class HandControlPanel(QFrame):
 
     # Раздельные обработчики для кнопок направления
     def _on_ccw_pressed(self):
-        print("[STUB] Manual CCW pressed")
+        print("Manual CCW pressed")
         self.model.command_handler.jog_ccw()
         iv = int(1000 * self.spin_ang_vel.value())
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
 
     def _on_ccw_released(self):
-        print("[STUB] Manual CCW released")
+        print("Manual CCW released")
         self.model.command_handler.halt()
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
     def _on_cw_pressed(self):
-        print("[STUB] Manual CW pressed")
+        print("Manual CW pressed")
         self.model.command_handler.jog_cw()
         iv = int(1000 * self.spin_ang_vel.value())
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV', value=iv)
 
     def _on_cw_released(self):
-        print("[STUB] Manual CW released")
+        print("Manual CW released")
         self.model.command_handler.halt()
         self.model.command_handler.set_plc_register(name='Modbus_VelocitySV')
 
@@ -283,7 +283,7 @@ class HandControlPanel(QFrame):
             self.slider_ang_vel.blockSignals(True)
             self.slider_ang_vel.setValue(iv)
             self.slider_ang_vel.blockSignals(False)
-        print(f"[STUB] Angular speed spin -> {value:.2f} deg/s")
+        print(f"Angular speed spin -> {value:.2f} deg/s")
 
     def _on_ang_speed_slider_changed(self, ivalue: int):
         v = ivalue / 100.0
@@ -291,7 +291,7 @@ class HandControlPanel(QFrame):
             self.spin_ang_vel.blockSignals(True)
             self.spin_ang_vel.setValue(v)
             self.spin_ang_vel.blockSignals(False)
-        print(f"[STUB] Angular speed slider -> {v:.2f} deg/s")
+        print(f"Angular speed slider -> {v:.2f} deg/s")
 
     def _on_torque_value_changed(self, value: float):
         iv = int(round(value * 10))  # -50..50 -> -500..500
@@ -299,7 +299,7 @@ class HandControlPanel(QFrame):
             self.slider_torque.blockSignals(True)
             self.slider_torque.setValue(iv)
             self.slider_torque.blockSignals(False)
-        print(f"[STUB] Torque spin -> {value:.1f} Nm")
+        print(f"Torque spin -> {value:.1f} Nm")
 
         tv = int_to_word(int(500 * self.spin_torque.value()))
         self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
@@ -310,7 +310,7 @@ class HandControlPanel(QFrame):
             self.spin_torque.blockSignals(True)
             self.spin_torque.setValue(v)
             self.spin_torque.blockSignals(False)
-        print(f"[STUB] Torque slider -> {v:.1f} Nm")
+        print(f"Torque slider -> {v:.1f} Nm")
         tv = int_to_word(int(500 * self.spin_torque.value()))
         self.model.command_handler.set_plc_register(name='Modbus_TensionSV', value=tv)
 
@@ -320,7 +320,7 @@ class HandControlPanel(QFrame):
             self.slider_rate.blockSignals(True)
             self.slider_rate.setValue(iv)
             self.slider_rate.blockSignals(False)
-        print(f"[STUB] Rate spin -> {value:.2f} Nm/s")
+        print(f"Rate spin -> {value:.2f} Nm/s")
 
     def _on_rate_slider_changed(self, ivalue: int):
         v = ivalue / 100.0
@@ -328,14 +328,14 @@ class HandControlPanel(QFrame):
             self.spin_rate.blockSignals(True)
             self.spin_rate.setValue(v)
             self.spin_rate.blockSignals(False)
-        print(f"[STUB] Rate slider -> {v:.2f} Nm/s")
+        print(f"Rate slider -> {v:.2f} Nm/s")
 
     def _on_dwell_changed(self, value: float):
-        print(f"[STUB] Dwell time -> {value:.0f} s")
+        print(f"Dwell time -> {value:.0f} s")
 
     def _on_run_toggled(self, checked: bool):
         self.btn_run.setText("СТОП" if checked else "ПУСК")
-        print(f"RUN toggled -> {'RUN' if checked else 'STOP'}")
+        print(f"ПУСК/СТОП -> {'ПУСК' if checked else 'СТОП'}")
         self._apply_enable_rules()
 
         if checked:
@@ -347,15 +347,8 @@ class HandControlPanel(QFrame):
             # При стопе: сброс момента в 0
             self.spin_torque.setValue(0.0)
             self.current_torque_sv = 0.0
-            self.model.command_handler.set_plc_register(name='Modbus_TorqueSV')
+            self.model.command_handler.set_plc_register(name='Modbus_TorqueSV') # Уставка момента в ПЛК = 0
 
-
-    # def _on_tool_btn1(self):
-    #     print("[STUB] Tool Button 1 clicked")
-    #     HandRegulatorSettingsDialog(self).exec()
-    #
-    # def _on_tool_btn2(self):
-    #     print("[STUB] Tool Button 2 clicked")
 
     # ---------- Вспомогательное: правила доступности ----------
     def _apply_enable_rules(self):
